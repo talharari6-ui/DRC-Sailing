@@ -13,6 +13,11 @@ import { DAY_NAMES } from '@/src/lib/constants'
 export default function SchedulePage() {
   const { coach } = useAuth()
 
+  // Return loading state while coach data is being loaded
+  if (!coach) {
+    return <div style={{ padding: '20px', color: 'var(--muted)', textAlign: 'center' }}>טוען...</div>
+  }
+
   // State
   const [viewMode, setViewMode] = useState('month') // month/week/day
   const [filterMode, setFilterMode] = useState('my') // my/all
