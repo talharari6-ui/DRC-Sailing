@@ -96,7 +96,8 @@ export default function SessionDetailModal({
             {session.group_sailors && session.group_sailors.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {session.group_sailors.map((gs) => {
-                  const sailor = gs.sailors || gs
+                  const sailor = gs.sailors
+                  if (!sailor) return null
                   return (
                     <div
                       key={sailor.id}
