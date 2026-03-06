@@ -40,7 +40,7 @@ export default function SessionDetailModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={session.group_name}>
+    <Modal isOpen={isOpen} onClose={onClose} title={session.groups?.name || 'קבוצה'}>
       <div style={{ direction: 'rtl', padding: '0 16px 16px' }}>
         {/* Session Info */}
         <div style={{ marginBottom: '20px' }}>
@@ -75,7 +75,7 @@ export default function SessionDetailModal({
               מדריך
             </div>
             <div style={{ color: 'var(--text)', fontSize: '14px' }}>
-              {session.coach_name}
+              {session.coaches?.name || 'לא מוגדר'}
             </div>
           </div>
         </div>
@@ -93,64 +93,67 @@ export default function SessionDetailModal({
             >
               נוכחות חניכים
             </div>
-            {session.sailors && session.sailors.length > 0 ? (
+            {session.group_sailors && session.group_sailors.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {session.sailors.map((sailor) => (
-                  <div
-                    key={sailor.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px',
-                      backgroundColor: 'var(--bg2)',
-                      borderRadius: '6px',
-                      fontSize: '14px'
-                    }}
-                  >
-                    <span>{sailor.name}</span>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <button
-                        onClick={() => handleMarkAttendance(sailor.id, true)}
-                        disabled={marking}
-                        style={{
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          border: 'none',
-                          backgroundColor:
-                            attendance[sailor.id]?.present === true
-                              ? '#4CAF50'
-                              : 'var(--border)',
-                          color: '#fff',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        ✓
-                      </button>
-                      <button
-                        onClick={() =>
-                          handleMarkAttendance(sailor.id, false, 'היעדרות')
-                        }
-                        disabled={marking}
-                        style={{
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          border: 'none',
-                          backgroundColor:
-                            attendance[sailor.id]?.present === false
-                              ? '#f44336'
-                              : 'var(--border)',
-                          color: '#fff',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        ✗
-                      </button>
+                {session.group_sailors.map((gs) => {
+                  const sailor = gs.sailors || gs
+                  return (
+                    <div
+                      key={sailor.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px',
+                        backgroundColor: 'var(--bg2)',
+                        borderRadius: '6px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span>{sailor.name}</span>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <button
+                          onClick={() => handleMarkAttendance(sailor.id, true)}
+                          disabled={marking}
+                          style={{
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            backgroundColor:
+                              attendance[sailor.id]?.present === true
+                                ? '#4CAF50'
+                                : 'var(--border)',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleMarkAttendance(sailor.id, false, 'היעדרות')
+                          }
+                          disabled={marking}
+                          style={{
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            backgroundColor:
+                              attendance[sailor.id]?.present === false
+                                ? '#f44336'
+                                : 'var(--border)',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          ✗
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div style={{ color: 'var(--muted)', fontSize: '12px' }}>
