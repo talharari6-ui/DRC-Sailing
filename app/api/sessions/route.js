@@ -5,14 +5,12 @@ export async function GET(request) {
     const supabase = getSupabaseClient()
     const searchParams = request.nextUrl.searchParams
     const groupId = searchParams.get('group_id')
-    const coachId = searchParams.get('coach_id')
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
 
     let query = supabase.from('sessions').select('*')
 
     if (groupId) query = query.eq('group_id', groupId)
-    if (coachId) query = query.eq('coach_id', coachId)
     if (dateFrom) query = query.gte('date', dateFrom)
     if (dateTo) query = query.lte('date', dateTo)
 
