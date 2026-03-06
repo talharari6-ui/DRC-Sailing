@@ -19,10 +19,16 @@ export default function SchedulePage() {
       setLoading(true)
       try {
         const res = await fetch('/api/sessions?include_details=true')
+        if (!res.ok) {
+          console.error('API error:', res.status, res.statusText)
+          setSessions([])
+          return
+        }
         const data = await res.json()
-        setSessions(data)
+        setSessions(Array.isArray(data) ? data : [])
       } catch (error) {
         console.error('Error loading sessions:', error)
+        setSessions([])
       } finally {
         setLoading(false)
       }
