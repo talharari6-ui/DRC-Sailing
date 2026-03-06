@@ -2,14 +2,26 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/src/hooks/useAuth'
+import ViewModeToggle from '@/src/components/ViewModeToggle'
+import FilterToggle from '@/src/components/FilterToggle'
+import { Calendar } from '@/src/components/Calendar'
+import SessionDetailModal from '@/src/components/SessionDetailModal'
+import SailorManagementModal from '@/src/components/SailorManagementModal'
+import SubstituteCoachModal from '@/src/components/SubstituteCoachModal'
 
 export default function SchedulePage() {
   const authResult = useAuth()
   const coach = authResult?.coach
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(false)
+  const [viewMode, setViewMode] = useState('month')
+  const [filterMode, setFilterMode] = useState('all')
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedSession, setSelectedSession] = useState(null)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [sailorModalOpen, setSailorModalOpen] = useState(false)
+  const [substituteModalOpen, setSubstituteModalOpen] = useState(false)
 
-  // Return loading state while coach data is being loaded
   if (!coach) {
     return <div style={{ padding: '20px', color: 'var(--muted)', textAlign: 'center' }}>טוען...</div>
   }
@@ -21,7 +33,6 @@ export default function SchedulePage() {
         const res = await fetch('/api/sessions?include_details=true')
         const data = await res.json()
 
-        // Check if response is successful and data is an array
         if (!res.ok) {
           console.error('API error:', res.status, data)
           setSessions([])
@@ -44,6 +55,100 @@ export default function SchedulePage() {
     loadSessions()
   }, [])
 
+  const getFilteredSessions = () => {
+    return sessions.filter(s => {
+      if (filterMode === 'my') {
+        return s.coach_id === coach?.id || s.substitute_coach_id === coach?.id
+      }
+      return true
+    })
+  }
+
+  const getSessionsForDate = (dateStr) => {
+    return getFilteredSessions().filter(s => s.date === dateStr)
+  }
+
+  const getDayContent = (dateStr, day) => {
+    const daySessions = getSessionsForDate(dateStr)
+    if (daySessions.length === 0) return null
+
+    return (
+      <div style={{ fontSize: '10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {daySessions.slice(0, 2).map(s => (
+          <div
+            key={s.id}
+            onClick={() => {
+              setSelectedSession(s)
+              setDetailModalOpen(true)
+            }}
+            style={{
+              background: s.groups?.color || '#3b82f6',
+              color: '#fff',
+              padding: '2px 3px',
+              borderRadius: '2px',
+              cursor: 'pointer',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {s.groups?.name?.substring(0, 5)}
+          </div>
+        ))}
+        {daySessions.length > 2 && (
+          <div style={{ fontSize: '9px', color: 'var(--muted)' }}>
+            +{daySessions.length - 2}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  const handleDateClick = (dateStr) => {
+    const daySession = getSessionsForDate(dateStr)
+    if (daySession.length === 1) {
+      setSelectedSession(daySession[0])
+      setDetailModalOpen(true)
+    } else if (daySession.length > 1) {
+      // Show list of sessions for this day
+      setSelectedSession(null)
+    }
+  }
+
+  const handleAttendanceUpdate = async (sessionId, sailorId, present, reason) => {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/attendance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sailor_id: sailorId, present, reason })
+      })
+      if (!res.ok) throw new Error('Failed to update attendance')
+    } catch (error) {
+      console.error('Error updating attendance:', error)
+    }
+  }
+
+  const handleSubstituteRequest = (sessionId) => {
+    const session = sessions.find(s => s.id === sessionId)
+    setSelectedSession(session)
+    setDetailModalOpen(false)
+    setSubstituteModalOpen(true)
+  }
+
+  const handleEditSailors = (sessionId) => {
+    const session = sessions.find(s => s.id === sessionId)
+    setSelectedSession(session)
+    setDetailModalOpen(false)
+    setSailorModalOpen(true)
+  }
+
+  const handleDecline = async (sessionId) => {
+    console.log('Session declined:', sessionId)
+    setDetailModalOpen(false)
+  }
+
+  const filteredSessions = getFilteredSessions()
+
   return (
     <div>
       <div style={{ marginBottom: '16px' }}>
@@ -55,26 +160,44 @@ export default function SchedulePage() {
         </p>
       </div>
 
+      <ViewModeToggle currentMode={viewMode} onModeChange={setViewMode} />
+      <FilterToggle currentFilter={filterMode} onFilterChange={setFilterMode} />
+
       {loading && (
         <div style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)' }}>
           טוען...
         </div>
       )}
 
-      {!loading && (
+      {!loading && viewMode === 'month' && (
+        <Calendar
+          year={currentDate.getFullYear()}
+          month={currentDate.getMonth()}
+          onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+          onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+          onDateClick={handleDateClick}
+          getDayContent={getDayContent}
+        />
+      )}
+
+      {!loading && viewMode !== 'month' && (
         <div style={{ marginTop: '24px' }}>
           <h2 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '12px' }}>
             📋 אירועים
           </h2>
-          {sessions.length === 0 ? (
+          {filteredSessions.length === 0 ? (
             <div style={{ color: 'var(--muted)', textAlign: 'center', padding: '20px' }}>
-              אין אירועים בתאריך זה
+              אין אירועים
             </div>
           ) : (
             <div>
-              {sessions.map(session => (
+              {filteredSessions.map(session => (
                 <div
                   key={session.id}
+                  onClick={() => {
+                    setSelectedSession(session)
+                    setDetailModalOpen(true)
+                  }}
                   style={{
                     background: 'var(--card)',
                     border: '1px solid var(--border)',
@@ -84,7 +207,11 @@ export default function SchedulePage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s'
                   }}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
+                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                 >
                   <div
                     style={{
@@ -112,6 +239,29 @@ export default function SchedulePage() {
           )}
         </div>
       )}
+
+      <SessionDetailModal
+        session={selectedSession}
+        isOpen={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        coachId={coach?.id}
+        onAttendanceUpdate={handleAttendanceUpdate}
+        onSubstituteRequest={handleSubstituteRequest}
+        onDecline={handleDecline}
+        onEditSailors={handleEditSailors}
+      />
+
+      <SailorManagementModal
+        session={selectedSession}
+        isOpen={sailorModalOpen}
+        onClose={() => setSailorModalOpen(false)}
+      />
+
+      <SubstituteCoachModal
+        session={selectedSession}
+        isOpen={substituteModalOpen}
+        onClose={() => setSubstituteModalOpen(false)}
+      />
     </div>
   )
 }
