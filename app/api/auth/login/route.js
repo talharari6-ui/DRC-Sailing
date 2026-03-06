@@ -13,7 +13,17 @@ export async function POST(request) {
     }
 
     // Query Supabase for coach
-    const supabase = getSupabaseClient()
+    let supabase
+    try {
+      supabase = getSupabaseClient()
+    } catch (err) {
+      console.error('Failed to get Supabase client:', err.message)
+      return Response.json(
+        { error: 'Supabase initialization failed', details: err.message },
+        { status: 500 }
+      )
+    }
+
     const { data, error } = await supabase
       .from('coaches')
       .select('*')
@@ -22,11 +32,12 @@ export async function POST(request) {
 
     // Handle errors
     if (error) {
-      console.error('Supabase error details:', {
+      console.error('Supabase query error:', {
         code: error.code,
         message: error.message,
         details: error.details,
-        hint: error.hint
+        hint: error.hint,
+        status: error.status
       })
 
       if (error.code === 'PGRST116') {
