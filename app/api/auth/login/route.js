@@ -1,4 +1,4 @@
-import { supabase } from '@/src/lib/supabase'
+import { getSupabaseClient } from '@/src/lib/supabase'
 
 export async function POST(request) {
   try {
@@ -13,6 +13,7 @@ export async function POST(request) {
     }
 
     // Query Supabase for coach
+    const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('coaches')
       .select('*')

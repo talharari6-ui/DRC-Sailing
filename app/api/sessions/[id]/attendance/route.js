@@ -2,6 +2,7 @@ import { supabase } from '@/src/lib/supabase'
 
 export async function GET(request, { params }) {
   try {
+    const supabase = getSupabaseClient()
     const { id: sessionId } = params
 
     const { data, error } = await supabase
@@ -19,6 +20,7 @@ export async function GET(request, { params }) {
 
 export async function POST(request, { params }) {
   try {
+    const supabase = getSupabaseClient()
     const { id: sessionId } = params
     const body = await request.json()
     const { sailor_id, present, absence_reason } = body

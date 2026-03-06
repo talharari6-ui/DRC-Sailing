@@ -1,7 +1,8 @@
-import { supabase } from '@/src/lib/supabase'
+import { getSupabaseClient } from '@/src/lib/supabase'
 
 export async function GET(request) {
   try {
+    const supabase = getSupabaseClient()
     const searchParams = request.nextUrl.searchParams
     const coachId = searchParams.get('coach_id')
     const dateFrom = searchParams.get('date_from')
@@ -25,6 +26,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const supabase = getSupabaseClient()
     const body = await request.json()
     const { coach_id, date, start_time, end_time, notes } = body
 

@@ -1,7 +1,8 @@
-import { supabase } from '@/src/lib/supabase'
+import { getSupabaseClient } from '@/src/lib/supabase'
 
 export async function PATCH(request, { params }) {
   try {
+    const supabase = getSupabaseClient()
     const { id } = params
     const body = await request.json()
 
@@ -21,6 +22,7 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const supabase = getSupabaseClient()
     const { id } = params
 
     const { error } = await supabase
