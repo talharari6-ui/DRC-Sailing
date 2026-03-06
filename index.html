@@ -1,0 +1,3086 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a1628">
+<title>חוג שייט | מרכז דניאל</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a1628;--bg2:#0d2444;--bg3:#0e3060;
+  --card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.09);
+  --blue:#3b82f6;--blue-light:#7dd3fc;
+  --green:#34d399;--red:#f87171;--yellow:#fbbf24;--purple:#a78bfa;
+  --text:#e0f2fe;--muted:#64748b;
+  --radius:16px;--safe:env(safe-area-inset-bottom,0px)
+}
+html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);overflow:hidden}
+#app{height:100vh;display:flex;flex-direction:column}
+.hdr{background:rgba(0,0,0,0.5);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0}
+.hdr-title{font-size:15px;font-weight:800;color:var(--blue-light)}
+.hdr-sub{font-size:10px;color:var(--muted)}
+.hdr-out{margin-right:auto;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:calc(150px + var(--safe));background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 50%,var(--bg3) 100%)}
+.content-login{flex:1;overflow-y:auto;padding:32px 20px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 50%,var(--bg3) 100%)}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(5,10,25,0.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe);z-index:100}
+.nb{flex:1;padding:8px 2px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:9px;font-weight:600}
+.nb.active{color:var(--blue-light)}
+.nb .ic{font-size:20px;line-height:1}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.sc{background:var(--card);border-radius:14px;padding:14px 10px;text-align:center;border:1px solid var(--border)}
+.si{font-size:22px;margin-bottom:4px}
+.sv{font-size:22px;font-weight:800}
+.sl{font-size:10px;color:var(--muted);margin-top:2px}
+.stitle{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px}
+.btn{border:none;cursor:pointer;font-weight:700;border-radius:12px;padding:14px 20px;font-size:15px;width:100%;display:block;text-align:center;transition:opacity 0.15s}
+.btn:active{opacity:0.8}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.btn-p{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;box-shadow:0 4px 20px rgba(37,99,235,0.35)}
+.btn-g{background:rgba(255,255,255,0.06);color:var(--muted);border:1px solid var(--border)}
+.btn-d{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
+.btn-t{background:linear-gradient(135deg,#0891b2,#0e7490);color:white}
+.btn-ex{background:linear-gradient(135deg,#166534,#15803d);color:white}
+.btn-sh{background:linear-gradient(135deg,#1e40af,#1d4ed8);color:white}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:9px;width:auto;display:inline-block}
+.btn-pur{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white}
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.fi{width:100%;background:rgba(0,0,0,0.35);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:16px;outline:none;-webkit-appearance:none}
+.fi:focus{border-color:var(--blue)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.trow{display:flex;gap:8px}
+.tbtn{flex:1;padding:11px 8px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,0.2);color:var(--muted);font-weight:700;font-size:13px;cursor:pointer}
+.tbtn.active{background:rgba(59,130,246,0.25);border-color:rgba(59,130,246,0.5);color:var(--blue-light)}
+.spill{padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,0.2);color:var(--muted);font-weight:700;font-size:12px;cursor:pointer}
+.spill.active{background:rgba(59,130,246,0.25);border-color:rgba(59,130,246,0.5);color:var(--blue-light)}
+input[type=date],input[type=time]{color-scheme:dark}
+select option{background:#0d2444}
+.dpick{display:flex;gap:6px;flex-wrap:wrap}
+.dpill{padding:9px 10px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,0.2);color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;min-width:40px;text-align:center}
+.dpill.active{background:rgba(59,130,246,0.25);border-color:rgba(59,130,246,0.5);color:var(--blue-light)}
+.wnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
+.wtitle{font-size:13px;font-weight:800;text-align:center;flex:1}
+.warr{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:16px;flex-shrink:0}
+.dblk{margin-bottom:14px}
+.dhdr{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.dhdr.today{color:var(--blue-light);border-bottom-color:rgba(59,130,246,0.4)}
+.gcard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;cursor:pointer}
+.gcard:active{border-color:var(--blue-light)}
+.scard{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.av-m{background:linear-gradient(135deg,#2563eb30,#1e40af40)}
+.av-f{background:linear-gradient(135deg,#ec489930,#be185d40)}
+.arow{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;margin-bottom:8px;cursor:pointer;border:1px solid transparent;-webkit-user-select:none;user-select:none}
+.arow.present{background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.25)}
+.arow.neutral{background:transparent;border-color:rgba(255,255,255,0.07)}
+.arow.absent{background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.07)}
+.achk{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;margin-right:auto}
+.achk.present{background:rgba(52,211,153,0.25);border:2px solid var(--green);color:var(--green)}
+.achk.absent{background:rgba(239,68,68,0.1);border:2px solid rgba(239,68,68,0.3);color:var(--red)}
+.achk.neutral{background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.15);color:var(--muted)}
+.pbar{height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-top:8px}
+.pfill{height:100%;border-radius:3px}
+.dots{display:flex;gap:3px;flex-wrap:wrap;margin-top:8px}
+.dot{width:12px;height:12px;border-radius:3px}
+.bbtn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0;margin-bottom:16px;display:flex;align-items:center;gap:4px}
+.cpill{background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--green)}
+.sitem{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer}
+.sitem:active{border-color:var(--blue-light)}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;z-index:200;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:middle;margin-left:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-w{background:rgba(239,68,68,0.2);color:var(--red)}
+.badge-t{background:rgba(59,130,246,0.2);color:var(--blue-light);border-radius:6px;padding:1px 6px;font-size:10px;font-weight:700}
+.admin-badge{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700}
+.filter-row{display:flex;gap:8px;margin-bottom:12px}
+.filter-btn{padding:8px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(0,0,0,0.2);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer}
+.filter-btn.active{background:rgba(59,130,246,0.2);border-color:rgba(59,130,246,0.5);color:var(--blue-light)}
+.hours-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
+.admin-section{background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+@media(min-width:500px){
+  .content,.content-login{max-width:480px;margin:0 auto}
+  .bnav{max-width:480px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <span style="font-size:24px">⛵</span>
+    <div>
+      <div class="hdr-title">מרכז דניאל לחתירה</div><!-- v2.1 -->
+      <div class="hdr-sub" id="hdr-sub">חוג שייט | עיריית תל אביב-יפו</div>
+    </div>
+    <div style="margin-right:auto;display:flex;align-items:center;gap:8px">
+      <div id="hdr-avatar" style="display:none;cursor:pointer" onclick="nav('profile')" title="פרופיל">
+        <div id="hdr-avatar-img" style="width:34px;height:34px;border-radius:50%;background:var(--border);border:2px solid rgba(255,255,255,0.2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:16px">👤</div>
+      </div>
+      <button class="hdr-out" id="logout-btn" onclick="logout()" style="display:none">יציאה ↩</button>
+    </div>
+  </div>
+  <div id="mc" class="content-login">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--muted)">
+      <div class="spin" style="width:36px;height:36px;border-width:3px"></div><p>טוען...</p>
+    </div>
+  </div>
+  <nav class="bnav" id="bnav" style="display:none">
+    <button class="nb active" id="nav-schedule" onclick="nav('schedule')"><span class="ic">📅</span>לוח</button>
+    <button class="nb"        id="nav-hours"    onclick="nav('hours')">   <span class="ic">⏱️</span>שעות</button>
+    <button class="nb"        id="nav-sailors"  onclick="nav('sailors')"> <span class="ic">👥</span>חניכים</button>
+    <button class="nb"        id="nav-history"  onclick="nav('history')"> <span class="ic">📊</span>קבוצות</button>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+<div id="sub-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:300px;max-width:90vw">
+    <h3 style="font-weight:800;font-size:18px;margin-bottom:16px">🔄 בחר מדריך מחליף</h3>
+    <div id="sub-list" style="max-height:250px;overflow-y:auto;margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeSubModal()">ביטול</button>
+      <button class="btn btn-d btn-sm" id="sub-clear-btn" onclick="clearSubstitute()" style="display:none">הסר החלפה</button>
+    </div>
+  </div>
+</div>
+<script>
+const SUPA_URL="https://ukmjspvhvughrdjexqwu.supabase.co";
+const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrbWpzcHZodnVnaHJkamV4cXd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NTg0NjAsImV4cCI6MjA4ODAzNDQ2MH0.ZnMMPuN6qiC5eMO2c5-t00KX_HKu7ynLzrIaUB9C8dY";
+// Admin IDs loaded from DB (coaches with is_admin=true)
+let ADMIN_IDS=[];
+const ADMIN_ID="__none__"; // legacy compat
+const BOATS=["Optimist","RS Feva","RS Toura"];
+const SIZES=["XS","S","M","L","XL","XXL"];
+const COLORS=["#3b82f6","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#ec4899"];
+const DS=["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
+const DL=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+
+function egf(){return{name:"",color:COLORS[0],days_of_week:[],start_time:"",end_time:"",start_date:"",coach_id:""};}
+let A=window.A={
+  coach:null,isAdmin:false,
+  groups:[],sailors:[],sessions:[],attendance:{},
+  allCoaches:[],allGroups:[],allSailors:[],allSessions:[],allAttendance:{},workHours:[],adminMonth:new Date().getMonth(),adminYear:new Date().getFullYear(),adminView:"agenda",adminDayDetail:null,prevView:null,absenceReasons:{},
+  view:"schedule",subView:null,
+  activeGroupId:null,activeSession:null,activeDate:null,
+  form:ef(),editId:null,
+  gf:egf(),editGId:null,
+  weekOffset:0,monthOffset:0,scheduleFilter:"all",historyFilter:"all",hoursYear:null,hoursMonth:undefined,
+  hForm:{date:td(),start_time:"",end_time:"",notes:""},editHId:null,
+};
+function ef(){return{first_name:"",last_name:"",birth_date:"",join_date:td(),shirt_size:"M",parent_name:"",parent_phone:"",gender:"male",boat:"Optimist"};}
+
+// ── Supabase ──────────────────────────────────────────────────
+async function sb(path,method="GET",body=null){
+  const h={"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"return=representation":""};
+  const opts={method,headers:h};
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(SUPA_URL+"/rest/v1/"+path,opts);
+  if(!res.ok){const e=await res.text();throw new Error(e);}
+  const t=await res.text();return t?JSON.parse(t):null;
+}
+const dbG=(t,q="",o="created_at.asc")=>sb(t+"?"+q+(o?"&order="+o:""));
+const dbP=(t,b)=>sb(t,"POST",b);
+const sbUpsert=async(t,b)=>{
+  const h={"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=representation"};
+  const res=await fetch(SUPA_URL+"/rest/v1/"+t,{method:"POST",headers:h,body:JSON.stringify(b)});
+  if(!res.ok){const e=await res.text();throw new Error(e);}
+  return res.json();
+};
+const dbPa=(t,q,b)=>sb(t+"?"+q,"PATCH",b);
+const dbD=(t,q)=>sb(t+"?"+q,"DELETE");
+
+// ── Helpers ───────────────────────────────────────────────────
+function td(){return new Date().toISOString().split("T")[0];}
+function addD(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function toISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function fs(d){if(!d)return"";const dt=new Date(d+"T00:00:00");return String(dt.getDate()).padStart(2,"0")+"/"+String(dt.getMonth()+1).padStart(2,"0");}
+function ff(d){if(!d)return"";const dt=new Date(d+"T00:00:00");return fs(d)+"/"+dt.getFullYear();}
+function fl(d){
+  if(!d)return"";
+  const dt=new Date(d+"T00:00:00");
+  const dayName=DL[dt.getDay()];
+  const dateStr=new Intl.DateTimeFormat("he-IL",{year:"numeric",month:"long",day:"numeric"}).format(dt);
+  return"יום "+dayName+", "+dateStr;
+}
+function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+function toast(msg,ms=2200){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),ms);}
+function rc(r){if(r===null)return"#64748b";return r>=75?"#34d399":r>=50?"#fbbf24":"#f87171";}
+function coachAvatar(coach, size=32){
+  if(!coach)return "";
+  const s=size+"px";
+  const initials=(coach.name||"?")[0].toUpperCase();
+  if(coach.avatar_url){
+    return`<img src="${coach.avatar_url}" style="width:${s};height:${s};border-radius:50%;object-fit:cover;flex-shrink:0">`;
+  }
+  return`<div style="width:${s};height:${s};border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.45)}px;font-weight:700;flex-shrink:0">${initials}</div>`;
+}
+function getG(id){return A.groups.find(g=>g.id===id)||(A.allGroups&&A.allGroups.find(g=>g.id===id));}
+function gSailors(gid){const g=getG(gid);if(!g)return[];return(g.sailorIds||[]).map(id=>A.sailors.find(s=>s.id===id)).filter(Boolean);}
+function gSess(gid){return A.sessions.filter(s=>s.group_id===gid);}
+function aRate(sailor,sessions){
+  const jd=sailor.join_date||"2000-01-01";
+  const rel=sessions.filter(s=>s.date>=jd&&!s.cancelled&&A.attendance[s.id]&&A.attendance[s.id][sailor.id]!==undefined);
+  if(!rel.length)return null;
+  return Math.round(rel.filter(s=>A.attendance[s.id][sailor.id]).length/rel.length*100);
+}
+function sloc(){try{return localStorage.getItem("sailing_last");}catch(e){return null;}}
+function ssave(){try{localStorage.setItem("sailing_last",A.coach?.id||"");}catch(e){}}
+function wkStart(off=0){const d=new Date();d.setDate(d.getDate()-d.getDay()+off*7);d.setHours(0,0,0,0);return d;}
+function calcHours(s,e){
+  if(!s||!e)return 0;
+  const sp=s.split(":");const sh=+sp[0],sm=+sp[1];
+  const ep=e.split(":");const eh=+ep[0],em=+ep[1];
+  return Math.max(0,((eh*60+em)-(sh*60+sm))/60);
+}
+function fmtH(h){return h%1===0?h+"ש'":h.toFixed(1)+"ש'";}
+
+// ── Load ──────────────────────────────────────────────────────
+async function loadAll(){
+  const cid=A.coach.id;
+  // Load ALL groups so coach can fill attendance for any group
+  const groups=await dbG("groups","","name.asc");
+  const gids=groups.map(g=>g.id);
+  let gsMap={};
+  if(gids.length){
+    const gs=await dbG("group_sailors",`group_id=in.(${gids.join(",")})`, "");
+    gs.forEach(r=>{if(!gsMap[r.group_id])gsMap[r.group_id]=[];gsMap[r.group_id].push(r.sailor_id);});
+  }
+  A.groups=groups.map(g=>({...g,sailorIds:gsMap[g.id]||[],days_of_week:g.days_of_week||[]}));
+  // Load ALL sailors globally so coaches can assign any sailor to their groups
+  A.sailors=await dbG("sailors","","last_name.asc");
+  const ownSessions=gids.length?await dbG("sessions",`group_id=in.(${gids.join(",")})`):[]; 
+  // Also load sessions where this coach is substitute
+  // Find the actual DB row id of the coach (cid is login_code/tz)
+  // A.allCoaches is loaded in admin flow but not here - fetch coach's DB id
+  let subSessions=[];
+  try{
+    // The coach object from login has id=login_code; need the DB numeric/uuid id
+    // allCoaches is loaded later, so find from the coach record itself
+    const coachRecord=(await dbG("coaches",`login_code=eq.${cid}`))||[];
+    const dbCoachId=coachRecord[0]?.id;
+    A.dbCoachId=dbCoachId;
+    if(dbCoachId){
+      subSessions=await dbG("sessions",`substitute_coach_id=eq.${dbCoachId}`)||[];
+    }
+  }catch(e){}
+  A.subSessions=subSessions;
+  // Merge, deduplicate
+  const sessById={};
+  [...ownSessions,...subSessions].forEach(s=>{sessById[s.id]=s;});
+  A.sessions=Object.values(sessById);
+  A.attendance={};
+  const sids=A.sessions.map(s=>s.id);
+  if(sids.length){
+    const att=await dbG("attendance",`session_id=in.(${sids.join(",")})`, "");
+    att.forEach(r=>{if(!A.attendance[r.session_id])A.attendance[r.session_id]={};A.attendance[r.session_id][r.sailor_id]=r.present;});
+  }
+  // work hours
+  A.workHours=await dbG("work_hours",`coach_id=eq.${cid}`,"date.desc");
+  A.cancellations={};
+  A.sessions.forEach(s=>{if(s.cancelled)A.cancellations[s.id]=true;});
+}
+
+async function loadHours(){
+  const cid=A.coach.id;
+  A.workHours=await dbG("work_hours","coach_id=eq."+cid,"date.desc");
+}
+async function loadScheduleData(){
+  A.allCoaches=await dbG("coaches","","name.asc");
+  A.allGroups=(await dbG("groups","","name.asc")).map(g=>({...g,days_of_week:g.days_of_week||[]}));
+  // Also refresh coach-specific data (sessions, attendance) if not admin
+  if(A.coach&&!A.isAdmin)await loadAll();
+}
+
+async function loadAdminData(){
+  A.allCoaches=await dbG("coaches","","name.asc");
+  A.allGroups=(await dbG("groups","","name.asc")).map(g=>({...g,days_of_week:g.days_of_week||[]}));
+  A.allSailors=await dbG("sailors","","last_name.asc");
+  const _yr=A.adminYear||new Date().getFullYear();
+  const _mn=A.adminMonth!==undefined?A.adminMonth:new Date().getMonth();
+  const _mnStr=_yr+"-"+String(_mn+1).padStart(2,"0");
+  A.allSessions=await dbG("sessions",`date=gte.${_mnStr}-01&date=lte.${_mnStr}-31`,"date.asc");
+  // work hours all
+  const wh=await dbG("work_hours","","date.desc");
+  A.workHours=wh;
+  A.cancellations={};
+  A.allSessions.forEach(s=>{if(s.cancelled)A.cancellations[s.id]=true;});
+  // attendance for all sessions
+  const sids=A.allSessions.map(s=>s.id);
+  A.allAttendance={};
+  if(sids.length){
+    // fetch in chunks to avoid URL limit
+    for(let i=0;i<sids.length;i+=50){
+      const chunk=sids.slice(i,i+50);
+      const att=await dbG("attendance",`session_id=in.(${chunk.join(",")})`, "");
+      att.forEach(r=>{
+        if(!A.allAttendance[r.session_id])A.allAttendance[r.session_id]={};
+        A.allAttendance[r.session_id][r.sailor_id]=r.present;
+        // load absence reasons into shared state
+        if(r.absence_reason){
+          if(!A.absenceReasons[r.session_id])A.absenceReasons[r.session_id]={};
+          A.absenceReasons[r.session_id][r.sailor_id]=r.absence_reason;
+        }
+      });
+    }
+  }
+  // group sailors map
+  const gids=A.allGroups.map(g=>g.id);
+  let gsMap={};
+  if(gids.length){
+    const gs=await dbG("group_sailors",`group_id=in.(${gids.join(",")})`, "");
+    gs.forEach(r=>{if(!gsMap[r.group_id])gsMap[r.group_id]=[];gsMap[r.group_id].push(r.sailor_id);});
+  }
+  A.allGroups=A.allGroups.map(g=>({...g,sailorIds:gsMap[g.id]||[]}));
+  // Alias so non-admin code paths work for admin too
+  A.groups=A.allGroups;
+  A.sailors=A.allSailors;
+  A.sessions=A.allSessions;
+  A.attendance=A.allAttendance||{};
+}
+
+// ── Auth ──────────────────────────────────────────────────────
+async function tryLogin(){
+  const id=(document.getElementById("lid")?.value||"").trim();
+  const name=(document.getElementById("lname")?.value||"").trim();
+  if(!id){toast("⚠️ נא להזין תעודת זהות");return;}
+  const btn=document.getElementById("lbtn");
+  btn.disabled=true;btn.innerHTML='טוען... <span class="spin"></span>';
+  try{
+    const ex=await dbG("coaches",`login_code=eq.${id}`);
+    if(!ex.length){toast("🚫 לא מורשה — פנה למנהל");btn.disabled=false;btn.textContent="כניסה →";return;}
+    const coach=ex[0];
+    if(coach.approved===false){toast("🚫 לא מורשה — פנה למנהל");btn.disabled=false;btn.textContent="כניסה →";return;}
+    A.coach=coach;
+    A.isAdmin=!!coach.is_admin;
+    ADMIN_IDS=A.isAdmin?[id]:[];
+    if(A.isAdmin){ssave();await loadAdminData();showApp();return;}
+    ssave();await loadAll();showApp();startSubPolling();await loadNotifications();
+  }catch(e){toast("❌ "+e.message);btn.disabled=false;btn.textContent="כניסה →";}
+}
+
+async function logout(){
+  A={...A,coach:null,isAdmin:false,groups:[],sailors:[],sessions:[],attendance:{},allCoaches:[],allGroups:[],allSailors:[],allSessions:[],allAttendance:{},workHours:[],view:"schedule",subView:null,activeGroupId:null,activeSession:null,activeDate:null};
+  document.getElementById("bnav").style.display="none";
+  document.getElementById("logout-btn").style.display="none";
+  document.getElementById("hdr-sub").textContent="חוג שייט | עיריית תל אביב-יפו";
+  renderLogin();
+}
+
+// Poll for substitute changes every 15 seconds
+let _subPollTimer=null;
+async function pollSubstitutes(){
+  if(!A.coach)return;
+  try{
+    const myGIds=A.isAdmin?(A.allGroups||[]).map(g=>g.id):(A.groups||[]).map(g=>g.id);
+    if(!myGIds.length)return;
+    const [ownSess,subSess,cancSess]=await Promise.all([
+      myGIds.length?dbG("sessions",`group_id=in.(${myGIds.join(",")})`):[],
+      (!A.isAdmin&&A.dbCoachId)?dbG("sessions",`substitute_coach_id=eq.${A.dbCoachId}`):(A.isAdmin?dbG("sessions","substitute_coach_id=not.is.null"):[]),
+      A.isAdmin?dbG("sessions","cancelled=eq.true"):[]
+    ]);
+    // Take snapshot BEFORE merge
+    const snapFn=arr=>JSON.stringify((arr||[]).map(s=>({id:s.id,sub:s.substitute_coach_id,cancelled:s.cancelled,approved:s.admin_approved})).sort((a,b)=>a.id>b.id?1:-1));
+    const prevSnap=snapFn(A.sessions);
+    const prevAllSnap=snapFn(A.allSessions);
+    // Apply updates - merge all fetched sessions
+    [...ownSess,...subSess,...cancSess].forEach(s=>{
+      const existing=A.sessions.find(x=>x.id===s.id);
+      if(existing) Object.assign(existing,s);
+      else A.sessions.push(s);
+      if(A.allSessions){
+        const ex2=A.allSessions.find(x=>x.id===s.id);
+        if(ex2) Object.assign(ex2,s);
+        else A.allSessions.push(s);
+      }
+    });
+    A.subSessions=subSess;
+    // Always re-render — scroll position is preserved
+    renderPage();
+  }catch(e){console.log("poll error",e);}
+}
+function startSubPolling(){
+  if(_subPollTimer)clearInterval(_subPollTimer);
+  _subPollTimer=setInterval(async()=>{await pollSubstitutes();await loadNotifications();},5000);
+}
+function stopSubPolling(){
+  if(_subPollTimer){clearInterval(_subPollTimer);_subPollTimer=null;}
+}
+
+
+function showApp(){
+  document.getElementById("bnav").style.display="flex";
+  document.getElementById("logout-btn").style.display="block";
+  document.getElementById("hdr-sub").textContent=A.isAdmin?"👑 מנהל":(A.coach?.name||"");
+  const avatarEl=document.getElementById("hdr-avatar");
+  const avatarImg=document.getElementById("hdr-avatar-img");
+  if(avatarEl){avatarEl.style.display="flex";}
+  if(avatarImg&&A.coach?.avatar_url){
+    avatarImg.innerHTML=`<img src="${A.coach.avatar_url}" style="width:100%;height:100%;object-fit:cover">`;
+  } else if(avatarImg){
+    avatarImg.textContent=A.coach?.name?A.coach.name[0].toUpperCase():"👤";
+  }
+  if(A.isAdmin){
+    // show admin nav
+    document.getElementById("bnav").innerHTML=`
+      <button class="nb active" id="nav-admin-overview" onclick="nav('admin-overview')"><span class="ic">👑</span>סקירה</button>
+      <button class="nb" id="nav-admin-coaches" onclick="nav('admin-coaches')"><span class="ic">🧑‍🏫</span>מדריכים</button>
+      <button class="nb" id="nav-admin-sailors" onclick="nav('admin-sailors')"><span class="ic">👥</span>חניכים</button>
+      <button class="nb" id="nav-admin-hours" onclick="nav('admin-hours')"><span class="ic">⏱️</span>שעות</button>
+      <button class="nb" id="nav-admin-schedule" onclick="nav('admin-schedule')"><span class="ic">📅</span>לוח</button>
+      <button class="nb" id="nav-admin-settings" onclick="nav('admin-settings')"><span class="ic">👥</span>קבוצות</button>`;
+    A.view="admin-overview";nav("admin-overview");
+  }else{
+    A.view="schedule";A.subView=null;
+    document.querySelectorAll(".nb").forEach(b=>b.classList.remove("active"));
+    document.getElementById("nav-schedule")?.classList.add("active");
+    loadScheduleData().then(renderPage);
+  }
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function nav(view){
+  A.view=view;A.subView=null;
+  document.querySelectorAll(".nb").forEach(b=>b.classList.remove("active"));
+  const nb=document.getElementById("nav-"+view);if(nb)nb.classList.add("active");
+  if(view==="schedule"||view==="admin-schedule")loadScheduleData().then(renderPage);
+  else if(view==="admin-overview"||view==="admin-coaches"||view==="admin-sailors"||view==="admin-hours"||view==="admin-settings")loadAdminData().then(renderPage);
+  else if(view==="hours"){loadHours().then(renderPage);}
+  else renderPage();
+}
+
+function goBack(){
+  if(A.subView==="addSailor"||A.subView==="editSailor"){A.subView=null;A.editId=null;renderPage();}
+  else if(A.subView==="addGroup"||A.subView==="editGroup"){A.subView=null;A.editGId=null;renderPage();}
+  else if(A.subView==="session"){A.subView=null;A.activeSession=null;renderPage();}
+  else if(A.subView==="assignSailors"){A.subView=A.prevSubView||"groupDetail";A.prevSubView=null;renderPage();}
+  else if(A.subView==="groupDetail"){
+    const pv=A.prevView;A.prevView=null;
+    A.subView=null;A.activeGroupId=null;A.activeDate=null;
+    if(pv==="admin-overview"||A.view==="admin-overview"){renderPage();setTimeout(updateAdminDetail,0);}
+    else if(pv==="my-cancellations"){nav('my-cancellations');}
+    else if(pv==="coach-calendar"){A.scheduleView='month';nav('schedule');}
+    else if(A.view==="schedule")loadScheduleData().then(renderPage);
+    else renderPage();
+  }
+  else if(A.subView==="addHours"||A.subView==="editHours"){A.subView=null;A.editHId=null;renderPage();}
+  else if(A.subView==="addCoach"||A.subView==="editCoach"){A.subView=null;A.editCoachId=null;renderPage();}
+  else if(A.subView==="addAdminSailor"||A.subView==="editAdminSailor"){A.subView=null;A.editId=null;A.form=ef();renderPage();}
+  else nav(A.view);
+}
+
+function setC(html,login=false){
+  const mc=document.getElementById("mc");
+  const prevScroll=login?0:mc.scrollTop;
+  mc.className=login?"content-login":"content";
+  mc.innerHTML=html;
+  if(login) mc.scrollTop=0;
+  else requestAnimationFrame(()=>{mc.scrollTop=prevScroll;});
+}
+
+// ── Group actions ─────────────────────────────────────────────
+async function saveGroup(){
+  const f=A.gf;
+  if(!f.name.trim()){toast("⚠️ נא להזין שם קבוצה");return;}
+  const coachId=f.coach_id||A.coach.id;
+  const pl={name:f.name.trim(),color:f.color,days_of_week:f.days_of_week,start_time:f.start_time||null,end_time:f.end_time||null,start_date:f.start_date||null,coach_id:coachId};
+  try{
+    if(A.editGId){
+      await dbPa("groups",`id=eq.${A.editGId}`,pl);
+      const g=getG(A.editGId);if(g)Object.assign(g,pl);
+      toast("✅ קבוצה עודכנה");
+    }else{
+      const res=await dbP("groups",pl);
+      A.groups.push({...res[0],sailorIds:[],days_of_week:pl.days_of_week});
+      toast("✅ קבוצה נוצרה!");
+    }
+    A.editGId=null;A.gf=egf();A.subView=null;renderPage();
+  }catch(e){toast("❌ "+e.message);}
+}
+async function delGroup(id){
+  if(!confirm("למחוק קבוצה זו?"))return;
+  try{
+    await dbD("groups",`id=eq.${id}`);
+    A.groups=A.groups.filter(g=>g.id!==id);
+    A.sessions=A.sessions.filter(s=>s.group_id!==id);
+    renderPage();toast("🗑️ נמחקה");
+  }catch(e){toast("❌ "+e.message);}
+}
+function editGroup(id){
+  const g=getG(id);if(!g)return;
+  A.gf={name:g.name,color:g.color,days_of_week:[...(g.days_of_week||[])],start_time:g.start_time||"",end_time:g.end_time||"",start_date:g.start_date||"",coach_id:g.coach_id||""};
+  A.editGId=id;A.subView="editGroup";renderPage();
+}
+function toggleDay(d){
+  const arr=A.gf.days_of_week;
+  const i=arr.indexOf(d);if(i>=0)arr.splice(i,1);else arr.push(d);arr.sort((a,b)=>a-b);
+  document.querySelectorAll(".dpill[data-day]").forEach(el=>el.classList.toggle("active",arr.includes(parseInt(el.dataset.day))));
+}
+function setGCol(c){
+  A.gf.color=c;
+  document.querySelectorAll(".cdot").forEach(d=>{d.style.outline=d.dataset.color===c?"3px solid white":"none";});
+}
+
+// ── Sailor actions ────────────────────────────────────────────
+async function saveSailor(){
+  const f=A.form;
+  if(!f.first_name.trim()||!f.last_name.trim()){toast("⚠️ נא למלא שם");return;}
+  try{
+    if(A.editId){
+      await dbPa("sailors",`id=eq.${A.editId}`,{...f});
+      const i=A.sailors.findIndex(s=>s.id===A.editId);if(i>=0)A.sailors[i]={...A.sailors[i],...f};
+      toast("✅ פרטים עודכנו");
+    }else{
+      const ns=(await dbP("sailors",{...f}))[0];A.sailors.push(ns);
+      if(A.activeGroupId){
+        await dbP("group_sailors",{group_id:A.activeGroupId,sailor_id:ns.id});
+        const g=getG(A.activeGroupId);if(g&&!g.sailorIds.includes(ns.id))g.sailorIds.push(ns.id);
+      }
+      toast("✅ חניך נוסף!");
+    }
+    A.form=ef();A.editId=null;A.subView=A.activeGroupId?"groupDetail":null;renderPage();
+  }catch(e){toast("❌ "+e.message);}
+}
+async function delSailor(id){
+  if(!confirm("למחוק את החניך?"))return;
+  try{
+    await dbD("sailors",`id=eq.${id}`);
+    A.sailors=A.sailors.filter(s=>s.id!==id);
+    A.groups.forEach(g=>{g.sailorIds=g.sailorIds.filter(x=>x!==id);});
+    renderPage();
+  }catch(e){toast("❌ "+e.message);}
+}
+function editSailor(id){
+  const s=A.sailors.find(x=>x.id===id);if(!s)return;
+  A.form={...s};A.editId=id;A.subView="editSailor";renderPage();
+}
+async function toggleMember(sid){
+  const g=getG(A.activeGroupId);if(!g)return;
+  const inG=g.sailorIds.includes(sid);
+  try{
+    if(inG){await dbD("group_sailors",`group_id=eq.${g.id}&sailor_id=eq.${sid}`);g.sailorIds=g.sailorIds.filter(x=>x!==sid);}
+    else{await dbP("group_sailors",{group_id:g.id,sailor_id:sid});g.sailorIds.push(sid);}
+    const btn=document.getElementById("as-"+sid);
+    if(btn){const ni=g.sailorIds.includes(sid);btn.textContent=ni?"✓ בקבוצה":"+ הוסף";btn.className="btn btn-sm "+(ni?"btn-t":"btn-g");}
+  }catch(e){toast("❌ "+e.message);}
+}
+
+// ── Session ───────────────────────────────────────────────────
+async function openSession(date,gid){
+  A.activeGroupId=gid;
+  // Find the group — could be from allGroups if another coach's group
+  const myG=getG(gid);
+  const anyG=myG||A.allGroups.find(g=>g.id===gid);
+  const sailorIds=anyG?.sailorIds||[];
+
+  // Ensure the group is accessible in A.groups for session rendering
+  if(!myG&&anyG){
+    A.groups.push({...anyG,sailorIds:anyG.sailorIds||[]});
+    const sids2=[...new Set([...A.sailors.map(s=>s.id),...sailorIds])];
+    if(sailorIds.length){
+      const newSailors=await dbG("sailors",`id=in.(${sailorIds.join(",")})`, "last_name.asc");
+      newSailors.forEach(s=>{if(!A.sailors.find(x=>x.id===s.id))A.sailors.push(s);});
+    }
+  }
+
+  const existing=(A.sessions||[]).find(s=>s.date===date&&s.group_id===gid)||(A.allSessions||[]).find(s=>s.date===date&&s.group_id===gid);
+  if(existing){
+    A.activeSession={...existing};
+    if(!A.attendance[existing.id])A.attendance[existing.id]={};
+    // null = untouched, true/false = filled
+    for(const sid of sailorIds){
+      if(A.attendance[existing.id][sid]===undefined)A.attendance[existing.id][sid]=null;
+    }
+  }else{
+    try{
+      const sess=(await dbP("sessions",{group_id:gid,date}))[0];
+      A.sessions.push(sess);A.activeSession={...sess};A.attendance[sess.id]={};
+      for(const sid of sailorIds) A.attendance[sess.id][sid]=null;
+    }catch(e){toast("❌ "+e.message);return;}
+  }
+  // Load absence reasons from DB
+  if(A.activeSession){
+    try{
+      const attRows=await dbG("attendance",`session_id=eq.${A.activeSession.id}`,"");
+      if(!A.absenceReasons)A.absenceReasons={};
+      A.absenceReasons[A.activeSession.id]={};
+      attRows.forEach(r=>{
+        if(r.absence_reason)A.absenceReasons[A.activeSession.id][r.sailor_id]=r.absence_reason;
+        // Sync present status (null stays null if no row exists)
+        if(A.attendance[A.activeSession.id])A.attendance[A.activeSession.id][r.sailor_id]=r.present;
+      });
+      // Sailors with no DB row remain null
+      sailorIds.forEach(sid=>{
+        if(!attRows.find(r=>r.sailor_id===sid))A.attendance[A.activeSession.id][sid]=null;
+      });
+    }catch(e){}
+  }
+  A.subView="session";renderPage();
+}
+
+async function toggleAtt(sid){
+  const sess=A.activeSession;if(!sess)return;
+  const cur=A.attendance[sess.id]?.[sid];
+  // cycle: null → true → false → null
+  const next = cur===null||cur===undefined ? true : cur===true ? false : null;
+  if(!A.attendance[sess.id])A.attendance[sess.id]={};
+  A.attendance[sess.id][sid]=next;
+  const arow=document.getElementById("arow-"+sid);
+  const st=next===true?"present":next===false?"absent":"neutral";
+  if(arow)arow.setAttribute("class","arow "+st);
+  const chk=document.getElementById("achk-"+sid);
+  if(chk){chk.className="achk "+st;chk.textContent=next===true?"✓":next===false?"✗":"—";}
+  // Show/hide absence reason row
+  const reasonRow=document.getElementById("abs-row-"+sid);
+  if(reasonRow){reasonRow.style.display=next===false?"block":"none";}
+  else if(!next&&arow){
+    // Create the reason row if it doesn't exist yet
+    const div=document.createElement("div");
+    div.id="abs-row-"+sid;
+    div.style.cssText="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.07)";
+    const cur=(A.absenceReasons?.[sess.id]?.[sid])||"";
+    div.innerHTML=`<input type="text" value="${cur}" placeholder="סיבת היעדרות (אופציונלי)..." onchange="saveAbsenceReason('${sid}',this.value)" onclick="event.stopPropagation()" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--text);direction:rtl;box-sizing:border-box"/>`;
+    arow.appendChild(div);
+  }
+  const allVals=Object.values(A.attendance[sess.id]);
+  const cnt=allVals.filter(v=>v===true).length;
+  const tot=allVals.filter(v=>v!==null).length;
+  const total=allVals.length;
+  const ctr=document.getElementById("actr");if(ctr)ctr.textContent=cnt+"/"+total;
+  try{
+    if(next===null){
+      // remove row from DB
+      await dbD("attendance",`session_id=eq.${sess.id}&sailor_id=eq.${sid}`);
+    } else {
+      // upsert using POST with on-conflict
+      await sbUpsert("attendance",{session_id:sess.id,sailor_id:sid,present:next});
+    }
+  }catch(e){toast("❌ שגיאת שמירה");}
+}
+async function saveAbsenceReason(sid, reason){
+  const sess=A.activeSession;if(!sess)return;
+  if(!A.absenceReasons[sess.id])A.absenceReasons[sess.id]={};
+  A.absenceReasons[sess.id][sid]=reason;
+  try{
+    await dbPa("attendance",`session_id=eq.${sess.id}&sailor_id=eq.${sid}`,{absence_reason:reason||null});
+  }catch(e){toast("❌ שגיאת שמירה");}
+}
+
+
+function promptCancelSession(){
+  const sess=A.activeSession;if(!sess)return;
+  const reason=prompt("סיבת דחייה (אופציונלי):");
+  if(reason===null)return;
+  cancelSession(reason);
+}
+async function cancelSession(reason){
+  const sess=A.activeSession;if(!sess)return;
+  const cancelled=!sess.cancelled;
+  try{
+    await dbPa("sessions",`id=eq.${sess.id}`,{cancelled,cancel_reason:cancelled?(reason||null):null});
+    const s=A.sessions.find(x=>x.id===sess.id);
+    if(s){s.cancelled=cancelled;s.cancel_reason=reason||null;}
+    A.activeSession={...A.activeSession,cancelled,cancel_reason:reason||null};
+    if(cancelled)A.cancellations[sess.id]=true;else delete A.cancellations[sess.id];
+    // If cancelled - clear work hours for this date
+    if(cancelled){
+      const g=getG(sess.group_id);
+      const hr=A.workHours.find(h=>h.date===sess.date&&h.coach_id===A.coach?.id);
+      if(hr){
+        await dbPa("work_hours",`id=eq.${hr.id}`,{start_time:null,end_time:null,notes:"דחייה אוטומטית"});
+        hr.start_time=null;hr.end_time=null;
+      }
+    }
+    if(cancelled){goBack();}
+    renderPage();toast(cancelled?"⚠️ פעילות סומנה כדחויה — שעות נמחקו":"✅ דחייה בוטלה");
+  }catch(e){toast("❌ "+e.message);}
+}
+function promptCancel(){
+  const reason=prompt("סיבת דחייה (אופציונלי):");
+  if(reason===null)return;
+  cancelSession(reason);
+}
+
+async function quickCancelFromDetail(groupId, date){
+  const reason=prompt("סיבת דחייה (אופציונלי):");
+  if(reason===null)return;
+  try{
+    let sess=A.sessions.find(s=>s.group_id===groupId&&s.date===date);
+    const cancelled=!(sess&&sess.cancelled);
+    if(!sess){
+      const res=await dbP("sessions",{group_id:groupId,date,cancelled:true,cancel_reason:reason||null,coach_note:""});
+      sess=res[0];A.sessions.push(sess);
+    } else {
+      await dbPa("sessions",`id=eq.${sess.id}`,{cancelled,cancel_reason:cancelled?(reason||null):null});
+      sess.cancelled=cancelled;sess.cancel_reason=cancelled?(reason||null):null;
+    }
+    if(cancelled){
+      const hr=A.workHours.find(h=>h.date===date&&h.coach_id===A.coach?.id);
+      if(hr){await dbPa("work_hours",`id=eq.${hr.id}`,{start_time:null,end_time:null});hr.start_time=null;hr.end_time=null;}
+    }
+    A.subView="groupDetail";A.activeGroupId=groupId;A.activeDate=date;
+    renderPage();toast(cancelled?"⚠️ פעילות דחויה":"✅ דחייה בוטלה");
+  }catch(e){toast("❌ "+e.message);}
+}
+
+
+async function substituteSession(date, groupId){
+  A._subDate=date; A._subGroupId=groupId;
+  const sess=A.sessions.find(s=>s.group_id===groupId&&s.date===date);
+  const myGroupIds=new Set((A.groups||[]).filter(g=>g.coach_id===A.coach?.id).map(g=>g.id));
+  const isMyGroup=myGroupIds.has(groupId);
+  // If not admin and not my group - auto-assign self as substitute without showing modal
+  if(!A.isAdmin&&!isMyGroup){
+    const me=(A.allCoaches||[]).find(x=>x.id===A.dbCoachId);
+    if(me){
+      try{
+        let sess=A.sessions.find(s=>s.group_id===groupId&&s.date===date);
+        const alreadyMe=sess&&sess.substitute_coach_id===me.id;
+        if(alreadyMe){
+          // Toggle off
+          if(sess){await dbPa("sessions",`id=eq.${sess.id}`,{substitute_coach_id:null});sess.substitute_coach_id=null;}
+          A.subSessions=(A.subSessions||[]).filter(s=>s.id!==sess?.id);
+          // Update button visually without full re-render
+          document.querySelectorAll('[data-sub-gid="'+groupId+'"][data-sub-date="'+date+'"]').forEach(b=>{b.removeAttribute('style');b.setAttribute('style','flex:1;padding:9px 4px;background:none;border:none;border-left:1px solid var(--border);color:#a78bfa;font-size:12px;font-weight:700;cursor:pointer');b.textContent="🔄 החלפה";});
+          // Remove substitute bar from card
+          const card2=document.getElementById("sess-card-"+date+"-"+groupId);
+          if(card2){const bar2=card2.querySelector(".sub-bar-inner");if(bar2)bar2.remove();}
+          toast("✅ הוסרת מרשימת המחליפים");
+        } else {
+          // Fetch fresh from DB to check current substitute
+          const freshSess=(await dbG("sessions",`group_id=eq.${groupId}&date=eq.${date}`))[0];
+          if(freshSess) { if(sess) Object.assign(sess,freshSess); else { sess=freshSess; A.sessions.push(sess); } }
+          if(sess&&sess.substitute_coach_id&&sess.substitute_coach_id!==me.id){
+            const existingSub=(A.allCoaches||[]).find(x=>x.id===sess.substitute_coach_id);
+            toast("⚠️ "+(existingSub?.name||"מדריך אחר")+" כבר רשום כמחליף");
+            return;
+          }
+          if(!sess){const res=await dbP("sessions",{group_id:groupId,date,substitute_coach_id:me.id});sess=res[0];A.sessions.push(sess);}
+          else{await dbPa("sessions",`id=eq.${sess.id}`,{substitute_coach_id:me.id,admin_approved:null});sess.substitute_coach_id=me.id;sess.admin_approved=null;}
+          A.subSessions=A.subSessions||[];
+          if(!A.subSessions.find(s=>s.id===sess.id))A.subSessions.push(sess);
+          // Update button visually without full re-render
+          document.querySelectorAll('[data-sub-gid="'+groupId+'"][data-sub-date="'+date+'"]').forEach(b=>{b.style.background="rgba(167,139,250,0.2)";b.style.color="#a78bfa";b.textContent="✓ מחליף";});
+          // Show substitute bar in card
+          const card=document.getElementById("sess-card-"+date+"-"+groupId);
+          if(card){
+            let bar=card.querySelector(".sub-bar-inner");
+            if(!bar){
+              bar=document.createElement("div");
+              bar.className="sub-bar-inner";
+              bar.style.cssText="background:rgba(167,139,250,0.1);padding:4px 12px;font-size:11px;font-weight:700;color:#a78bfa;border-bottom:1px solid rgba(167,139,250,0.2)";
+              card.insertBefore(bar,card.firstChild);
+            }
+            bar.innerHTML="🔄 מחליף: "+(me?.name||"")+" · <span style='color:#f59e0b'>ממתין לאישור</span>";
+          }
+          toast("🔄 סומנת כמחליף");
+        }
+      }catch(e){toast("❌ "+e.message);}
+    }
+    return;
+  }
+  const coaches=(A.allCoaches||[]).filter(x=>x.id!==A.coach?.id&&!x.is_admin);
+  const list=document.getElementById("sub-list");
+  const clearBtn=document.getElementById("sub-clear-btn");
+  if(!list)return;
+  list.innerHTML=coaches.map(coach=>`
+    <div onclick="selectSubstitute('${coach.id}')" style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;border:1px solid ${sess?.substitute_coach_id===coach.id?"var(--blue)":"var(--border)"};margin-bottom:6px;background:${sess?.substitute_coach_id===coach.id?"rgba(59,130,246,0.1)":"transparent"}">
+      ${coachAvatar(coach,32)}
+      <span style="font-weight:700">${esc(coach.name)}</span>
+      ${sess?.substitute_coach_id===coach.id?"<span style='margin-right:auto;color:var(--blue);font-size:12px'>✓ נבחר</span>":""}
+    </div>`).join("");
+  if(clearBtn) clearBtn.style.display=sess?.substitute_coach_id?"block":"none";
+  const modal=document.getElementById("sub-modal");
+  if(modal){modal.style.display="flex";}
+}
+
+function closeSubModal(){
+  const modal=document.getElementById("sub-modal");
+  if(modal)modal.style.display="none";
+}
+
+async function selectSubstitute(coachId){
+  const date=A._subDate; const groupId=A._subGroupId;
+  const sub=A.allCoaches.find(x=>x.id===coachId);
+  try{
+    let sess=A.sessions.find(s=>s.group_id===groupId&&s.date===date);
+    if(!sess){
+      const res=await dbP("sessions",{group_id:groupId,date,substitute_coach_id:coachId,coach_note:""});
+      sess=res[0];A.sessions.push(sess);
+    } else {
+      await dbPa("sessions",`id=eq.${sess.id}`,{substitute_coach_id:coachId});
+      sess.substitute_coach_id=coachId;
+    }
+    // If current coach marked themselves - add to subSessions for immediate 'mine' filter update
+    if(sess&&(coachId===A.dbCoachId)){
+      A.subSessions=A.subSessions||[];
+      if(!A.subSessions.find(s=>s.id===sess.id)) A.subSessions.push(sess);
+    }
+    closeSubModal();renderPage();
+    toast("🔄 "+sub?.name+" הוגדר כמחליף");
+  }catch(e){toast("❌ "+e.message);}
+}
+
+async function clearSubstitute(){
+  const date=A._subDate; const groupId=A._subGroupId;
+  try{
+    const sess=A.sessions.find(s=>s.group_id===groupId&&s.date===date);
+    if(sess){
+      await dbPa("sessions",`id=eq.${sess.id}`,{substitute_coach_id:null});
+      sess.substitute_coach_id=null;
+      // Also remove from A.subSessions so 'mine' filter updates immediately
+      A.subSessions=(A.subSessions||[]).filter(s=>s.id!==sess.id);
+    }
+    closeSubModal();renderPage();
+    toast("✅ החלפה הוסרה");
+  }catch(e){toast("❌ "+e.message);}
+}
+async function quickCancel(date,gid){
+  var sess=A.sessions.find(function(s){return s.date===date&&s.group_id===gid;});
+  if(!sess){
+    var g=getG(gid);if(!g)return;
+    try{
+      var res=(await dbP("sessions",{group_id:gid,date:date,created_by:A.coach.id}))[0];
+      sess=res;A.sessions.push(sess);
+      if(A.allSessions)A.allSessions.push(sess);
+      A.attendance[sess.id]={};
+    }catch(e){toast("❌ "+e.message);return;}
+  }
+  if(sess.cancelled){
+    try{
+      await dbPa("sessions","id=eq."+sess.id,{cancelled:false,cancel_reason:null});
+      sess.cancelled=false;sess.cancel_reason=null;
+      delete A.cancellations[sess.id];
+      renderPage();toast("✅ דחייה בוטלה");
+    }catch(e){toast("❌ "+e.message);}
+    return;
+  }
+  // Show inline reason row in card
+  const cardEl=document.getElementById("sess-card-"+date+"-"+gid);
+  if(!cardEl)return;
+  const existRow=cardEl.querySelector(".cancel-reason-row");
+  if(existRow){existRow.remove();return;}
+  const row=document.createElement("div");
+  row.className="cancel-reason-row";
+  row.style.cssText="padding:8px 12px;border-top:1px solid var(--border);background:rgba(245,158,11,0.07)";
+  const curReason=sess.cancel_reason||"";
+  row.innerHTML=`<input type="text" value="${curReason}" placeholder="סיבת דחייה (אופציונלי)..."
+    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.07);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);direction:rtl"
+    onkeydown="if(event.key==='Enter')saveCancelReason('${sess.id}','${date}','${gid}',this.value)"
+  />
+  <div style="display:flex;gap:6px;margin-top:6px">
+    <button class="btn btn-g btn-sm" style="flex:1" onclick="this.closest('.cancel-reason-row').remove()">ביטול</button>
+    <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,#f59e0b,#d97706);color:white" 
+      onclick="saveCancelReason('${sess.id}','${date}','${gid}',this.closest('.cancel-reason-row').querySelector('input').value)">⚠️ דחה</button>
+  </div>`;
+  cardEl.appendChild(row);
+  row.querySelector("input").focus();
+}
+async function saveCancelReason(sessId,date,gid,reason){
+  const sess=A.sessions.find(s=>s.id===sessId);if(!sess)return;
+  const cardEl=document.getElementById("sess-card-"+date+"-"+gid);
+  if(cardEl){const r=cardEl.querySelector(".cancel-reason-row");if(r)r.remove();}
+  try{
+    await dbPa("sessions","id=eq."+sessId,{cancelled:true,cancel_reason:reason.trim()||null,admin_approved:null});
+    sess.cancelled=true;sess.cancel_reason=reason.trim()||null;
+    A.cancellations[sessId]=true;
+    renderPage();toast("⚠️ פעילות סומנה כדחויה");
+  }catch(e){toast("❌ "+e.message);}
+}
+function showDayMenu(date,evt){
+  document.getElementById("day-menu")&&document.getElementById("day-menu").remove();
+  var groups=(A.allGroups&&A.allGroups.length?A.allGroups:A.groups)||[];
+  var dow=new Date(date+"T00:00:00").getDay();
+  var items=groups.filter(function(g){return(g.days_of_week||[]).indexOf(dow)>=0&&(!g.start_date||date>=g.start_date);});
+  if(!items.length){toast("אין קבוצות ביום זה");return;}
+  var menu=document.createElement("div");
+  menu.id="day-menu";
+  menu.style.cssText="position:fixed;z-index:500;background:#0d2444;border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:8px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.6)";
+  var r=evt.target.getBoundingClientRect();
+  menu.style.top=(r.bottom+6)+"px";
+  menu.style.left=Math.max(8,r.left-80)+"px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:11px;font-weight:800;color:var(--muted);padding:4px 8px 8px";
+  title.textContent="⚠️ סמן כדחוי — "+date;
+  menu.appendChild(title);
+  items.forEach(function(g){
+    var s=A.sessions.find(function(x){return x.date===date&&x.group_id===g.id;});
+    var canc=s&&s.cancelled;
+    var row=document.createElement("div");
+    row.style.cssText="padding:9px 10px;cursor:pointer;border-radius:8px;font-size:13px;color:"+(canc?"#f59e0b":"var(--text)")+";font-weight:"+(canc?"700":"400");
+    row.textContent=(canc?"✓ ":"")+g.name;
+    row.onmouseover=function(){this.style.background="rgba(255,255,255,0.07)";};
+    row.onmouseout=function(){this.style.background="";};
+    row.onclick=function(){menu.remove();quickCancel(date,g.id);};
+    menu.appendChild(row);
+  });
+  document.body.appendChild(menu);
+  setTimeout(function(){document.addEventListener("click",function h(){menu.remove();document.removeEventListener("click",h);});},100);
+}
+async function toggleAll(){
+  const sess=A.activeSession;if(!sess)return;
+  const att=A.attendance[sess.id]||{};const ids=Object.keys(att);
+  const vals=ids.map(id=>att[id]);
+  // cycle: not-all-true → all true | all-true → all false | all-false → all null
+  let next;
+  if(vals.every(v=>v===true)) next=false;
+  else if(vals.every(v=>v===false)) next=null;
+  else next=true;
+  ids.forEach(id=>{A.attendance[sess.id][id]=next;});
+  renderPage();
+  try{
+    for(const sid of ids){
+      if(next===null) await dbD("attendance",`session_id=eq.${sess.id}&sailor_id=eq.${sid}`);
+      else await sbUpsert("attendance",{session_id:sess.id,sailor_id:sid,present:next});
+    }
+  }catch(e){toast("❌ שגיאה");}
+}
+
+// ── Work hours ────────────────────────────────────────────────
+async function saveHours(){
+  const f=A.hForm;
+  if(!f.date||!f.start_time||!f.end_time){toast("⚠️ נא למלא תאריך ושעות");return;}
+  if(f.start_time>=f.end_time){toast("⚠️ שעת יציאה חייבת להיות אחרי כניסה");return;}
+  // Check if coach cancelled a session on this date
+  const myGroupIds=new Set((A.groups||[]).filter(g=>g.coach_id===A.coach?.id).map(g=>g.id));
+  const cancelledThatDay=(A.sessions||[]).filter(s=>s.date===f.date&&s.cancelled&&myGroupIds.has(s.group_id));
+  if(cancelledThatDay.length){
+    const groupNames=cancelledThatDay.map(s=>{const g=(A.groups||[]).find(x=>x.id===s.group_id);return g?g.name:"";}).filter(Boolean).join(", ");
+    const proceed=confirm("⚠️ שים לב — הפעילות \""+groupNames+"\" באותו יום נדחתה.\nהאם למלא שעות בכל זאת?");
+    if(!proceed)return;
+  }
+  try{
+    if(A.editHId){
+      await dbPa("work_hours",`id=eq.${A.editHId}`,{date:f.date,start_time:f.start_time,end_time:f.end_time,notes:f.notes||null});
+      const i=A.workHours.findIndex(h=>h.id===A.editHId);
+      if(i>=0)A.workHours[i]={...A.workHours[i],...f};
+      toast("✅ עודכן");
+    }else{
+      const res=(await dbP("work_hours",{coach_id:A.coach.id,date:f.date,start_time:f.start_time,end_time:f.end_time,notes:f.notes||null}))[0];
+      A.workHours.unshift(res);toast("✅ נשמר!");
+    }
+    A.editHId=null;A.hForm={date:td(),start_time:"",end_time:"",notes:""};A.subView=null;renderPage();
+  }catch(e){toast("❌ "+e.message);}
+}
+async function delHours(id){
+  
+  try{
+    await dbD("work_hours",`id=eq.${id}`);
+    A.workHours=A.workHours.filter(h=>h.id!==id);renderPage();
+  }catch(e){toast("❌ "+e.message);}
+}
+function editHours(id){
+  const h=A.workHours.find(x=>x.id===id);if(!h)return;
+  A.hForm={date:h.date,start_time:h.start_time,end_time:h.end_time,notes:h.notes||""};
+  A.editHId=id;A.subView="editHours";renderPage();
+}
+
+// ── Form helpers ──────────────────────────────────────────────
+function setGender(g){A.form.gender=g;document.querySelectorAll(".tbtn[data-g]").forEach(b=>b.classList.toggle("active",b.dataset.g===g));}
+function setSize(sz){A.form.shirt_size=sz;document.querySelectorAll(".spill[data-s]").forEach(b=>b.classList.toggle("active",b.dataset.s===sz));}
+
+// ── Export ────────────────────────────────────────────────────
+function toCSV(rows){return rows.map(r=>r.map(c=>{const s=String(c??"");return(s.includes(",")||s.includes('"')||s.includes("\n"))?`"${s.replace(/"/g,'""')}"`:s;}).join(",")).join("\n");}
+function dlCSV(content,name){const blob=new Blob(["\uFEFF"+content],{type:"text/csv;charset=utf-8;"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();}
+function exportGroup(gid){
+  const g=getG(gid);if(!g)return;
+  const sess=gSess(gid).sort((a,b)=>a.date.localeCompare(b.date));
+  const sailors=gSailors(gid);
+  const rows=[["שם מלא","סירה","הצטרפות",...sess.map(s=>fs(s.date)),"%"],...sailors.map(s=>{
+    const jd=s.join_date||"2000-01-01";
+    const rel=sess.filter(x=>x.date>=jd);
+    const marks=sess.map(x=>{if(x.date<jd)return"—";return(A.attendance[x.id]||{})[s.id]?"✓":"✗";});
+    const pct=rel.length?Math.round(rel.filter(x=>(A.attendance[x.id]||{})[s.id]).length/rel.length*100)+"%":"—";
+    return[s.first_name+" "+s.last_name,s.boat,s.join_date||"",...marks,pct];
+  })];
+  dlCSV(toCSV(rows),`${g.name}_${td()}.csv`);toast("📥 הורד!");
+}
+function exportHours(){
+  const rows=[["תאריך","כניסה","יציאה","שעות","הערות"],...A.workHours.map(h=>[h.date,h.start_time,h.end_time,calcHours(h.start_time,h.end_time).toFixed(1),h.notes||""])];
+  dlCSV(toCSV(rows),`שעות_${A.coach?.name||""}_${td()}.csv`);toast("📥 הורד!");
+}
+function exportAllHours(){
+  const rows=[["מדריך","תאריך","כניסה","יציאה","שעות","הערות"]];
+  A.allCoaches.forEach(c=>{
+    A.workHours.filter(h=>h.coach_id===c.id).sort((a,b)=>a.date.localeCompare(b.date))
+      .forEach(h=>rows.push([c.name,h.date,h.start_time,h.end_time,calcHours(h.start_time,h.end_time).toFixed(1),h.notes||""]));
+  });
+  dlCSV(toCSV(rows),`שעות_כל_המדריכים_${td()}.csv`);toast("📥 הורד!");
+}
+function exportCancellations(){
+  const rows=[["מדריך","קבוצה","תאריך","סיבה"]];
+  A.allSessions.filter(s=>s.cancelled).sort((a,b)=>b.date.localeCompare(a.date)).forEach(s=>{
+    const g=A.allGroups.find(x=>x.id===s.group_id);
+    const c=A.allCoaches.find(x=>x.id===g?.coach_id);
+    rows.push([c?.name||"",g?.name||"",s.date,s.cancel_reason||""]);
+  });
+  dlCSV(toCSV(rows),`דחיות_${td()}.csv`);toast("📥 הורד!");
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderPage(){
+  if(A.subView==="addSailor"||A.subView==="editSailor")setC(rSailorForm());
+  else if(A.subView==="addGroup"||A.subView==="editGroup")setC(rGroupForm());
+  else if(A.subView==="session")setC(rSession());
+  else if(A.subView==="groupDetail")setC(rGroupDetail());
+  else if(A.subView==="assignSailors")setC(rAssign());
+
+  else if(A.view==="schedule")setC(rSchedule());
+  else if(A.view==="coach-calendar")setC(rCoachCalendar());
+  else if(A.view==="hours")setC(rHours());
+  else if(A.view==="sailors")setC(rSailors());
+  else if(A.view==="history")setC(rHistory());
+  else if(A.view==="settings")setC(rSettings());
+  else if(A.view==="profile")setC(rProfile());
+  else if(A.view==="admin-overview")setC(rAdminMonthly());
+  else if(A.view==="admin-coaches")setC(rAdminCoaches());
+  else if(A.view==="admin-sailors")setC(rAdminSailors());
+  else if(A.view==="admin-hours")setC(rAdminHours());
+  else if(A.view==="admin-schedule")setC(rSchedule(true));
+  else if(A.view==="admin-absences")setC(rAdminAbsences());
+  else if(A.view==="admin-cancellations")setC(rAdminCancellations());
+  else if(A.view==="admin-substitutions")setC(rAdminSubstitutions());
+  else if(A.view==="my-cancellations")setC(rMyCancellations());
+  else if(A.view==="admin-settings")setC(rAdminSettings());
+}
+
+// ── Login ─────────────────────────────────────────────────────
+function renderLogin(){
+  setC(`
+    <div style="font-size:64px;text-align:center;margin-bottom:16px">⛵</div>
+    <div style="font-size:24px;font-weight:800;text-align:center;color:var(--blue-light);margin-bottom:4px">מרכז דניאל לחתירה</div>
+    <div style="font-size:13px;text-align:center;color:var(--muted);margin-bottom:40px">חוג שייט | עיריית תל אביב-יפו</div>
+    <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:20px;padding:24px">
+      <div class="fg">
+        <label class="fl">תעודת זהות</label>
+        <input class="fi" id="lid" type="number" placeholder="תעודת זהות" inputmode="numeric" style="font-size:22px;letter-spacing:2px;text-align:center" oninput="chkNew()" onkeydown="if(event.key==='Enter')tryLogin()">
+      </div>
+      <div class="fg" id="ng" style="display:none">
+        <label class="fl">שמך (הרשמה ראשונה)</label>
+        <input class="fi" id="lname" placeholder="שם מלא">
+      </div>
+      <button class="btn btn-p" id="lbtn" onclick="tryLogin()" style="margin-top:4px">כניסה →</button>
+    </div>
+    <p style="text-align:center;color:var(--muted);font-size:11px;margin-top:16px">כל מדריך מתחבר עם ת"ז שלו</p>
+
+  `,true);
+}
+let _ct=null;
+async function chkNew(){
+  clearTimeout(_ct);_ct=setTimeout(async()=>{
+    const id=(document.getElementById("lid")?.value||"").trim();
+    if(id===ADMIN_ID){document.getElementById("ng").style.display="none";return;}
+    if(id.length<5){document.getElementById("ng").style.display="none";return;}
+    try{const r=await dbG("coaches",`id=eq.${id}`);document.getElementById("ng").style.display=r.length?"none":"block";}catch(e){}
+  },500);
+}
+
+// ── Schedule ──────────────────────────────────────────────────
+function rSchedule(isAdmin=false){
+  // view mode: week / day / month
+  const vm=A.scheduleView||"week";
+  const off=A.weekOffset;
+  const ws=wkStart(off);
+  // For month view, use monthOffset to determine which month to show
+  const moff=A.monthOffset||0;
+  const now2=new Date();
+  const mViewDate=new Date(now2.getFullYear(), now2.getMonth()+moff, 1);
+  const days=vm==="month"
+    ? Array.from({length:7},(_,i)=>addD(mViewDate,i))
+    : Array.from({length:7},(_,i)=>addD(ws,i));
+  const todayStr=td();
+
+  const map={};days.forEach(d=>{map[toISO(d)]=[];});
+  (A.allGroups&&A.allGroups.length?A.allGroups:A.groups).forEach(g=>{
+    const coach=(A.allCoaches||[]).find(c=>c.id===g.coach_id);
+    const isMe=g.coach_id===A.coach?.id;
+    (g.days_of_week||[]).forEach(dow=>{
+      const dayD=days.find(d=>d.getDay()===dow);
+      if(dayD){
+        const ds=toISO(dayD);
+        const subSessDay=(A.subSessions||[]).find(s=>s.group_id===g.id&&s.date===ds);
+        const isMeOrSub=isMe||(!!subSessDay);
+        if(map[ds]&&(!g.start_date||ds>=g.start_date))map[ds].push({g,coach,isMe:isMeOrSub});
+      }
+    });
+  });
+  // sort each day by start_time
+  Object.keys(map).forEach(ds=>{map[ds].sort((a,b)=>(a.g.start_time||"99:99").localeCompare(b.g.start_time||"99:99"));});
+
+  const navStr=isAdmin?"admin-schedule":"schedule";
+  const filterHtml=`
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="filter-btn ${vm==="day"?"active":""}" onclick="A.scheduleView='day';nav('${navStr}')">יום</button>
+      <button class="filter-btn ${vm==="week"?"active":""}" onclick="A.scheduleView='week';nav('${navStr}')">שבוע</button>
+      <button class="filter-btn ${vm==="month"?"active":""}" onclick="A.scheduleView='month';nav('${navStr}')">חודש</button>
+      ${!isAdmin?`<span style="flex:1"></span>
+      <button class="filter-btn ${A.scheduleFilter==="all"?"active":""}" onclick="A.scheduleFilter='all';renderPage()">📅 הכל</button>
+      <button class="filter-btn ${A.scheduleFilter==="mine"?"active":""}" onclick="A.scheduleFilter='mine';renderPage()">⭐ שלי</button>`:""}
+    </div>`;
+
+  // compute viewDays and titleStr
+  let viewDays, titleStr, monthCalHTML="";
+  if(vm==="day"){
+    viewDays=[days[Math.floor(days.length/2)]];
+    titleStr=fl(toISO(viewDays[0]));
+  } else if(vm==="month"){
+    const myr=mViewDate.getFullYear(), mmn=mViewDate.getMonth();
+    const dim=new Date(myr,mmn+1,0).getDate();
+    const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(myr,mmn,1));
+    titleStr=mName;
+    // build calendar grid
+    const firstDow=new Date(myr,mmn,1).getDay(); // 0=sun
+    // build full month map
+    const mmap={};
+    for(let d2=1;d2<=dim;d2++){
+      const ds=myr+"-"+String(mmn+1).padStart(2,"0")+"-"+String(d2).padStart(2,"0");
+      mmap[ds]=[];
+    }
+    (A.allGroups&&A.allGroups.length?A.allGroups:A.groups).forEach(g=>{
+      const coach=A.allCoaches.find(c=>c.id===g.coach_id);
+      const isMe=g.coach_id===A.coach?.id;
+      (g.days_of_week||[]).forEach(dow=>{
+        for(let d2=1;d2<=dim;d2++){
+          const dt=new Date(myr,mmn,d2);
+          const ds=toISO(dt);
+          const subSessDay=(A.subSessions||[]).find(s=>s.group_id===g.id&&s.date===ds);
+          const isMeOrSub=isMe||(!!subSessDay);
+          if(dt.getDay()===dow&&(!g.start_date||ds>=g.start_date)){
+            if(!A.scheduleFilter||A.scheduleFilter==="all"||isMeOrSub||isAdmin)mmap[ds].push({g,coach,isMe:isMeOrSub});
+          }
+        }
+      });
+    });
+    // day headers
+    const dayHdrs=["א","ב","ג","ד","ה","ו","ש"];
+    let cells="";
+    // empty cells before first
+    for(let i=0;i<firstDow;i++)cells+=`<div></div>`;
+    for(let d2=1;d2<=dim;d2++){
+      const ds=myr+"-"+String(mmn+1).padStart(2,"0")+"-"+String(d2).padStart(2,"0");
+      const isToday=ds===todayStr;
+      let items=mmap[ds]||[];
+      if(!isAdmin&&A.scheduleFilter==="mine")items=items.filter(x=>x.isMe);
+      // Show all groups as dots
+      const myItems=items;
+      items.sort((a,b)=>(a.g.start_time||"99:99").localeCompare(b.g.start_time||"99:99"));
+      const dots2=myItems.map(({g})=>{
+        const sessD=(map[ds]||[]).find(s=>s.group_id===g.id);
+        const isCancelledD=sessD&&sessD.cancelled;
+        return`<div title="${esc(g.name)}" style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${isCancelledD?"#ef4444":g.color}"></div>`;
+      }).join("");
+      cells+=`<div onclick="schedCellClick('${ds}')" style="min-height:70px;padding:5px;border-radius:8px;cursor:pointer;border:1px solid ${isToday?'var(--blue)':'var(--border)'};background:${isToday?'rgba(59,130,246,0.12)':ds<todayStr?'rgba(0,0,0,0.15)':'var(--card)'};transition:background 0.15s">
+        <div style="font-size:12px;font-weight:${isToday?"800":"600"};color:${isToday?"var(--blue-light)":"var(--text)"};margin-bottom:4px">${d2}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:3px">${dots2}</div>
+      </div>`;
+    }
+    monthCalHTML=`
+      <div id="coach-detail-panel"></div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px">
+        ${dayHdrs.map(h=>`<div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:4px 0">${h}</div>`).join("")}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">
+        ${cells}
+      </div>`;
+    viewDays=[];
+  } else {
+    viewDays=days;
+    titleStr=ff(toISO(days[0]))+" – "+ff(toISO(days[6]));
+  }
+  return`
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:10px">📅 לוח</h2>
+    ${filterHtml}
+    <div class="wnav">
+      <button class="warr" onclick="A.scheduleView==='month'?(A.monthOffset--,renderPage()):A.weekOffset--;nav('${navStr}')">&#8594;</button>
+      <div class="wtitle">${titleStr}</div>
+      <button class="warr" onclick="A.scheduleView==='month'?(A.monthOffset++,renderPage()):A.weekOffset++;nav('${navStr}')">&#8592;</button>
+    </div>
+    ${(A.scheduleView==="month"?moff!==0:off!==0)?`<button class="btn btn-g btn-sm" style="margin-bottom:12px" onclick="A.scheduleView==='month'?(A.monthOffset=0,renderPage()):(A.weekOffset=0,nav('${navStr}'))">↩ היום</button>`:""}
+    ${(!isAdmin&&A.notifications&&A.notifications.filter(n=>!n.read).length)?`
+    <div style="margin-bottom:12px">
+      ${A.notifications.filter(n=>!n.read).map(n=>{
+        const isApproved=n.type==='approved';
+        const color=isApproved?'var(--green)':'#ef4444';
+        const border=isApproved?'rgba(34,197,94,0.3)':'rgba(239,68,68,0.3)';
+        const bg=isApproved?'rgba(34,197,94,0.07)':'rgba(239,68,68,0.07)';
+        return "<div style=\"display:flex;align-items:center;gap:8px;background:"+bg+";border:1px solid "+border+";border-radius:10px;padding:10px 14px;margin-bottom:6px\">"
+          +"<div style=\"font-size:18px\">"+(isApproved?"✅":"❌")+"</div>"
+          +"<div style=\"flex:1;font-size:13px;color:"+color+";font-weight:600\">"+esc(n.message)+"</div>"
+          +"<button onclick=\"dismissNotification('"+n.id+"')\" style=\"background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px\">✕</button>"
+          +"</div>";
+      }).join('')}
+    </div>`:""}
+    ${vm==="month"?monthCalHTML:""}
+    ${viewDays.map(d=>{
+      const ds=toISO(d);
+      let items=map[ds]||[];
+      if(!isAdmin&&A.scheduleFilter==="mine")items=items.filter(x=>x.isMe);
+      const isToday=ds===todayStr;
+      const dow=d.getDay();
+      return`<div class="dblk">
+        <div class="dhdr ${isToday?"today":""}">
+          <span>${DL[dow]} ${ff(ds)}</span>
+          <span style="display:flex;gap:6px;align-items:center">
+            ${isToday?`<span class="badge-t">היום</span>`:""}
+            <button onclick="event.stopPropagation();A.gf=egf();A.gf.days_of_week=[${dow}];A.gf.start_date='${ds}';A.subView='addGroup';renderPage()" style="background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.3);color:var(--blue-light);border-radius:6px;padding:2px 8px;font-size:12px;cursor:pointer">+ קבוצה</button>
+          </span>
+        </div>
+        ${items.length===0?`<div style="font-size:12px;color:var(--muted);padding:6px 0 2px;padding-right:4px">אין פעילות</div>`
+        :items.map(({g,coach,isMe})=>`
+          <div id="sess-card-${ds}-${g.id}" style="background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;border-right:3px solid ${g.color};${isMe||isAdmin?"":"opacity:0.55"}overflow:hidden">
+            ${(function(){var _s=A.sessions.find(function(x){return x.date===ds&&x.group_id===g.id;});return (_s&&_s.cancelled?'<div style="background:rgba(245,158,11,0.1);padding:4px 12px;font-size:11px;font-weight:700;color:#f59e0b;border-bottom:1px solid rgba(245,158,11,0.2)">'+"⚠️ פעילות נדחתה"+(_s.cancel_reason?" · "+esc(_s.cancel_reason):"")+(_s.admin_approved===true?" <span style='color:var(--green)'>✓ מאושר</span>":_s.admin_approved===false?" <span style='color:#ef4444'>✗ לא אושר</span>":" · <span style='color:#f59e0b'>ממתין לאישור</span>")+'</div>':"") + (_s&&_s.substitute_coach_id?(function(){var _sub=(A.allCoaches||[]).find(function(x){return x.id===_s.substitute_coach_id;});return '<div style="background:rgba(167,139,250,0.1);padding:4px 12px;font-size:11px;font-weight:700;color:#a78bfa;border-bottom:1px solid rgba(167,139,250,0.2)" class="sub-bar-inner">🔄 מחליף: '+esc(_sub?_sub.name:"")+(_s.admin_approved===true?' · <span style="color:var(--green)">✓ מאושר</span>':_s.admin_approved===false?' · <span style="color:#ef4444">✗ לא אושר</span>':' · <span style="color:#f59e0b">ממתין לאישור</span>')+'</div>';})():"")})()}
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px">
+              <div style="width:8px;height:8px;border-radius:50%;background:${g.color};flex-shrink:0"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:700;font-size:13px">${esc(g.name)}${isMe?` <span style="font-size:10px;color:var(--green);font-weight:700">● שלי</span>`:""}</div>
+                <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px">${coach?.avatar_url?`<img src="${coach.avatar_url}" style="width:14px;height:14px;border-radius:50%;object-fit:cover">`:""}<span>${esc(coach?.name||"")}${g.start_time?" · ⏰ "+g.start_time+(g.end_time?"–"+g.end_time:""):""}</span></div>
+              </div>
+              
+            </div>
+            <div style="display:flex;border-top:1px solid var(--border)">
+              <button style="flex:1;padding:9px 4px;background:none;border:none;border-left:1px solid var(--border);color:var(--green);font-size:12px;font-weight:700;cursor:pointer" onclick="openSession('${ds}','${g.id}')" ${(function(){var _sx=A.sessions.find(x=>x.date===ds&&x.group_id===g.id);return _sx&&_sx.cancelled?"disabled style='opacity:0.35;cursor:not-allowed;pointer-events:none'":""})()}>✅ נוכחות</button>
+              ${(isMe||A.isAdmin)?`<button style="flex:1;padding:9px 4px;background:none;border:none;border-left:1px solid var(--border);color:#f59e0b;font-size:12px;font-weight:700;cursor:pointer" onclick="quickCancel('${ds}','${g.id}')">⚠️ דחייה</button>`:""}
+              <button style="flex:1;padding:9px 4px;background:none;border:none;border-left:1px solid var(--border);color:#a78bfa;font-size:12px;font-weight:700;cursor:pointer" data-sub-gid="${g.id}" data-sub-date="${ds}" onclick="substituteSession('${ds}','${g.id}')">🔄 החלפה</button>
+              <button style="flex:1;padding:9px 4px;background:none;border:none;border-left:1px solid var(--border);color:var(--blue-light);font-size:12px;font-weight:700;cursor:pointer" onclick="A.activeGroupId='${g.id}';A.activeDate='${ds}';A.prevSubView=null;A.prevView=A.view;A.subView='assignSailors';renderPage()">👥 הוסף/הסר חניך</button>
+              <button style="flex:1;padding:9px 4px;background:none;border:none;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer" onclick="A.activeGroupId='${g.id}';A.activeDate='${ds}';A.subView='groupDetail';renderPage()">📋 פרטי קבוצה</button>
+            </div>
+          </div>`).join("")}
+      </div>`;
+    }).join("")}
+  `;
+}
+
+// ── Hours (coach) ─────────────────────────────────────────────
+function rHours(){
+  const now=new Date();
+  const yr=A.hoursYear||now.getFullYear();
+  const mn=A.hoursMonth!==undefined?A.hoursMonth:now.getMonth();
+  const todayStr=td();
+  
+  // month nav
+  const daysInMonth=new Date(yr,mn+1,0).getDate();
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+  
+  // total for month
+  const monthTotal=A.workHours.filter(h=>h.date.startsWith(yr+"-"+String(mn+1).padStart(2,"0")))
+    .reduce((s,h)=>s+calcHours(h.start_time,h.end_time),0);
+  const grandTotal=A.workHours.reduce((s,h)=>s+calcHours(h.start_time,h.end_time),0);
+
+  // build day rows
+  let rows="";
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=yr+"-"+String(mn+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+    const dow=new Date(dateStr+"T00:00:00").getDay();
+    const isToday=dateStr===todayStr;
+    const isFuture=dateStr>todayStr;
+    const rec=A.workHours.find(h=>h.date===dateStr);
+    const hid="hr-"+dateStr;
+    // Check if coach has a cancelled session or substitute role that day
+    const myGIds=new Set((A.groups||[]).filter(g=>g.coach_id===A.coach?.id).map(g=>g.id));
+    const mySessToday=(A.sessions||[]).filter(s=>s.date===dateStr&&myGIds.has(s.group_id));
+    const cancelledSess=mySessToday.filter(s=>s.cancelled);
+    // Sessions where I'm substitute (from dedicated store)
+    const subSess=(A.subSessions||[]).filter(s=>s.date===dateStr);
+    // Sessions where I was replaced (my group, someone else is substitute)
+    const replacedSess=mySessToday.filter(s=>s.substitute_coach_id&&s.substitute_coach_id!==(A.dbCoachId||A.coach?.id));
+    let dayNotice="";
+    if(cancelledSess.length){
+      const names=cancelledSess.map(s=>{const g=(A.groups||[]).find(x=>x.id===s.group_id);return g?esc(g.name):"";}).filter(Boolean).join(", ");
+      dayNotice+=`<div style="font-size:11px;color:#f59e0b;margin-top:4px;width:100%">⚠️ הפעילות "${names}" נדחתה</div>`;
+    }
+    if(subSess.length){
+      const allG=A.allGroups&&A.allGroups.length?A.allGroups:A.groups||[];
+      subSess.forEach(s=>{
+        const g=allG.find(x=>x.id===s.group_id);
+        const origCoach=(A.allCoaches||[]).find(x=>x.id===g?.coach_id);
+        const gName=g?esc(g.name):"?";
+        const cName=origCoach?esc(origCoach.name):"";
+        dayNotice+=`<div style="font-size:11px;color:var(--blue-light);margin-top:4px;width:100%">🔄 החלפת את ${cName?`${cName} `:""}בפעילות ${gName}</div>`;
+      });
+    }
+    if(replacedSess.length){
+      replacedSess.forEach(s=>{
+        const g=(A.groups||[]).find(x=>x.id===s.group_id);
+        const subCoach=(A.allCoaches||[]).find(x=>x.id===s.substitute_coach_id);
+        dayNotice+=`<div style="font-size:11px;color:#a78bfa;margin-top:4px;width:100%">👤 ${esc(subCoach?.name||"מדריך")} החליף אותך בפעילות "${esc(g?.name||"")}"</div>`;
+      });
+    }
+    
+    rows+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="min-width:52px;text-align:right">
+        <div style="font-size:15px;font-weight:${isToday?"800":"600"};color:${isToday?"var(--blue-light)":"var(--text)"}">${String(day).padStart(2,"0")}</div>
+        <div style="font-size:10px;color:var(--muted)">${DL[dow]}</div>
+        ${isToday?`<div style="font-size:9px;color:var(--blue-light);font-weight:700">היום</div>`:""}
+      </div>
+      <div style="flex:1;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <input type="text" inputmode="numeric" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:8px;font-size:14px;width:80px;text-align:center;" 
+          value="${rec?rec.start_time:""}" 
+          placeholder="כניסה"
+          onchange="autoSaveHours('${dateStr}','start_time',this.value)" onblur="fixTimeInput(this,'${dateStr}','start_time')"
+          id="st-${dateStr}">
+        <span style="color:var(--muted);font-size:12px">–</span>
+        <input type="text" inputmode="numeric" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:8px;font-size:14px;width:80px;text-align:center;" 
+          value="${rec?rec.end_time:""}" 
+          placeholder="יציאה"
+          onchange="autoSaveHours('${dateStr}','end_time',this.value)" onblur="fixTimeInput(this,'${dateStr}','end_time')"
+          id="et-${dateStr}">
+        ${rec&&rec.start_time&&rec.end_time?`<span id="hspan-${dateStr}" style="font-size:12px;font-weight:700;color:var(--green);min-width:32px">${fmtH(calcHours(rec.start_time,rec.end_time))}</span>`:`<span id="hspan-${dateStr}" style="min-width:32px"></span>`}
+        <input style="background:rgba(0,0,0,0.2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:8px;font-size:12px;flex:1;min-width:60px;color-scheme:dark" 
+          value="${rec?esc(rec.notes||""):""}" 
+          placeholder="הערה..."
+          onchange="autoSaveHours('${dateStr}','notes',this.value)" oninput="autoSaveHours('${dateStr}','notes',this.value)"
+          id="nt-${dateStr}">
+        <span id="cpybtn-${dateStr}" style="display:flex;gap:4px">${rec&&rec.start_time&&rec.end_time?`<button onclick="showCopyModal('${dateStr}')" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:var(--blue-light);border-radius:8px;padding:6px 8px;font-size:12px;cursor:pointer">📋</button>`:""}</span>
+        <button id="clrbtn-${dateStr}" onclick="clearHours('${dateStr}')" style="display:${rec&&(rec.start_time||rec.end_time||rec.notes)?'inline-block':'none'};background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:8px;padding:6px 8px;font-size:12px;cursor:pointer">🗑️</button>
+        <span id="sv-${dateStr}" style="font-size:10px;color:var(--green);font-weight:700;opacity:0;transition:opacity 0.3s;min-width:40px">✓ נשמר</span>
+      </div>
+      ${dayNotice}
+    </div>`;
+  }
+
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 style="font-size:20px;font-weight:800">⏱️ שעות עבודה</h2>
+      <button class="btn btn-ex btn-sm" onclick="exportHours()">📥 ייצוא</button>
+    </div>
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 16px">
+      <button class="warr" onclick="prevMonth()">&#8594;</button>
+      <div style="text-align:center">
+        <div style="font-size:15px;font-weight:800">${mName}</div>
+        <div id="month-total" style="font-size:12px;color:var(--green);font-weight:700">${fmtH(monthTotal)} החודש</div>
+      </div>
+      <button class="warr" onclick="nextMonth()">&#8592;</button>
+    </div>
+    
+    <div style="background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.15);border-radius:10px;padding:8px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--muted)">שעות חודשיות</span>
+      <span id="grand-total" style="font-size:16px;font-weight:800;color:var(--green)">${fmtH(monthTotal)}</span>
+    </div>
+    
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px">
+      ${rows}
+    </div>
+  `;
+}
+
+function prevMonth(){
+  const now=new Date();
+  let yr=A.hoursYear||now.getFullYear();
+  let mn=A.hoursMonth!==undefined?A.hoursMonth:now.getMonth();
+  mn--;if(mn<0){mn=11;yr--;}
+  A.hoursYear=yr;A.hoursMonth=mn;renderPage();
+}
+function nextMonth(){
+  const now=new Date();
+  let yr=A.hoursYear||now.getFullYear();
+  let mn=A.hoursMonth!==undefined?A.hoursMonth:now.getMonth();
+  mn++;if(mn>11){mn=0;yr++;}
+  A.hoursYear=yr;A.hoursMonth=mn;renderPage();
+}
+
+// pending save timers per date
+const _hTimers={};
+function fixTimeInput(el, date, field){
+  let v = el.value.trim();
+  if(!v) return;
+  // If only digits entered (e.g. "9", "10", "14") - add :00
+  if(/^\d{1,2}$/.test(v)){
+    v = v.padStart(2,'0') + ':00';
+    el.value = v;
+    autoSaveHours(date, field, v);
+  }
+  // If format like "9:" or "10:" - add 00
+  else if(/^\d{1,2}:$/.test(v)){
+    v = v.padStart(3,'0') + '00';
+    el.value = v;
+    autoSaveHours(date, field, v);
+  }
+}
+
+
+function autoSaveHours(date,field,value){
+  let rec=A.workHours.find(h=>h.date===date);
+  if(!rec){rec={id:null,coach_id:A.coach.id,date,start_time:"",end_time:"",notes:""};A.workHours.push(rec);}
+  rec[field]=value;
+  // update hours span inline
+  if(rec.start_time&&rec.end_time){
+    const h=calcHours(rec.start_time,rec.end_time);
+    const st=document.getElementById("st-"+date);
+    if(st){const span=st.parentElement.querySelector("span[style*='min-width:32px']");if(span){span.textContent=h>0?fmtH(h):"";span.style.color="var(--green)";}}
+  }
+  // update month total and grand total inline
+  const mKey=date.substr(0,7);
+  const mTotal=A.workHours.filter(h=>h.date.startsWith(mKey)).reduce((s,h)=>s+calcHours(h.start_time,h.end_time),0);
+  const gTotal=A.workHours.reduce((s,h)=>s+calcHours(h.start_time,h.end_time),0);
+  const mEl=document.getElementById("month-total");if(mEl)mEl.textContent=fmtH(mTotal)+" החודש";
+  const gEl=document.getElementById("grand-total");if(gEl)gEl.textContent=fmtH(gTotal);
+  clearTimeout(_hTimers[date]);
+  _hTimers[date]=setTimeout(()=>persistHours(date),800);
+  // Show/hide clear button based on whether there's data
+  const clrBtn=document.getElementById("clrbtn-"+date);
+  if(clrBtn) clrBtn.style.display=(rec.start_time||rec.end_time||rec.notes)?"inline-block":"none";;
+  // Show/hide copy button immediately
+  const cpyEl=document.getElementById("cpybtn-"+date);
+  if(cpyEl){
+    if(rec.start_time&&rec.end_time){
+      cpyEl.innerHTML=`<button onclick="showCopyModal('${date}')" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:var(--blue-light);border-radius:8px;padding:6px 8px;font-size:12px;cursor:pointer;white-space:nowrap">📋</button>`;
+    }else{
+      cpyEl.innerHTML="";
+    }
+  }
+}
+
+async function clearHours(date){
+  
+  const rec=A.workHours.find(h=>h.date===date);
+  if(!rec)return;
+  try{
+    if(rec.id){await dbD("work_hours","id=eq."+rec.id);rec.id=null;}
+    rec.start_time="";rec.end_time="";rec.notes="";
+    const st=document.getElementById("st-"+date);
+    const et=document.getElementById("et-"+date);
+    const nt=document.getElementById("nt-"+date);
+    if(st)st.value="";if(et)et.value="";if(nt)nt.value="";
+    const sp=document.getElementById("sv-"+date);if(sp)sp.textContent="";
+    const hspan=document.getElementById("hspan-"+date);if(hspan)hspan.textContent="";
+    const cpyEl=document.getElementById("cpybtn-"+date);if(cpyEl)cpyEl.innerHTML="";
+    const clrEl=document.getElementById("clrbtn-"+date);if(clrEl)clrEl.style.display="none";
+    // update totals
+    autoSaveHours(date,"start_time","");
+    toast("🗑️ שעות נוקו");
+  }catch(e){toast("❌ "+e.message);}
+}
+function normalizeTime(t){
+  if(!t) return t;
+  t = t.trim().replace(/[^\d:]/g,'');
+  // "1730" or "930" -> "17:30" / "09:30"
+  if(/^\d{3,4}$/.test(t)){
+    t = t.padStart(4,'0');
+    return t.slice(0,2)+':'+t.slice(2);
+  }
+  // "9" or "17" -> "09:00" / "17:00"
+  if(/^\d{1,2}:?$/.test(t)) return t.replace(':','').padStart(2,'0')+':00';
+  // "9:3" -> "09:30"
+  if(/^\d{1,2}:\d{1}$/.test(t)) return t.split(':')[0].padStart(2,'0')+':'+t.split(':')[1]+'0';
+  return t;
+}
+async function persistHours(date){
+  const rec=A.workHours.find(h=>h.date===date);
+  if(!rec)return;
+  if(!rec.start_time&&!rec.end_time&&!rec.notes)return;
+  // Normalize times
+  rec.start_time=normalizeTime(rec.start_time);
+  rec.end_time=normalizeTime(rec.end_time);
+  // Update input fields visually
+  const stEl=document.getElementById('st-'+date);if(stEl&&rec.start_time)stEl.value=rec.start_time;
+  const etEl=document.getElementById('et-'+date);if(etEl&&rec.end_time)etEl.value=rec.end_time;
+  // Don't save if only one of start/end is filled
+  if((rec.start_time&&!rec.end_time)||(rec.end_time&&!rec.start_time))return;
+  try{
+    if(rec.id){
+      await dbPa("work_hours",`id=eq.${rec.id}`,{start_time:rec.start_time||null,end_time:rec.end_time||null,notes:rec.notes||null});
+    }else{
+      const res=(await dbP("work_hours",{coach_id:A.coach.id,date,start_time:rec.start_time||null,end_time:rec.end_time||null,notes:rec.notes||null}))[0];
+      rec.id=res.id;
+    }
+    var st2=document.getElementById("st-"+date);
+    if(st2){var el2=st2.parentElement;if(el2){el2.style.background="rgba(52,211,153,0.08)";setTimeout(function(){if(el2)el2.style.background="";},1500);}}
+    var savedEl=document.getElementById("sv-"+date);
+    if(savedEl){savedEl.textContent="✓ נשמר";savedEl.style.opacity="1";setTimeout(function(){if(savedEl)savedEl.style.opacity="0";},2000);}
+  }catch(e){toast("❌ שגיאת שמירה: "+e.message);}
+}
+
+function showCopyModal(date){
+  // find same weekday in rest of month
+  const src=A.workHours.find(h=>h.date===date);
+  if(!src||!src.start_time||!src.end_time){toast("⚠️ נא למלא שעות קודם");return;}
+  const d=new Date(date+"T00:00:00");
+  const dow=d.getDay();
+  const yr=d.getFullYear(),mn=d.getMonth();
+  const dim=new Date(yr,mn+1,0).getDate();
+  const candidates=[];
+  for(let day=1;day<=dim;day++){
+    const cd=new Date(yr,mn,day);
+    const ds=toISO(cd);
+    if(ds>date&&cd.getDay()===dow)candidates.push(ds);
+  }
+  if(!candidates.length){toast("אין ימים זהים נוספים בחודש");return;}
+  A.copySource=date;A.copyCandidates=candidates;A.copySelected=new Set();
+  // show modal
+  const modal=document.createElement("div");
+  modal.id="copy-modal";
+  modal.style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:flex-end;justify-content:center";
+  modal.innerHTML=`<div style="background:#0d2444;border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:70vh;overflow-y:auto">
+    <div style="font-size:16px;font-weight:800;margin-bottom:4px">📋 שכפול שעות</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${src.start_time}–${src.end_time} · בחר ימים לשכפול</div>
+    ${candidates.map(ds=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;cursor:pointer" id="cday-${ds}" onclick="toggleCopyDay('${ds}')">
+      <div style="width:22px;height:22px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px" id="cchk-${ds}"></div>
+      <span style="font-size:14px;font-weight:600">${fl(ds)}</span>
+    </div>`).join("")}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+      <button class="btn btn-g" onclick="document.getElementById('copy-modal').remove()">ביטול</button>
+      <button class="btn btn-p" onclick="applyCopyHours()">✅ שכפל</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+function toggleCopyDay(ds){
+  if(A.copySelected.has(ds))A.copySelected.delete(ds);else A.copySelected.add(ds);
+  const el=document.getElementById("cday-"+ds);
+  const chk=document.getElementById("cchk-"+ds);
+  if(el)el.style.borderColor=A.copySelected.has(ds)?"rgba(59,130,246,0.5)":"var(--border)";
+  if(chk)chk.textContent=A.copySelected.has(ds)?"✓":"";
+}
+async function applyCopyHours(){
+  const src=A.workHours.find(h=>h.date===A.copySource);
+  if(!src)return;
+  document.getElementById("copy-modal")?.remove();
+  let count=0;
+  for(const ds of A.copySelected){
+    let rec=A.workHours.find(h=>h.date===ds);
+    if(!rec){rec={id:null,coach_id:A.coach.id,date:ds,start_time:src.start_time,end_time:src.end_time,notes:src.notes||""};A.workHours.push(rec);}
+    else{rec.start_time=src.start_time;rec.end_time=src.end_time;}
+    try{
+      if(rec.id){await dbPa("work_hours",`id=eq.${rec.id}`,{start_time:rec.start_time,end_time:rec.end_time});}
+      else{const res=(await dbP("work_hours",{coach_id:A.coach.id,date:ds,start_time:src.start_time,end_time:src.end_time,notes:src.notes||null}))[0];rec.id=res.id;}
+      count++;
+    }catch(e){}
+  }
+  renderPage();toast(`✅ שוכפל ל-${count} ימים`);
+}
+
+// ── Settings ──────────────────────────────────────────────────
+function rProfile(){
+  return`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+      <button class="btn btn-sm" onclick="nav('schedule')" style="background:rgba(255,255,255,0.07);border:1px solid var(--border);font-size:18px;padding:4px 10px">←</button>
+      <h2 style="font-size:20px;font-weight:800">👤 הפרופיל שלי</h2>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+        <div id="settings-avatar" onclick="document.getElementById('avatar-input').click()" style="width:72px;height:72px;border-radius:50%;background:var(--border);border:2px solid rgba(255,255,255,0.15);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;position:relative;flex-shrink:0">
+          ${A.coach?.avatar_url?`<img src="${A.coach.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:`<span>${A.coach?.name?A.coach.name[0].toUpperCase():"👤"}</span>`}
+          <div style="position:absolute;bottom:2px;right:2px;background:var(--blue);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px">✏️</div>
+        </div>
+        <div>
+          <div style="font-weight:800;font-size:18px">${esc(A.coach?.name)}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">לחץ על התמונה לשינוי</div>
+        </div>
+      </div>
+      <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <label style="font-size:13px;color:var(--muted);min-width:90px;text-align:right">🎂 יום הולדת</label>
+          <input type="date" value="${A.coach?.birth_date||''}" 
+            onchange="saveCoachField('birth_date',this.value)"
+            style="flex:1;background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:13px;color-scheme:dark">
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <label style="font-size:13px;color:var(--muted);min-width:90px;text-align:right">📞 טלפון</label>
+          <input type="tel" value="${A.coach?.phone||''}" 
+            onchange="saveCoachField('phone',this.value)"
+            placeholder="050-0000000"
+            style="flex:1;background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:13px">
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function rSettings(){
+  const total=new Set(A.groups.flatMap(g=>g.sailorIds)).size;
+  return`
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:16px">🏊 ניהול קבוצות</h2>
+    <div class="sgrid">
+      <div class="sc"><div class="si">🏊</div><div class="sv" style="color:var(--blue)">${A.groups.length}</div><div class="sl">קבוצות</div></div>
+      <div class="sc"><div class="si">👥</div><div class="sv" style="color:var(--green)">${total}</div><div class="sl">חניכים</div></div>
+      <div class="sc"><div class="si">📅</div><div class="sv" style="color:var(--yellow)">${A.sessions.length}</div><div class="sl">מפגשים</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="stitle" style="margin-bottom:0">הקבוצות שלי</div>
+      <button class="btn btn-p btn-sm" onclick="A.gf=egf();A.subView='addGroup';renderPage()">+ קבוצה חדשה</button>
+    </div>
+    ${[...A.groups].sort((a,b)=>{const da=(a.days_of_week&&a.days_of_week.length?Math.min(...a.days_of_week):99);const db=(b.days_of_week&&b.days_of_week.length?Math.min(...b.days_of_week):99);return da!==db?da-db:(a.start_time||"99:99").localeCompare(b.start_time||"99:99");}).length===0?`<div style="text-align:center;padding:40px 0;color:var(--muted)">
+      <div style="font-size:40px;margin-bottom:12px">🏊</div><p>עוד לא הגדרת קבוצות</p>
+      <button class="btn btn-p btn-sm" style="margin-top:12px" onclick="A.gf=egf();A.subView='addGroup';renderPage()">צור קבוצה ראשונה</button>
+    </div>`:(()=>{
+      const sorted=[...A.groups].sort((a,b)=>{const da=(a.days_of_week&&a.days_of_week.length?Math.min(...a.days_of_week):99);const db=(b.days_of_week&&b.days_of_week.length?Math.min(...b.days_of_week):99);return da!==db?da-db:(a.start_time||"99:99").localeCompare(b.start_time||"99:99");});
+      let html="";let lastDay=-1;
+      sorted.forEach(g=>{
+        const firstDay=(g.days_of_week&&g.days_of_week.length?Math.min(...g.days_of_week):-1);
+        if(firstDay!==lastDay){
+          lastDay=firstDay;
+          const dayLabel=firstDay>=0?("יום "+DL[firstDay]):"ללא יום";
+          html+=`<div style="font-size:12px;font-weight:800;color:var(--muted);margin:14px 0 6px;padding-right:6px;border-right:3px solid var(--blue)">${dayLabel}</div>`;
+        }
+        const timeStr=g.start_time?(g.start_time+(g.end_time?"–"+g.end_time:"")):"";
+        html+=`<div class="gcard" onclick="A.activeGroupId=\'${g.id}\';A.subView=\'groupDetail\';renderPage()">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:12px;height:12px;border-radius:50%;background:${g.color};flex-shrink:0"></div>
+              <div style="font-weight:800;font-size:16px">${esc(g.name)}</div>
+            </div>
+            <div style="display:flex;gap:6px" onclick="event.stopPropagation()">
+              <button class="btn btn-g btn-sm" onclick="editGroup(\'${g.id}\')">✏️</button>
+              <button class="btn btn-d btn-sm" onclick="delGroup(\'${g.id}\')">מחק</button>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">${g.sailorIds.length} חניכים · ${gSess(g.id).length} מפגשים${timeStr?" · "+timeStr:""}</div>
+        </div>`;
+      });
+      return html;
+    })()}
+  `;
+}
+
+// ── Group Detail ──────────────────────────────────────────────
+function rGroupDetail(){
+  const g=getG(A.activeGroupId);if(!g){goBack();return"";}
+  const sailors=gSailors(g.id);
+  const dayStr=(g.days_of_week||[]).map(d=>DL[d]).join(", ");
+  const timeStr=g.start_time?(g.start_time+(g.end_time?"–"+g.end_time:"")):"";
+  const attendBtn=A.activeDate&&A.activeDate!==td()?
+    `✅ נוכחות ${fs(A.activeDate)}`:"✅ נוכחות היום";
+  return`
+    <button class="bbtn" onclick="goBack()">← חזרה</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <div style="width:14px;height:14px;border-radius:50%;background:${g.color}"></div>
+      <h2 style="font-size:20px;font-weight:800">${esc(g.name)}</h2>
+    </div>
+    ${dayStr?`<div style="font-size:12px;color:var(--muted);margin-bottom:2px">📆 ${dayStr}${timeStr?" · ⏰ "+timeStr:""}</div>`:""}
+    ${A.activeDate?`<div style="font-size:13px;font-weight:700;color:var(--blue-light);margin-bottom:2px">📌 ${fl(A.activeDate)}</div>`:""}
+    <div style="height:12px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+      <button class="btn btn-p" onclick="openSession(A.activeDate||td(),'${g.id}')" ${(()=>{const _s=A.sessions.find(x=>x.date===(A.activeDate||td())&&x.group_id===g.id);return _s&&_s.cancelled?"disabled style='opacity:0.4;cursor:not-allowed'":""})()}>${attendBtn}</button>
+      <button class="btn btn-g" onclick="A.prevSubView='groupDetail';A.subView='assignSailors';renderPage()">👥 נהל חניכים</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+      ${(()=>{const _s=A.sessions.find(x=>x.date===(A.activeDate||td())&&x.group_id===g.id);const _cancelled=_s&&_s.cancelled;return`<button class="btn btn-sm" style="background:${_cancelled?"rgba(34,197,94,0.15)":"rgba(245,158,11,0.15)"};border:1px solid ${_cancelled?"rgba(34,197,94,0.3)":"rgba(245,158,11,0.3)"};color:${_cancelled?"var(--green)":"#f59e0b"}" onclick="quickCancelFromDetail('${g.id}',A.activeDate||td())">${_cancelled?"✅ בטל דחייה":"⚠️ דחה פעילות"}</button>`;})()}
+      <button class="btn btn-g btn-sm" data-sub-gid="${g.id}" data-sub-date="${A.activeDate||td()}" onclick="substituteSession(A.activeDate||td(),'${g.id}')">🔄 החלפה</button>
+    </div>
+    <button class="btn btn-g btn-sm" style="margin-bottom:14px" onclick="editGroup('${g.id}')">✏️ ערוך פרטי קבוצה</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <button class="btn btn-ex btn-sm" onclick="exportGroup('${g.id}')">📥 Excel</button>
+      <button class="btn btn-sh btn-sm" onclick="exportGroup('${g.id}');setTimeout(()=>window.open('https://sheets.new','_blank'),400)">📊 Sheets</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="stitle" style="margin-bottom:0">חניכים (${sailors.length})</div>
+      <button class="btn btn-p btn-sm" onclick="A.form=ef();A.editId=null;A.subView='addSailor';renderPage()">+ חדש</button>
+    </div>
+    ${sailors.length===0?`<div style="text-align:center;padding:30px;color:var(--muted)">
+      <p>אין חניכים בקבוצה</p>
+      <button class="btn btn-g btn-sm" style="margin-top:10px" onclick="A.subView='assignSailors';renderPage()">הוסף חניכים קיימים</button>
+    </div>`:sailors.map(s=>{
+      const r=aRate(s,gSess(g.id));const col=rc(r);
+      return`<div class="scard">
+        <div class="av av-${s.gender==="female"?"f":"m"}">${s.gender==="female"?"👧":"👦"}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:14px">${esc(s.first_name)} ${esc(s.last_name)}</div>
+          <div style="font-size:11px;color:var(--muted)">🚢 ${s.boat} · 👕 ${s.shirt_size}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${r!==null?`<div style="font-size:15px;font-weight:800;color:${col}">${r}%</div>`:""}
+          <button class="btn btn-g btn-sm" onclick="editSailor('${s.id}')">✏️</button>
+        </div>
+      </div>`;
+    }).join("")}
+  `;
+}
+
+// ── Assign ────────────────────────────────────────────────────
+function rAssign(){
+  const g=getG(A.activeGroupId);if(!g){goBack();return"";}
+  return`
+    <button class="bbtn" onclick="if(A.prevView&&!A.prevSubView){const v=A.prevView;A.prevView=null;A.subView=null;A.view=v;renderPage();}else{A.subView=A.prevSubView||'groupDetail';A.prevSubView=null;renderPage();}">← חזרה</button>
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:4px">שיוך חניכים ל-${esc(g.name)}</h2>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:16px">לחץ להוספה/הסרה</p>
+    <button class="btn btn-p btn-sm" style="margin-bottom:14px" onclick="A.form=ef();A.editId=null;A.subView='addSailor';renderPage()">+ חניך חדש</button>
+    ${A.sailors.length===0?`<div style="text-align:center;padding:30px;color:var(--muted)">אין חניכים עדיין</div>`
+    :A.sailors.map(s=>{
+      const inG=g.sailorIds.includes(s.id);
+      return`<div class="scard">
+        <div class="av av-${s.gender==="female"?"f":"m"}">${s.gender==="female"?"👧":"👦"}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:14px">${esc(s.first_name)} ${esc(s.last_name)}</div>
+          <div style="font-size:11px;color:var(--muted)">🚢 ${s.boat}</div>
+        </div>
+        <button id="as-${s.id}" class="btn btn-sm ${inG?"btn-t":"btn-g"}" onclick="toggleMember('${s.id}')">${inG?"✓ בקבוצה":"+ הוסף"}</button>
+      </div>`;
+    }).join("")}
+  `;
+}
+
+// ── All Sailors ───────────────────────────────────────────────
+function rSailors(){
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="font-size:20px;font-weight:800">👥 כל החניכים</h2>
+      <button class="btn btn-p btn-sm" onclick="A.activeGroupId=null;A.form=ef();A.editId=null;A.subView='addSailor';renderPage()">+ הוסף</button>
+    </div>
+    ${A.sailors.length===0?`<div style="text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:48px">👥</div><p style="margin-top:12px">עוד אין חניכים</p></div>`
+    :A.sailors.map(s=>{
+      const groups=A.groups.filter(g=>g.sailorIds.includes(s.id));
+      const allS=A.sessions.filter(x=>A.attendance[x.id]&&A.attendance[x.id][s.id]!==undefined);
+      const r=aRate(s,allS);const col=rc(r);
+      return`<div class="scard">
+        <div class="av av-${s.gender==="female"?"f":"m"}">${s.gender==="female"?"👧":"👦"}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:14px">${esc(s.first_name)} ${esc(s.last_name)}</div>
+          <div style="font-size:11px;color:var(--muted)">🚢 ${s.boat} · 👕 ${s.shirt_size}</div>
+          ${groups.length?`<div style="margin-top:3px">${groups.map(g=>`<span style="background:${g.color}22;border:1px solid ${g.color}55;border-radius:6px;padding:1px 6px;font-size:10px;color:${g.color};margin-left:3px">${esc(g.name)}</span>`).join("")}</div>`:""}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${r!==null?`<div style="font-size:15px;font-weight:800;color:${col}">${r}%</div>`:""}
+          <button class="btn btn-g btn-sm" onclick="editSailor('${s.id}')">✏️</button>
+          <button class="btn btn-d btn-sm" onclick="delSailor('${s.id}')">✕</button>
+        </div>
+      </div>`;
+    }).join("")}
+  `;
+}
+
+// ── Sailor Form ───────────────────────────────────────────────
+function rSailorForm(){
+  const f=A.form;const isEdit=!!A.editId;
+  const g=A.activeGroupId?getG(A.activeGroupId):null;
+  return`
+    <button class="bbtn" onclick="A.editId=null;A.subView=null;A.activeSession=null;nav('schedule')">${g?"← חזרה לקבוצה":"← חזרה"}</button>
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:20px">${isEdit?"✏️ עריכת חניך":"⛵ הוסף חניך חדש"}</h2>
+    ${g&&!isEdit?`<div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--blue-light)">✓ יתווסף אוטומטית לקבוצה ${esc(g.name)}</div>`:""}
+    <div class="frow">
+      <div class="fg"><label class="fl">שם פרטי *</label><input class="fi" value="${esc(f.first_name)}" oninput="A.form.first_name=this.value" inputmode="text"></div>
+      <div class="fg"><label class="fl">שם משפחה *</label><input class="fi" value="${esc(f.last_name)}" oninput="A.form.last_name=this.value" inputmode="text"></div>
+    </div>
+    <div class="fg"><label class="fl">מגדר</label>
+      <div class="trow">
+        <button class="tbtn ${f.gender==="male"?"active":""}" data-g="male" onclick="setGender('male')">👦 בן</button>
+        <button class="tbtn ${f.gender==="female"?"active":""}" data-g="female" onclick="setGender('female')">👧 בת</button>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">סירה</label>
+      <select class="fi" onchange="A.form.boat=this.value">${BOATS.map(b=>`<option ${f.boat===b?"selected":""}>${b}</option>`).join("")}</select>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">תאריך לידה</label><input type="date" class="fi" value="${esc(f.birth_date)}" onchange="A.form.birth_date=this.value"></div>
+      <div class="fg"><label class="fl">תאריך הצטרפות</label><input type="date" class="fi" value="${esc(f.join_date||td())}" onchange="A.form.join_date=this.value"></div>
+    </div>
+    <div class="fg"><label class="fl">מידת חולצה</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${SIZES.map(sz=>`<button class="spill ${f.shirt_size===sz?"active":""}" data-s="${sz}" onclick="setSize('${sz}')">${sz}</button>`).join("")}</div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">שם הורה</label><input class="fi" value="${esc(f.parent_name)}" oninput="A.form.parent_name=this.value"></div>
+      <div class="fg"><label class="fl">טלפון הורה</label><input type="tel" class="fi" value="${esc(f.parent_phone)}" oninput="A.form.parent_phone=this.value"></div>
+    </div>
+    <button class="btn btn-p" onclick="saveSailor()">${isEdit?"💾 שמור שינויים":"⛵ הוסף חניך"}</button>
+  `;
+}
+
+// ── Group Form ────────────────────────────────────────────────
+function rGroupForm(){
+  const f=A.gf;const isEdit=!!A.editGId;
+  return`
+    <button class="bbtn" onclick="A.subView=null;A.editGId=null;renderPage()">← חזרה</button>
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:20px">${isEdit?"✏️ עריכת קבוצה":"🏊 קבוצה חדשה"}</h2>
+    <div class="fg"><label class="fl">שם הקבוצה *</label>
+      <input class="fi" value="${esc(f.name)}" oninput="A.gf.name=this.value" placeholder="לדוגמה: אופטימיסט מתקדמים">
+    </div>
+    <div class="fg"><label class="fl">צבע</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+        ${COLORS.map(c=>`<div class="cdot" data-color="${c}" onclick="setGCol('${c}')" style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;outline:${c===f.color?"3px solid white":"none"};outline-offset:2px"></div>`).join("")}
+      </div>
+    </div>
+    ${A.isAdmin?`<div class="fg"><label class="fl">מדריך</label>
+      <select class="fi" onchange="A.gf.coach_id=this.value">
+        ${A.allCoaches.filter(c=>!c.is_admin).map(c=>`<option value="${c.id}" ${f.coach_id===c.id?"selected":""}>${esc(c.name)}</option>`).join("")}
+      </select>
+    </div>`:""}
+    <div class="fg"><label class="fl">ימי פעילות</label>
+      <div class="dpick">${DS.map((n,i)=>`<button class="dpill ${(f.days_of_week||[]).includes(i)?"active":""}" data-day="${i}" onclick="toggleDay(${i})">${n}</button>`).join("")}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">א׳=ראשון, ב׳=שני, ג׳=שלישי, ד׳=רביעי, ה׳=חמישי, ו׳=שישי, ש׳=שבת</div>
+    </div>
+    <div class="fg"><label class="fl">שעות פעילות</label>
+      <div class="frow">
+        <div><label class="fl" style="font-size:11px">התחלה</label><input type="time" class="fi" value="${esc(f.start_time)}" onchange="A.gf.start_time=this.value"></div>
+        <div><label class="fl" style="font-size:11px">סיום</label><input type="time" class="fi" value="${esc(f.end_time)}" onchange="A.gf.end_time=this.value"></div>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">תאריך תחילת פעילות</label>
+      <input type="date" class="fi" value="${esc(f.start_date)}" onchange="A.gf.start_date=this.value">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">הקבוצה תופיע בלוח מתאריך זה</div>
+    </div>
+    <button class="btn btn-p" onclick="saveGroup()">${isEdit?"💾 שמור שינויים":"✅ צור קבוצה"}</button>
+  `;
+}
+
+// ── Session ───────────────────────────────────────────────────
+function rSession(){
+  const sess=A.activeSession;if(!sess){goBack();return"";}
+  if(sess.cancelled){
+    return`<button class="bbtn" onclick="goBack()">← חזרה</button>
+    <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+      <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:18px;font-weight:800;color:var(--yellow)">פעילות נדחתה</div>
+      ${sess.cancel_reason?`<div style="margin-top:8px;font-size:14px">${esc(sess.cancel_reason)}</div>`:""}
+      <div style="margin-top:16px;font-size:12px;color:var(--muted)">לא ניתן למלא נוכחות לפעילות שדחויה</div>
+    </div>`;
+  }
+  const g=getG(sess.group_id);
+  const att=A.attendance[sess.id]||{};
+  const ids=Object.keys(att);
+  const cnt=ids.filter(id=>att[id]).length;
+  const allP=ids.length>0&&ids.every(id=>att[id]===true);
+  return`
+    <button class="bbtn" onclick="A.activeSession=null;A.subView=A.prevView==='admin-overview'?'groupDetail':null;if(A.prevView==='admin-overview'){renderPage();}else{nav('schedule');}">← חזרה ללוח</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div>
+        <h2 style="font-size:17px;font-weight:800">✅ נוכחות — ${esc(g?.name||"")}</h2>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${fl(sess.date)}</div>
+      </div>
+      <span class="cpill" id="actr">${cnt}/${ids.length}</span>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="btn btn-g btn-sm" onclick="A.subView='assignSailors';renderPage()" style="font-size:11px;padding:4px 10px">👥 חניכים</button>
+      <button class="btn btn-sm" style="font-size:11px;padding:4px 10px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#f59e0b" onclick="promptCancelSession()">⚠️ דחייה</button>
+    </div>
+    ${ids.length===0?`<div style="text-align:center;padding:40px;color:var(--muted)">אין חניכים בקבוצה</div>`:`
+    <button class="btn btn-g btn-sm" style="margin-bottom:12px;width:auto" onclick="toggleAll()">${(()=>{const vals=ids.map(id=>att[id]);if(vals.every(v=>v===true))return"סמן הכל ✗";if(vals.every(v=>v===false))return"נקה הכל —";return"סמן הכל ✓";})()}</button>
+    ${ids.map(sid=>{
+      const s=A.sailors.find(x=>x.id===sid);const p=att[sid];
+      const absReason=A.absenceReasons?.[sess.id]?.[sid]||"";
+      return`<div id="arow-${sid}" class="arow ${p===true?"present":p===false?"absent":"neutral"}" style="flex-direction:column;align-items:stretch;padding:8px 12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div onclick="toggleAtt('${sid}')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer">
+            <div class="av av-${s?.gender==="female"?"f":"m"}" style="width:38px;height:38px;font-size:18px">${s?.gender==="female"?"👧":"👦"}</div>
+            <div style="flex:1"><div style="font-weight:700;font-size:15px">${s?esc(s.first_name)+" "+esc(s.last_name):"?"}</div>
+              <div style="font-size:11px;color:var(--muted)">${s?.boat||""}</div>
+            </div>
+          </div>
+          <div id="achk-${sid}" onclick="toggleAtt('${sid}')" class="achk ${p===true?"present":p===false?"absent":"neutral"}" style="cursor:pointer">${p===true?"✓":p===false?"✗":"—"}</div>
+        </div>
+        <div id="abs-row-${sid}" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.07);display:${p===false?"block":"none"}">
+          <input type="text" value="${esc(absReason)}"
+            placeholder="סיבת היעדרות (אופציונלי)..."
+            onchange="saveAbsenceReason('${sid}',this.value)"
+            onclick="event.stopPropagation()"
+            style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--text);direction:rtl;box-sizing:border-box"/>
+        </div>
+      </div>`;
+    }).join("")}
+    <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--muted)">💾 נשמר אוטומטית לשרת</div>`}
+  `;
+}
+
+// ── History ───────────────────────────────────────────────────
+function rHistory(){
+  if(!A.groups.length)return`<h2 style="font-size:20px;font-weight:800;margin-bottom:20px">📊 קבוצות</h2>
+    <div style="text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:48px">📊</div><p>עוד אין נתונים</p></div>`;
+  const myGroupIds=new Set((A.groups||[]).filter(g=>g.coach_id===A.coach?.id).map(g=>g.id));
+  const myCancelled=A.sessions.filter(s=>s.cancelled&&myGroupIds.has(s.group_id));
+  const cb=myCancelled.length?`<button class="btn btn-sm" style="margin-bottom:14px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;width:100%;text-align:right" onclick="nav('my-cancellations')">⚠️ פעילויות שנדחו (${myCancelled.length}) ←</button>`:"";
+  return`<h2 style="font-size:20px;font-weight:800;margin-bottom:12px">📊 קבוצות</h2>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="filter-btn ${A.historyFilter==='all'?'active':''}" onclick="A.historyFilter='all';renderPage()">🌐 הכל</button>
+      <button class="filter-btn ${A.historyFilter==='mine'?'active':''}" onclick="A.historyFilter='mine';renderPage()">⭐ שלי</button>
+    </div>
+    ${cb}
+    ${(A.historyFilter==='mine'?(A.allGroups||A.groups).filter(g=>g.coach_id===A.coach?.id):(A.allGroups&&A.allGroups.length?A.allGroups:A.groups)).map(g=>{
+      const sess=gSess(g.id).sort((a,b)=>a.date.localeCompare(b.date));
+      const sailors=gSailors(g.id);
+      if(!sess.length&&!sailors.length)return"";
+      return`<div class="card" style="border-right:3px solid ${g.color}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:800;font-size:15px">${esc(g.name)}</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ex btn-sm" onclick="exportGroup('${g.id}')">📥</button>
+            <button class="btn btn-sh btn-sm" onclick="exportGroup('${g.id}');setTimeout(()=>window.open('https://sheets.new','_blank'),400)">📊</button>
+          </div>
+        </div>
+        ${sailors.length===0?`<p style="color:var(--muted);font-size:12px">אין חניכים</p>`
+        :sailors.map(s=>{
+          const r=aRate(s,sess);const col=rc(r);
+          const jd=s.join_date||"2000-01-01";
+          const rel=sess.filter(x=>x.date>=jd);
+          const att=rel.filter(x=>(A.attendance[x.id]||{})[s.id]).length;
+          const missed=rel.length-att;
+          const dots=sess.slice(-12).map(x=>{
+            if(x.date<jd)return`<div class="dot" style="background:#1e3a5f"></div>`;
+            const p=(A.attendance[x.id]||{})[s.id];
+            return`<div class="dot" style="background:${p?"#34d399":"#ef4444"};opacity:${p?0.8:0.4}"></div>`;
+          }).join("");
+          return`<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><span style="font-weight:700;font-size:13px">${esc(s.first_name)} ${esc(s.last_name)}</span>
+              ${missed>=3?`<span class="badge badge-w" style="margin-right:6px">⚠️ ${missed}</span>`:""}</div>
+              <div><span style="font-size:17px;font-weight:800;color:${col}">${r!==null?r+"%":"—"}</span><span style="font-size:10px;color:var(--muted);margin-right:4px">${att}/${rel.length}</span></div>
+            </div>
+            <div class="pbar"><div class="pfill" style="width:${r||0}%;background:${col}"></div></div>
+            <div class="dots">${dots}</div>
+          </div>`;
+        }).join("")}
+      </div>`;
+    }).join("")}`;
+}
+
+// ── ADMIN VIEWS ───────────────────────────────────────────────
+
+async function loadNotifications(){
+  if(!A.dbCoachId||A.isAdmin)return;
+  try{
+    const notes=await dbG("notifications",`coach_id=eq.${A.dbCoachId}&read=eq.false`,"created_at.desc");
+    const prev=JSON.stringify((A.notifications||[]).map(n=>n.id).sort());
+    A.notifications=notes||[];
+    const next=JSON.stringify((A.notifications||[]).map(n=>n.id).sort());
+    if(prev!==next) renderPage();
+  }catch(e){console.log("notif error",e);}
+}
+
+async function dismissNotification(id){
+  try{
+    await dbPa("notifications","id=eq."+id,{read:true});
+    if(A.notifications)A.notifications=A.notifications.filter(n=>n.id!==id);
+    renderPage();
+  }catch(e){toast("❌ "+e.message);}
+}
+
+async function createNotification(coachId, sessId, type, message){
+  try{
+    await dbP("notifications",{coach_id:coachId,session_id:sessId,type,message,read:false});
+  }catch(e){console.log("notif create error",e);}
+}
+
+
+async function approveSession(sessId, approved){
+  try{
+    await dbPa("sessions","id=eq."+sessId,{admin_approved:approved});
+    const s=(A.allSessions||[]).find(x=>x.id===sessId)||(A.sessions||[]).find(x=>x.id===sessId);
+    if(s) s.admin_approved=approved;
+    // Create notification for relevant coach
+    if(s){
+      const g=(A.allGroups||[]).find(x=>x.id===s.group_id);
+      const targetCoachId=s.substitute_coach_id||g?.coach_id;
+      if(targetCoachId){
+        const isSub=!!s.substitute_coach_id;
+        const g2=(A.allGroups||[]).find(x=>x.id===s.group_id);
+        const d=new Date((s.date||"")+"T12:00:00");
+        const dateStr=s.date?d.toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"numeric"}):"";
+        const groupName=g2?.name||"";
+        const msg=isSub
+          ?(approved?"בקשת ההחלפה אושרה ✓ — "+groupName+" · "+dateStr:"בקשת ההחלפה נדחתה ✗ — "+groupName+" · "+dateStr)
+          :(approved?"דחיית הפעילות אושרה ✓ — "+groupName+" · "+dateStr:"דחיית הפעילות לא אושרה ✗ — "+groupName+" · "+dateStr);
+        await createNotification(targetCoachId, sessId, approved?"approved":"rejected", msg);
+      }
+    }
+    renderPage();
+    toast(approved?"✅ אושר":"❌ לא אושר");
+  }catch(e){toast("❌ "+e.message);}
+}
+
+
+function rAdminMonthly(){
+  const now=new Date();
+  const yr=A.adminYear||now.getFullYear();
+  const mn=A.adminMonth!==undefined?A.adminMonth:now.getMonth();
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+  const dim=new Date(yr,mn+1,0).getDate();
+  const mnStr=String(mn+1).padStart(2,"0");
+  const todayStr=td();
+
+  const sessMap={};
+  A.allSessions.forEach(s=>{if(!sessMap[s.date])sessMap[s.date]=[];sessMap[s.date].push(s);});
+
+  const monthSess=A.allSessions.filter(s=>!s.cancelled);
+  const monthCanc=A.allSessions.filter(s=>s.cancelled);
+
+  // Build agenda rows - one per day that has scheduled groups
+  let rows="";
+  for(let day=1;day<=dim;day++){
+    const dateStr=yr+"-"+mnStr+"-"+String(day).padStart(2,"0");
+    const dow=new Date(dateStr+"T00:00:00").getDay();
+    const scheduledGroups=A.allGroups.filter(g=>(g.days_of_week||[]).includes(dow));
+    if(!scheduledGroups.length)continue;
+
+    const isToday=dateStr===todayStr;
+    const isPast=dateStr<todayStr;
+    const dbSess=sessMap[dateStr]||[];
+    const dayName="יום "+DL[dow];
+    const dateLabel=String(day).padStart(2,"0")+"/"+mnStr;
+
+    const groupCards=scheduledGroups.map(g=>{
+      const sess=dbSess.find(s=>s.group_id===g.id);
+      const isCancelled=sess?.cancelled;
+      const subCoach=sess?.substitute_coach_id?A.allCoaches.find(x=>x.id===sess.substitute_coach_id):null;
+      const coach=A.allCoaches.find(x=>x.id===g.coach_id);
+      const displayCoach=subCoach||coach;
+      const sailors=g.sailorIds||[];
+      const att=sess?A.allAttendance[sess.id]||{}:{};
+      const present=sailors.filter(id=>att[id]).length;
+      const hasAtt=Object.keys(att).length>0;
+
+      return`<div onclick="A.subView=null;A.prevView=A.view;A.activeGroupId='${g.id}';A.activeDate='${dateStr}';A.subView='groupDetail';renderPage()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;
+        background:${isCancelled?"rgba(239,68,68,0.08)":"rgba(255,255,255,0.03)"};
+        border-radius:10px;border:1px solid ${isCancelled?"rgba(239,68,68,0.3)":isPast?"var(--border)":"rgba(255,255,255,0.08)"};
+        opacity:${isPast&&!sess?"0.5":"1"}">
+        <div style="width:4px;height:40px;border-radius:2px;background:${isCancelled?"#ef4444":g.color};flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:14px;color:${isCancelled?"#ef4444":g.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${isCancelled?"❌ ":""}${esc(g.name)}
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
+            ${coachAvatar(displayCoach,20)}
+            <span style="font-size:12px;color:${subCoach?"var(--yellow)":"var(--muted)"}">
+              ${subCoach?"🔄 ":""}${esc(displayCoach?.name||"")}
+            </span>
+            ${g.start_time?`<span style="font-size:11px;color:var(--muted)">· ${g.start_time}</span>`:""}
+          </div>
+        </div>
+        <div style="text-align:left;flex-shrink:0">
+          ${hasAtt
+            ?`<div style="font-size:13px;font-weight:800;color:${present===sailors.length?"var(--green)":"var(--yellow)"}">${present}/${sailors.length}</div>
+               <div style="font-size:10px;color:var(--muted)">נוכחים</div>`
+            :`<div style="font-size:13px;font-weight:700;color:var(--muted)">${sailors.length}</div>
+              <div style="font-size:10px;color:var(--muted)">חניכים</div>`
+          }
+        </div>
+      </div>`;
+    }).join("");
+
+    rows+=`<div style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding:0 2px">
+        <div style="font-size:13px;font-weight:800;color:${isToday?"var(--blue-light)":"var(--text)"}">
+          ${dayName}
+        </div>
+        <div style="font-size:12px;color:var(--muted)">${dateLabel}</div>
+        ${isToday?`<span style="font-size:10px;background:var(--blue);color:#fff;padding:1px 7px;border-radius:10px;font-weight:700">היום</span>`:""}
+        <div style="flex:1;height:1px;background:${isToday?"var(--blue)":"var(--border)"}"></div>
+        <div style="font-size:11px;color:var(--muted)">${scheduledGroups.length} קבוצות</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">${groupCards}</div>
+    </div>`;
+  }
+
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <h2 style="font-size:20px;font-weight:800">👑 מסוף מנהל</h2>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 12px">
+      <button class="warr" onclick="A.adminMonth--;if(A.adminMonth<0){A.adminMonth=11;A.adminYear--;}loadAdminData().then(renderPage)">&#8594;</button>
+      <div style="flex:1;text-align:center;font-weight:800;font-size:16px">${mName}</div>
+      <button class="warr" onclick="A.adminMonth++;if(A.adminMonth>11){A.adminMonth=0;A.adminYear++;}loadAdminData().then(renderPage)">&#8592;</button>
+      ${(yr!==now.getFullYear()||mn!==now.getMonth())?`<button class="btn btn-g btn-sm" onclick="A.adminMonth=${now.getMonth()};A.adminYear=${now.getFullYear()};loadAdminData().then(renderPage)">היום</button>`:""}
+    </div>
+    <div class="sgrid" style="margin-bottom:12px">
+      <div class="sc" style="cursor:pointer" onclick="nav('admin-cancellations')" style="cursor:pointer"><div class="si">⚠️</div><div class="sv" style="color:var(--yellow)">${monthCanc.length}</div><div class="sl">דחיות</div></div>
+      <div class="sc" style="cursor:pointer" onclick="nav('admin-substitutions')"><div class="si">🔄</div><div class="sv" style="color:#a78bfa">${(()=>{return A.allSessions.filter(s=>s.substitute_coach_id).length;})()}</div><div class="sl">החלפות</div></div>
+      <div class="sc" style="cursor:pointer" onclick="nav('admin-absences')"><div class="si">🚫</div><div class="sv" style="color:#ef4444">${(()=>{let tot=0;const mnSess=A.allSessions.filter(s=>!s.cancelled);mnSess.forEach(s=>{const att=A.allAttendance[s.id]||{};tot+=Object.values(att).filter(v=>v===false).length;});return tot;})()}</div><div class="sl">חיסורים</div></div>
+    </div>
+    ${(()=>{
+      const allS=[...(A.allSessions||[]),...(A.sessions||[]).filter(s=>!(A.allSessions||[]).find(x=>x.id===s.id))];const pendingCanc=allS.filter(s=>s.cancelled&&s.admin_approved!==true&&s.admin_approved!==false);
+      const pendingSub=allS.filter(s=>s.substitute_coach_id&&!s.cancelled&&s.admin_approved!==true&&s.admin_approved!==false);
+      if(!pendingCanc.length&&!pendingSub.length)return "";
+      const makeRows=(list)=>list.map(s=>{
+        const g=(A.allGroups||[]).find(x=>x.id===s.group_id);
+        const coach=(A.allCoaches||[]).find(x=>x.id===g?.coach_id);
+        const sub=s.substitute_coach_id?(A.allCoaches||[]).find(x=>x.id===s.substitute_coach_id):null;
+        const d=new Date(s.date+"T12:00:00");
+        const dayStr=d.toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"numeric"});
+        const type=s.cancelled?"⚠️ דחייה":"🔄 החלפה";
+        const detail=s.cancelled?(s.cancel_reason||"ללא סיבה"):(sub?"→ "+sub.name:"");
+        return "<div style=\"display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid rgba(245,158,11,0.15)\">"
+          +"<div style=\"flex:1\"><div style=\"font-size:13px;font-weight:700\">"+type+" · "+esc(g?.name||"")+" · "+dayStr+"</div>"
+          +"<div style=\"font-size:11px;color:var(--muted)\">"+esc(coach?.name||"")+" · "+esc(detail)+"</div></div>"
+          +"<button class=\"btn btn-sm\" style=\"background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3);padding:4px 10px\" onclick=\"approveSession(\'"+s.id+"\',true)\">✓ אשר</button>"
+          +" <button class=\"btn btn-sm\" style=\"background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:4px 10px\" onclick=\"approveSession(\'"+s.id+"\',false)\">✗ דחה</button>"
+          +"</div>";
+      }).join("");
+      const cancBox=pendingCanc.length?"<div style=\"background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:14px 16px;margin-bottom:10px\">"
+        +"<div style=\"font-size:13px;font-weight:800;color:#f59e0b;margin-bottom:8px\">⚠️ דחיות ממתינות לאישור ("+pendingCanc.length+")</div>"
+        +makeRows(pendingCanc)+"</div>":"";
+      const subBox=pendingSub.length?"<div style=\"background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.3);border-radius:12px;padding:14px 16px;margin-bottom:10px\">"
+        +"<div style=\"font-size:13px;font-weight:800;color:#a78bfa;margin-bottom:8px\">🔄 החלפות ממתינות לאישור ("+pendingSub.length+")</div>"
+        +makeRows(pendingSub)+"</div>":"";
+      return "<div style=\"margin-bottom:4px\">"+cancBox+subBox+"</div>";
+    })()}
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="filter-btn ${A.adminView==='agenda'?'active':''}" onclick="A.adminView='agenda';renderPage()">📋 רשימה</button>
+      <button class="filter-btn ${A.adminView==='calendar'?'active':''}" onclick="A.adminView='calendar';renderPage()">📅 לוח</button>
+    </div>
+    ${A.adminView==='calendar'?rAdminCalendarGrid(yr,mn,mnStr,dim,todayStr,sessMap):rows||`<div style="text-align:center;padding:40px 0;color:var(--muted)"><div style="font-size:40px">📅</div><p>אין פעילויות מתוכננות</p></div>`}
+  `;
+}
+
+
+function updateAdminDetail(){
+  const container=document.getElementById("admin-detail-panel");
+  if(!container){renderPage();return;}
+  if(!A.adminDayDetail){container.innerHTML="";return;}
+  const dDate=A.adminDayDetail;
+  const mnStr=dDate.slice(5,7);
+  const dDow=new Date(dDate+"T00:00:00").getDay();
+  const dGroups=A.allGroups.filter(g=>(g.days_of_week||[]).includes(dDow));
+  const sessMap={};
+  A.allSessions.forEach(s=>{if(!sessMap[s.date])sessMap[s.date]=[];sessMap[s.date].push(s);});
+  const dSess=sessMap[dDate]||[];
+  const dDay=parseInt(dDate.split("-")[2]);
+  container.innerHTML=`<div style="margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)">
+      <div style="font-weight:800">יום ${DL[dDow]} ${String(dDay).padStart(2,"0")}/${mnStr}</div>
+      <button onclick="A.adminDayDetail=null;updateAdminDetail()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px">✕</button>
+    </div>
+    ${dGroups.map(g=>{
+      const sess=dSess.find(s=>s.group_id===g.id);
+      const isCancelled=sess?.cancelled;
+      const sub=sess?.substitute_coach_id?A.allCoaches.find(x=>x.id===sess.substitute_coach_id):null;
+      const coach=A.allCoaches.find(x=>x.id===g.coach_id);
+      const sailors=g.sailorIds||[];
+      const att=sess?A.allAttendance[sess.id]||{}:{};
+      const present=sailors.filter(id=>att[id]).length;
+      const hasAtt=Object.keys(att).length>0;
+      return "<div onclick=\"A.subView=null;A.prevView=A.view;A.activeGroupId='"+g.id+"';A.activeDate='"+dDate+"';A.subView='groupDetail';renderPage()\" style='display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer'>"
+        +"<div style='width:3px;height:36px;border-radius:2px;background:"+(isCancelled?"#ef4444":g.color)+"'></div>"
+        +"<div style='flex:1'>"
+          +"<div style='font-weight:700;font-size:13px;color:"+(isCancelled?"#ef4444":g.color)+"'>"+(isCancelled?"❌ ":"")+esc(g.name)+"</div>"
+          +"<div style='font-size:11px;color:"+(sub?"var(--yellow)":"var(--muted)")+";display:flex;align-items:center;gap:4px;margin-top:2px'>"
+            +coachAvatar(sub||coach,16)+" "+(sub?"🔄 "+esc(sub.name):esc(coach?.name||""))
+          +"</div>"
+        +"</div>"
+        +"<div style='font-size:12px;font-weight:700;color:"+(hasAtt?(present===sailors.length?"var(--green)":"var(--yellow)"):"var(--muted)")+"'>"
+          +(hasAtt?present+"/"+sailors.length:sailors.length+" חנ'")
+        +"</div>"
+        +"</div>";
+    }).join("")}
+  </div>`;
+}
+
+
+function rAdminCalendarGrid(yr,mn,mnStr,dim,todayStr,sessMap){
+  const firstDow=new Date(yr,mn,1).getDay();
+  const totalCells=Math.ceil((firstDow+dim)/7)*7;
+  const dayHdrs=["א","ב","ג","ד","ה","ו","ש"].map(h=>`<div style="text-align:center;font-size:11px;font-weight:800;color:var(--muted);padding:5px 0">${h}</div>`).join("");
+
+  let cells="";
+  for(let i=0;i<totalCells;i++){
+    const day=i-firstDow+1;
+    const isValid=day>=1&&day<=dim;
+    if(!isValid){cells+=`<div></div>`;continue;}
+    const dateStr=yr+"-"+mnStr+"-"+String(day).padStart(2,"0");
+    const isToday=dateStr===todayStr;
+    const isPast=dateStr<todayStr;
+    const dow=new Date(dateStr+"T00:00:00").getDay();
+    const scheduledGroups=A.allGroups.filter(g=>(g.days_of_week||[]).includes(dow));
+    const dbSess=sessMap[dateStr]||[];
+
+    const dots=scheduledGroups.map(g=>{
+      const sess=dbSess.find(s=>s.group_id===g.id);
+      const isCancelled=sess?.cancelled;
+      const hasSub=!!sess?.substitute_coach_id;
+      const hasAtt=sess&&Object.keys(A.allAttendance[sess.id]||{}).length>0;
+      return`<div title="${esc(g.name)}" style="width:8px;height:8px;border-radius:50%;flex-shrink:0;
+        background:${isCancelled?"#ef4444":g.color};
+        opacity:${isCancelled?0.5:1};
+        box-shadow:${hasSub?"0 0 0 2px #f59e0b":"none"};
+        outline:${hasAtt?"2px solid #34d39388":"none"}"></div>`;
+    }).join("");
+
+    cells+=`<div onclick="A.adminDayDetail='${dateStr}';A.subView=null;A.activeGroupId=null;updateAdminDetail()" style="
+      min-height:70px;padding:5px;border-radius:8px;cursor:${scheduledGroups.length?'pointer':'default'};
+      border:1px solid ${isToday?"var(--blue)":"var(--border)"};
+      background:${isToday?"rgba(59,130,246,0.12)":isPast?"rgba(0,0,0,0.15)":"var(--card)"};
+      transition:background 0.15s">
+      <div style="font-size:12px;font-weight:${isToday?"800":"600"};color:${isToday?"var(--blue-light)":"var(--text)"};margin-bottom:4px">${day}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px">${dots}</div>
+    </div>`;
+  }
+
+  // Day detail popup
+  let detail="";
+  return`<div id="admin-detail-panel">${detail}</div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px">${dayHdrs}</div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">${cells}</div>
+  `;
+}
+
+
+function rAdminAbsences(){
+  const yr=A.adminYear||new Date().getFullYear();
+  const mn=A.adminMonth!==undefined?A.adminMonth:new Date().getMonth();
+  const prevMn=mn===0?11:mn-1; const prevYr=mn===0?yr-1:yr;
+  const nextMn=mn===11?0:mn+1; const nextYr=mn===11?yr+1:yr;
+  const mnStr=String(mn+1).padStart(2,"0");
+  const mnSess=A.allSessions.filter(s=>s.date.startsWith(yr+"-"+mnStr)&&!s.cancelled).sort((a,b)=>a.date.localeCompare(b.date));
+  
+  // Build absences list: {date, groupName, sailorName, reason}
+  const rows=[];
+  mnSess.forEach(s=>{
+    const g=A.allGroups.find(x=>x.id===s.group_id);
+    const att=A.allAttendance[s.id]||{};
+    Object.entries(att).forEach(([sailorId,present])=>{
+      if(!present){
+        const sailor=A.allSailors.find(x=>x.id===sailorId);
+        const reason=(A.absenceReasons?.[s.id]?.[sailorId])||"";
+        rows.push({date:s.date,group:g?.name||"",sailorName:sailor?(sailor.first_name+" "+sailor.last_name):"?",reason,color:g?.color||"#888"});
+      }
+    });
+  });
+
+  // Group by date
+  const byDate={};
+  rows.forEach(r=>{if(!byDate[r.date])byDate[r.date]=[];byDate[r.date].push(r);});
+  const dates=Object.keys(byDate).sort();
+
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="bbtn" onclick="nav('admin-overview')">← חזרה</button>
+      <h2 style="font-size:18px;font-weight:800;flex:1">🚫 חיסורים — ${mName}</h2>
+      <button class="btn btn-ex btn-sm" onclick="exportAbsencesXlsx()">📥 Excel</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="btn btn-g btn-sm" onclick="A.adminMonth=${prevMn};A.adminYear=${prevYr};renderPage()">→</button>
+      <span style="flex:1;text-align:center;font-weight:700">${mName}</span>
+      <button class="btn btn-g btn-sm" onclick="A.adminMonth=${nextMn};A.adminYear=${nextYr};renderPage()">←</button>
+    </div>
+    ${rows.length===0
+      ?`<div style="text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:48px">✅</div><p>אין חיסורים מתועדים לחודש זה</p></div>`
+      :dates.map(date=>{
+        const dayRows=byDate[date];
+        const dow=new Date(date+"T00:00:00").getDay();
+        return`<div style="margin-bottom:14px">
+          <div style="font-size:13px;font-weight:800;color:var(--blue-light);margin-bottom:6px;padding:0 2px">
+            יום ${DL[dow]} · ${ff(date)}
+          </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            ${dayRows.map((r,i)=>`
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;${i>0?"border-top:1px solid var(--border)":""}">
+                <div style="width:3px;height:36px;border-radius:2px;background:${r.color};flex-shrink:0"></div>
+                <div style="flex:1">
+                  <div style="font-weight:700;font-size:13px">${esc(r.sailorName)}</div>
+                  <div style="font-size:11px;color:var(--muted)">${esc(r.group)}</div>
+                </div>
+                <div style="font-size:12px;color:${r.reason?"#f59e0b":"var(--muted)"};text-align:left;max-width:120px;word-break:break-word">
+                  ${r.reason?esc(r.reason):"ללא סיבה"}
+                </div>
+              </div>`).join("")}
+          </div>
+        </div>`;
+      }).join("")}
+  `;
+}
+
+async function exportAbsencesXlsx(){
+  const yr=A.adminYear||new Date().getFullYear();
+  const mn=A.adminMonth!==undefined?A.adminMonth:new Date().getMonth();
+  const mnStr=String(mn+1).padStart(2,"0");
+  const mnSess=A.allSessions.filter(s=>s.date.startsWith(yr+"-"+mnStr)&&!s.cancelled).sort((a,b)=>a.date.localeCompare(b.date));
+  const rowsData=[["תאריך","יום","קבוצה","חניך","סיבה"]];
+  mnSess.forEach(s=>{
+    const g=A.allGroups.find(x=>x.id===s.group_id);
+    const att=A.allAttendance[s.id]||{};
+    const dow=new Date(s.date+"T00:00:00").getDay();
+    Object.entries(att).forEach(([sailorId,present])=>{
+      if(!present){
+        const sailor=A.allSailors.find(x=>x.id===sailorId);
+        const reason=(A.absenceReasons?.[s.id]?.[sailorId])||"";
+        rowsData.push([ff(s.date),"יום "+DL[dow],g?.name||"",sailor?(sailor.first_name+" "+sailor.last_name):"?",reason]);
+      }
+    });
+  });
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+  const csv=rowsData.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`חיסורים_${mName}.csv`;
+  a.click();
+  toast("📥 מוריד...");
+}
+
+
+function coachPanelClick(el){
+  const gid=el.dataset.gid;
+  const date=el.dataset.date;
+  A.prevView='coach-calendar';
+  A.activeGroupId=gid;
+  A.activeDate=date;
+  A.subView='groupDetail';
+  renderPage();
+}
+
+
+function schedCellClick(ds){
+  A.adminDayDetail=ds;
+  const panel=document.getElementById("coach-detail-panel");
+  if(panel) updateCoachDetail();
+  else renderPage();
+}
+
+
+function updateCoachDetail(){
+  const container=document.getElementById("coach-detail-panel");
+  if(!container){renderPage();return;}
+  if(!A.adminDayDetail){container.innerHTML="";return;}
+  const dDate=A.adminDayDetail;
+  const mnStr=dDate.slice(5,7);
+  const dDow=new Date(dDate+"T00:00:00").getDay();
+  // Show all groups scheduled that day
+  const allGroups=A.allGroups&&A.allGroups.length?A.allGroups:A.groups||[];
+  const myGroupIds=new Set((A.groups||[]).filter(g=>g.coach_id===A.coach?.id).map(g=>g.id));
+  const dayGroups=allGroups.filter(g=>(g.days_of_week||[]).includes(dDow));
+  const sessMap2={};
+  (A.sessions||[]).forEach(s=>{if(!sessMap2[s.date])sessMap2[s.date]=[];sessMap2[s.date].push(s);});
+  (A.allSessions||[]).forEach(s=>{if(!sessMap2[s.date])sessMap2[s.date]=[];if(!sessMap2[s.date].find(x=>x.id===s.id))sessMap2[s.date].push(s);});
+  const dSess=sessMap2[dDate]||[];
+  const dDay=parseInt(dDate.split("-")[2]);
+  const myGroups=dayGroups; // use all groups, mark mine below
+  if(!dayGroups.length){
+    container.innerHTML='<div style="margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center"><span style="color:var(--muted);font-size:13px">אין פעילויות ביום זה</span><button onclick="A.adminDayDetail=null;updateCoachDetail()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px">✕</button></div>';
+    return;
+  }
+
+  // Build HTML as string (no template literals with .map inside innerHTML)
+  let html='<div style="margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)">';
+  html+='<div style="font-weight:800">יום '+DL[dDow]+' '+String(dDay).padStart(2,"0")+'/'+mnStr+'</div>';
+  html+='<button onclick="A.adminDayDetail=null;updateCoachDetail()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px">✕</button>';
+  html+='</div>';
+  dayGroups.forEach(g=>{
+    const sess=dSess.find(s=>s.group_id===g.id);
+    const isCancelled=sess&&sess.cancelled;
+    const isMe=myGroupIds.has(g.id);
+    const sailors=g.sailorIds||[];
+    const att=sess?(A.attendance[sess.id]||(A.allAttendance&&A.allAttendance[sess.id])||{}):{}; 
+    const present=sailors.filter(id=>att[id]===true).length;
+    const hasAtt=Object.values(att).some(v=>v!==null);
+    html+='<div data-gid="'+g.id+'" data-date="'+dDate+'" onclick="coachPanelClick(this)" ';
+    html+='style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid rgba(255,255,255,0.04);cursor:pointer">';
+    html+='<div style="width:3px;height:36px;border-radius:2px;background:'+(isCancelled?'#ef4444':g.color)+'"></div>';
+    html+='<div style="flex:1">';
+    html+='<div style="font-weight:700;font-size:13px;color:'+(isCancelled?'#ef4444':g.color)+'">'+(isCancelled?'❌ ':'')+esc(g.name)+'</div>';
+    html+='<div style="font-size:11px;color:var(--muted);margin-top:2px">'+(g.start_time||'')+'</div>';
+    html+='</div>';
+    html+='<div style="font-size:12px;font-weight:700;color:'+(hasAtt?(present===sailors.length?'var(--green)':'var(--yellow)'):'var(--muted)')+'">'+
+      (hasAtt?present+'/'+sailors.length:sailors.length+" חנ'")+
+    '</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  container.innerHTML=html;
+}
+
+
+function rCoachCalendar(){
+  const now=new Date();
+  const yr=A.adminYear||now.getFullYear();
+  const mn=A.adminMonth!==undefined?A.adminMonth:now.getMonth();
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+  const dim=new Date(yr,mn+1,0).getDate();
+  const mnStr=String(mn+1).padStart(2,"0");
+  const todayStr=td();
+  const myGroups=(A.groups||[]).filter(g=>g.coach_id===A.coach?.id);
+  const myGroupIds=new Set(myGroups.map(g=>g.id));
+
+  const sessMap={};
+  A.sessions.forEach(s=>{if(!sessMap[s.date])sessMap[s.date]=[];sessMap[s.date].push(s);});
+
+  // Calendar grid
+  const firstDow=new Date(yr,mn,1).getDay();
+  const totalCells=Math.ceil((firstDow+dim)/7)*7;
+  const dayHdrs=["א","ב","ג","ד","ה","ו","ש"].map(h=>`<div style="text-align:center;font-size:11px;font-weight:800;color:var(--muted);padding:5px 0">${h}</div>`).join("");
+
+  let cells="";
+  for(let i=0;i<totalCells;i++){
+    const day=i-firstDow+1;
+    const isValid=day>=1&&day<=dim;
+    if(!isValid){cells+=`<div></div>`;continue;}
+    const dateStr=yr+"-"+mnStr+"-"+String(day).padStart(2,"0");
+    const isToday=dateStr===todayStr;
+    const isPast=dateStr<todayStr;
+    const dow=new Date(dateStr+"T00:00:00").getDay();
+    const dayGroups=myGroups.filter(g=>(g.days_of_week||[]).includes(dow));
+    const dbSess=sessMap[dateStr]||[];
+
+    const dots=dayGroups.map(g=>{
+      const sess=dbSess.find(s=>s.group_id===g.id);
+      const isCancelled=sess?.cancelled;
+      const hasAtt=sess&&Object.values(A.attendance[sess.id]||{}).some(v=>v!==null);
+      return`<div title="${esc(g.name)}" style="width:8px;height:8px;border-radius:50%;flex-shrink:0;
+        background:${isCancelled?"#ef4444":g.color};
+        opacity:${isCancelled?0.5:1};
+        outline:${hasAtt?"2px solid #34d39388":"none"}"></div>`;
+    }).join("");
+
+    cells+=`<div onclick="A.adminDayDetail='${dateStr}';A.subView=null;A.activeGroupId=null;updateCoachDetail()" style="
+      min-height:70px;padding:5px;border-radius:8px;cursor:${dayGroups.length?'pointer':'default'};
+      border:1px solid ${isToday?"var(--blue)":"var(--border)"};
+      background:${isToday?"rgba(59,130,246,0.12)":isPast?"rgba(0,0,0,0.15)":"var(--card)"};
+      transition:background 0.15s">
+      <div style="font-size:12px;font-weight:${isToday?"800":"600"};color:${isToday?"var(--blue-light)":"var(--text)"};margin-bottom:4px">${day}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px">${dots}</div>
+    </div>`;
+  }
+
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <h2 style="font-size:20px;font-weight:800;flex:1">📅 לוח חודשי</h2>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 12px">
+      <button class="warr" onclick="A.adminMonth--;if(A.adminMonth<0){A.adminMonth=11;A.adminYear--;}A.adminDayDetail=null;renderPage()">&#8594;</button>
+      <div style="flex:1;text-align:center;font-weight:800;font-size:16px">${mName}</div>
+      <button class="warr" onclick="A.adminMonth++;if(A.adminMonth>11){A.adminMonth=0;A.adminYear++;}A.adminDayDetail=null;renderPage()">&#8592;</button>
+      ${(yr!==now.getFullYear()||mn!==now.getMonth())?`<button class="btn btn-g btn-sm" onclick="A.adminMonth=${now.getMonth()};A.adminYear=${now.getFullYear()};A.adminDayDetail=null;renderPage()">היום</button>`:""}
+    </div>
+    <div id="coach-detail-panel"></div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px">${dayHdrs}</div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">${cells}</div>
+  `;
+}
+
+
+function rMyCancellations(){
+  // Only show cancellations for groups belonging to this coach
+  const myGroupIds=new Set((A.groups||[]).filter(g=>g.coach_id===A.coach?.id).map(g=>g.id));
+  const cancelled=A.sessions.filter(s=>s.cancelled&&myGroupIds.has(s.group_id)).sort((a,b)=>b.date.localeCompare(a.date));
+
+  // group by month
+  const byMonth={};
+  cancelled.forEach(s=>{
+    const key=s.date.slice(0,7);
+    if(!byMonth[key])byMonth[key]=[];
+    byMonth[key].push(s);
+  });
+  const months=Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
+
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="bbtn" onclick="nav('history')">← חזרה</button>
+      <h2 style="font-size:18px;font-weight:800">⚠️ פעילויות שנדחו</h2>
+    </div>
+    ${cancelled.length===0
+      ?`<div style="text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:48px">✅</div><p>לא דחית אף פעילות</p></div>`
+      :months.map(month=>{
+        const [yr,mn]=month.split("-");
+        const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(parseInt(yr),parseInt(mn)-1,1));
+        return`
+          <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;margin-top:10px;text-transform:uppercase">${mName}</div>
+          ${byMonth[month].map(s=>{
+            const g=getG(s.group_id);
+            const dow=new Date(s.date+"T00:00:00").getDay();
+            return`<div onclick="A.activeGroupId='${s.group_id}';A.activeDate='${s.date}';A.prevView='my-cancellations';A.subView='groupDetail';renderPage()" class="card" style="margin-bottom:8px;cursor:pointer;border-right:3px solid ${g?.color||"var(--yellow)"};padding:10px 14px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-weight:700;font-size:14px;color:${g?.color||"var(--text)"}">${esc(g?.name||"")}</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:2px">יום ${DL[dow]} · ${ff(s.date)}</div>
+                </div>
+                <div style="font-size:12px;color:#f59e0b;text-align:left;max-width:120px;word-break:break-word">
+                  ${s.cancel_reason?esc(s.cancel_reason):"ללא סיבה"}
+                </div>
+              </div>
+            </div>`;
+          }).join("")}`;
+      }).join("")}
+  `;
+}
+
+
+function exportSubstitutions(){
+  const yr=A.adminYear||new Date().getFullYear();
+  const mn=A.adminMonth!==undefined?A.adminMonth:new Date().getMonth();
+  const mnStr=String(mn+1).padStart(2,"0");
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+  const subs=(A.allSessions||[]).filter(s=>s.substitute_coach_id&&s.date&&s.date.startsWith(yr+"-"+mnStr)).sort((a,b)=>a.date.localeCompare(b.date));
+  const rows=[["תאריך","יום","קבוצה","מדריך מקורי","מדריך מחליף"]];
+  subs.forEach(s=>{
+    const g=(A.allGroups||[]).find(x=>x.id===s.group_id);
+    const orig=(A.allCoaches||[]).find(x=>x.id===g?.coach_id);
+    const sub=(A.allCoaches||[]).find(x=>x.id===s.substitute_coach_id);
+    const dow=new Date(s.date+"T00:00:00").getDay();
+    rows.push([ff(s.date),"יום "+DL[dow],g?.name||"",orig?.name||"",sub?.name||""]);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`החלפות_${mName}.csv`;a.click();
+  toast("📥 מוריד...");
+}
+
+function rAdminSubstitutions(){
+  const yr=A.adminYear||new Date().getFullYear();
+  const mn=A.adminMonth!==undefined?A.adminMonth:new Date().getMonth();
+  const prevMn=mn===0?11:mn-1; const prevYr=mn===0?yr-1:yr;
+  const nextMn=mn===11?0:mn+1; const nextYr=mn===11?yr+1:yr;
+  const mnStr=String(mn+1).padStart(2,"0");
+  const subs=(A.allSessions||[]).filter(s=>s.substitute_coach_id&&s.date&&s.date.startsWith(yr+"-"+mnStr)).sort((a,b)=>a.date.localeCompare(b.date));
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+
+  const byDate={};
+  subs.forEach(s=>{if(!byDate[s.date])byDate[s.date]=[];byDate[s.date].push(s);});
+  const dates=Object.keys(byDate).sort();
+
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="bbtn" onclick="nav('admin-overview')">← חזרה</button>
+      <h2 style="font-size:18px;font-weight:800;flex:1">🔄 החלפות — ${mName}</h2>
+      <button class="btn btn-ex btn-sm" onclick="exportSubstitutions()">📥 Excel</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="btn btn-g btn-sm" onclick="A.adminMonth=${prevMn};A.adminYear=${prevYr};renderPage()">→</button>
+      <span style="flex:1;text-align:center;font-weight:700">${mName}</span>
+      <button class="btn btn-g btn-sm" onclick="A.adminMonth=${nextMn};A.adminYear=${nextYr};renderPage()">←</button>
+    </div>
+    ${subs.length===0
+      ?`<div style="text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:48px">🔄</div><p>אין החלפות לחודש זה</p></div>`
+      :dates.map(date=>{
+        const dayRows=byDate[date];
+        const dow=new Date(date+"T00:00:00").getDay();
+        return`<div style="margin-bottom:14px">
+          <div style="font-size:13px;font-weight:800;color:var(--blue-light);margin-bottom:6px;padding:0 2px">
+            יום ${DL[dow]} · ${ff(date)}
+          </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            ${dayRows.map((s,i)=>{
+              const g=(A.allGroups||[]).find(x=>x.id===s.group_id);
+              const orig=(A.allCoaches||[]).find(x=>x.id===g?.coach_id);
+              const sub=(A.allCoaches||[]).find(x=>x.id===s.substitute_coach_id);
+              return`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;${i>0?"border-top:1px solid var(--border)":""}">
+                <div style="width:3px;height:36px;border-radius:2px;background:${g?.color||"#888"};flex-shrink:0"></div>
+                <div style="flex:1">
+                  <div style="font-weight:700;font-size:13px;color:${g?.color||"var(--text)"}">
+                    ${esc(g?.name||"")}
+                  </div>
+                  <div style="font-size:11px;color:var(--muted)">${esc(orig?.name||"")}</div>
+                </div>
+                <div style="font-size:13px;color:#a78bfa;font-weight:600">
+                  🔄 ${esc(sub?.name||"")}
+                </div>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>`;
+      }).join("")}
+  `;
+}
+
+
+function rAdminCancellations(){
+  const yr=A.adminYear||new Date().getFullYear();
+  const mn=A.adminMonth!==undefined?A.adminMonth:new Date().getMonth();
+  const prevMn=mn===0?11:mn-1; const prevYr=mn===0?yr-1:yr;
+  const nextMn=mn===11?0:mn+1; const nextYr=mn===11?yr+1:yr;
+  const mnStr=String(mn+1).padStart(2,"0");
+  const canc=A.allSessions.filter(s=>s.cancelled&&s.date.startsWith(yr+"-"+mnStr)).sort((a,b)=>a.date.localeCompare(b.date));
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+
+  // group by date
+  const byDate={};
+  canc.forEach(s=>{if(!byDate[s.date])byDate[s.date]=[];byDate[s.date].push(s);});
+  const dates=Object.keys(byDate).sort();
+
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="bbtn" onclick="nav('admin-overview')">← חזרה</button>
+      <h2 style="font-size:18px;font-weight:800;flex:1">⚠️ דחיות — ${mName}</h2>
+      <button class="btn btn-ex btn-sm" onclick="exportCancellationsXlsx()">📥 Excel</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="btn btn-g btn-sm" onclick="A.adminMonth=${prevMn};A.adminYear=${prevYr};renderPage()">→</button>
+      <span style="flex:1;text-align:center;font-weight:700">${mName}</span>
+      <button class="btn btn-g btn-sm" onclick="A.adminMonth=${nextMn};A.adminYear=${nextYr};renderPage()">←</button>
+    </div>
+    ${canc.length===0
+      ?`<div style="text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:48px">✅</div><p>אין דחיות לחודש זה</p></div>`
+      :dates.map(date=>{
+        const dayRows=byDate[date];
+        const dow=new Date(date+"T00:00:00").getDay();
+        return`<div style="margin-bottom:14px">
+          <div style="font-size:13px;font-weight:800;color:var(--blue-light);margin-bottom:6px;padding:0 2px">
+            יום ${DL[dow]} · ${ff(date)}
+          </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            ${dayRows.map((s,i)=>{
+              const g=A.allGroups.find(x=>x.id===s.group_id);
+              const coach=A.allCoaches.find(x=>x.id===g?.coach_id);
+              return`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;${i>0?"border-top:1px solid var(--border)":""}">
+                <div style="width:3px;height:36px;border-radius:2px;background:${g?.color||"#888"};flex-shrink:0"></div>
+                <div style="flex:1">
+                  <div style="font-weight:700;font-size:13px;color:${g?.color||"var(--text)"}">${esc(g?.name||"")}</div>
+                  <div style="font-size:11px;color:var(--muted)">${esc(coach?.name||"")}</div>
+                </div>
+                <div style="font-size:12px;color:${s.cancel_reason?"#f59e0b":"var(--muted)"};text-align:left;max-width:130px;word-break:break-word">
+                  ${s.cancel_reason?esc(s.cancel_reason):"ללא סיבה"}
+                </div>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>`;
+      }).join("")}
+  `;
+}
+
+async function exportCancellationsXlsx(){
+  const yr=A.adminYear||new Date().getFullYear();
+  const mn=A.adminMonth!==undefined?A.adminMonth:new Date().getMonth();
+  const mnStr=String(mn+1).padStart(2,"0");
+  const canc=A.allSessions.filter(s=>s.cancelled&&s.date.startsWith(yr+"-"+mnStr)).sort((a,b)=>a.date.localeCompare(b.date));
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+  const rows=[["תאריך","יום","קבוצה","מדריך","סיבה"]];
+  canc.forEach(s=>{
+    const g=A.allGroups.find(x=>x.id===s.group_id);
+    const coach=A.allCoaches.find(x=>x.id===g?.coach_id);
+    const dow=new Date(s.date+"T00:00:00").getDay();
+    rows.push([ff(s.date),"יום "+DL[dow],g?.name||"",coach?.name||"",s.cancel_reason||""]);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`דחיות_${mName}.csv`;
+  a.click();
+  toast("📥 מוריד...");
+}
+
+
+function exportMonthlyCancellations(yr, mn){
+  const mnStr=String(mn+1).padStart(2,"0");
+  const canc=A.allSessions.filter(s=>s.cancelled&&s.date.startsWith(yr+"-"+mnStr));
+  if(!canc.length){toast("אין דחיות לחודש זה");return;}
+  const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(yr,mn,1));
+  const rows=[["תאריך","קבוצה","מדריך","סיבה"]];
+  canc.sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
+    const g=A.allGroups.find(x=>x.id===s.group_id);
+    const coach=A.allCoaches.find(x=>x.id===g?.coach_id);
+    rows.push([ff(s.date),g?.name||"",coach?.name||"",s.cancel_reason||""]);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`דחיות_${mName}.csv`;
+  a.click();
+  toast("📥 דוח דחיות יוצא");
+}
+
+
+function rAdminOverview(){
+  const totalHours=A.workHours.reduce((s,h)=>s+calcHours(h.start_time,h.end_time),0);
+  const totalAtt=Object.values(A.allAttendance).reduce((s,att)=>s+Object.values(att).filter(Boolean).length,0);
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <h2 style="font-size:22px;font-weight:800">👑 מסוף מנהל</h2>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <div class="sgrid">
+      <div class="sc"><div class="si">🧑‍🏫</div><div class="sv" style="color:var(--blue)">${A.allCoaches.length}</div><div class="sl">מדריכים</div></div>
+      <div class="sc" style="cursor:pointer;position:relative" onclick="nav('admin-absences')">
+        <div class="si">🚫</div>
+        <div class="sv" style="color:#ef4444">${(()=>{
+          const mn=String((A.adminMonth||new Date().getMonth())+1).padStart(2,"0");
+          const yr=A.adminYear||new Date().getFullYear();
+          const mnSess=A.allSessions.filter(s=>s.date.startsWith(yr+"-"+mn)&&!s.cancelled);
+          let tot=0;
+          mnSess.forEach(s=>{const att=A.allAttendance[s.id]||{};tot+=Object.values(att).filter(v=>v===false).length;});
+          return tot;
+        })()}</div>
+        <div class="sl">חיסורים</div>
+      </div>
+      <div class="sc"><div class="si">🏊</div><div class="sv" style="color:var(--yellow)">${A.allGroups.length}</div><div class="sl">קבוצות</div></div>
+    </div>
+    <div class="sgrid">
+      <div class="sc"><div class="si">📅</div><div class="sv" style="color:var(--purple)">${A.allSessions.length}</div><div class="sl">מפגשים</div></div>
+      <div class="sc"><div class="si">✅</div><div class="sv" style="color:var(--green)">${totalAtt}</div><div class="sl">נוכחויות</div></div>
+      <div class="sc"><div class="si">⏱️</div><div class="sv" style="color:var(--blue-light)">${fmtH(totalHours)}</div><div class="sl">שעות</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="stitle" style="margin-bottom:0">⚠️ דחיות פעילות</div>
+      <button class="btn btn-ex btn-sm" onclick="exportCancellations()">📥 ייצוא</button>
+    </div>
+    ${(()=>{const canc=A.allSessions.filter(s=>s.cancelled).sort((a,b)=>b.date.localeCompare(a.date));
+      if(!canc.length)return`<div style="font-size:12px;color:var(--muted);margin-bottom:14px;padding:6px 0">אין דחיות מתועדות</div>`;
+      return`<div class="card" style="margin-bottom:14px">${canc.slice(0,10).map(s=>{const g=A.allGroups.find(x=>x.id===s.group_id);const c=A.allCoaches.find(x=>x.id===g?.coach_id);
+        return`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
+          <div><span style="color:var(--yellow);font-weight:700">⚠️ ${esc(g?.name||"")}</span> · ${esc(c?.name||"")}</div>
+          <div style="color:var(--muted)">${ff(s.date)}${s.cancel_reason?" · "+esc(s.cancel_reason):""}</div>
+        </div>`;}).join("")}</div>`;})()}
+    <div class="stitle">מדריכים — סיכום שעות</div>
+    ${A.allCoaches.map(c=>{
+      const cHours=A.workHours.filter(h=>h.coach_id===c.id).reduce((s,h)=>s+calcHours(h.start_time,h.end_time),0);
+      const cGroups=A.allGroups.filter(g=>g.coach_id===c.id);
+      const cSessions=A.allSessions.filter(s=>cGroups.find(g=>g.id===s.group_id));
+      return`<div class="card" style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:14px">${coachAvatar(c,24)}${esc(c.name)}</div>
+            <div style="font-size:11px;color:var(--muted)">${cGroups.length} קבוצות · ${cSessions.length} מפגשים</div>
+          </div>
+          <div style="text-align:left">
+            <div style="font-size:18px;font-weight:800;color:var(--blue-light)">${fmtH(cHours)}</div>
+            <div style="font-size:10px;color:var(--muted)">שעות מתועדות</div>
+          </div>
+        </div>
+      </div>`;
+    }).join("")}
+  `;
+}
+
+async function saveAdminCoach(){
+  const f=A.adminCoachForm;
+  if(!f.id.trim()||!f.first_name.trim()||!f.last_name.trim()){toast("⚠️ נא למלא ת.ז., שם ושם משפחה");return;}
+  const fullName=f.first_name.trim()+" "+f.last_name.trim();
+  try{
+    if(A.editCoachId){
+      const lc=(f.login_code||"").trim();
+      if(!lc){toast("⚠️ נא להזין תעודת זהות");return;}
+      await dbPa("coaches",`id=eq.${A.editCoachId}`,{name:fullName,first_name:f.first_name.trim(),last_name:f.last_name.trim(),login_code:lc});
+      const c=A.allCoaches.find(x=>x.id===A.editCoachId);
+      if(c){c.name=fullName;c.first_name=f.first_name.trim();c.last_name=f.last_name.trim();c.login_code=lc;}
+      toast("✅ מדריך עודכן");
+    }else{
+      const ex=await dbG("coaches",`id=eq.${f.id.trim()}`);
+      if(ex.length){toast("⚠️ ת.ז. כבר קיימת");return;}
+      const res=(await dbP("coaches",{id:f.id.trim(),name:fullName,first_name:f.first_name.trim(),last_name:f.last_name.trim(),login_code:f.login_code.trim()||f.id.trim(),approved:true,is_admin:false}))[0];
+      A.allCoaches.push(res);toast("✅ מדריך נוסף!");
+    }
+    A.adminCoachForm={id:"",first_name:"",last_name:"",login_code:""};A.editCoachId=null;A.subView=null;renderPage();
+  }catch(e){toast("❌ "+e.message);}
+}
+async function toggleApprove(id){
+  const c=A.allCoaches.find(x=>x.id===id);if(!c)return;
+  const next=!c.approved;
+  try{
+    await dbPa("coaches",`id=eq.${id}`,{approved:next});
+    c.approved=next;renderPage();
+    toast(next?"✅ מדריך אושר":"🚫 מדריך חסום");
+  }catch(e){toast("❌ "+e.message);}
+}
+async function toggleIsAdmin(id){
+  const c=A.allCoaches.find(x=>x.id===id);if(!c)return;
+  const next=!c.is_admin;
+  try{
+    await dbPa("coaches",`id=eq.${id}`,{is_admin:next});
+    c.is_admin=next;renderPage();
+    toast(next?"👑 הוגדר כמנהל":"👤 הוסר מהגדרת מנהל");
+  }catch(e){toast("❌ "+e.message);}
+}
+async function delCoach(id){
+  if(!confirm("למחוק מדריך זה?"))return;
+  try{await dbD("coaches",`id=eq.${id}`);A.allCoaches=A.allCoaches.filter(c=>c.id!==id);renderPage();toast("🗑️ נמחק");}
+  catch(e){toast("❌ "+e.message);}
+}
+function rAdminCoachForm(){
+  const f=A.adminCoachForm;const isEdit=!!A.editCoachId;
+  return`
+    <button class="bbtn" onclick="A.subView=null;A.editCoachId=null;renderPage()">← חזרה</button>
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:20px">${isEdit?"✏️ עריכת מדריך":"+ הוסף מדריך"}</h2>
+    <div class="fg"><label class="fl">תעודת זהות</label>
+      <input class="fi" value="${esc(f.login_code||f.id)}" oninput="A.adminCoachForm.login_code=this.value" placeholder="מספר ת.ז." inputmode="numeric"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">שם פרטי</label><input class="fi" value="${esc(f.first_name)}" oninput="A.adminCoachForm.first_name=this.value"></div>
+      <div class="fg"><label class="fl">שם משפחה</label><input class="fi" value="${esc(f.last_name)}" oninput="A.adminCoachForm.last_name=this.value"></div>
+    </div>
+    <button class="btn btn-p" onclick="saveAdminCoach()">${isEdit?"💾 שמור":"✅ הוסף מדריך"}</button>
+  `;
+}
+function rAdminCoaches(){
+  if(A.subView==="addCoach"||A.subView==="editCoach")return rAdminCoachForm();
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="font-size:20px;font-weight:800">🧑‍🏫 מדריכים</h2>
+      <button class="btn btn-p btn-sm" onclick="A.adminCoachForm={id:\'\',first_name:\'\',last_name:\'\',login_code:\'\'};A.editCoachId=null;A.subView=\'addCoach\';renderPage()">+ הוסף</button>
+    </div>
+    ${A.allCoaches.map(c=>{
+      const cGroups=A.allGroups.filter(g=>g.coach_id===c.id);
+      const cSailors=new Set(cGroups.flatMap(g=>g.sailorIds||[])).size;
+      const approved=c.approved!==false;
+      return`<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div>
+              <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px">${coachAvatar(c,26)}${esc(c.name)}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">ת"ז: ${c.id} · ${cGroups.length} קבוצות · ${cSailors} חניכים</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button onclick="toggleApprove(\'${c.id}\')"
+              style="background:${approved?"rgba(52,211,153,0.2)":"rgba(239,68,68,0.15)"};border:1px solid ${approved?"rgba(52,211,153,0.4)":"rgba(239,68,68,0.3)"};color:${approved?"var(--green)":"var(--red)"};border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer">
+              ${approved?"✓ מאושר":"✗ חסום"}
+            </button>
+            <button onclick="toggleIsAdmin(\'${c.id}\')"
+              style="background:${c.is_admin?"rgba(124,58,237,0.2)":"rgba(255,255,255,0.06)"};border:1px solid ${c.is_admin?"rgba(124,58,237,0.4)":"var(--border)"};color:${c.is_admin?"var(--purple)":"var(--muted)"};border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer">
+              ${c.is_admin?"👑 מנהל":"👤"}
+            </button>
+            <button class="btn btn-g btn-sm" onclick="A.adminCoachForm={id:\'${c.id}\',first_name:\'${esc(c.first_name||"")}\',last_name:\'${esc(c.last_name||"")}\',login_code:\'${esc(c.login_code||c.id)}\'};A.editCoachId=\'${c.id}\';A.subView=\'editCoach\';renderPage()">✏️</button>
+            <button class="btn btn-d btn-sm" onclick="delCoach(\'${c.id}\')">✕</button>
+          </div>
+        </div>
+        ${cGroups.length?`<div style="display:flex;gap:5px;flex-wrap:wrap">${cGroups.map(g=>`
+          <div style="background:${g.color}22;border:1px solid ${g.color}55;border-radius:8px;padding:4px 10px;font-size:11px;color:${g.color};font-weight:700">
+            ${esc(g.name)}${g.start_time?" · "+g.start_time+(g.end_time?"–"+g.end_time:""):""}
+          </div>`).join("")}</div>`:""}
+      </div>`;
+    }).join("")}
+  `;
+}
+
+async function saveAdminSailor(){
+  const f=A.form;
+  if(!f.first_name.trim()||!f.last_name.trim()){toast("⚠️ נא למלא שם");return;}
+  try{
+    if(A.editId){
+      await dbPa("sailors",`id=eq.${A.editId}`,{...f});
+      const i=A.allSailors.findIndex(s=>s.id===A.editId);if(i>=0)A.allSailors[i]={...A.allSailors[i],...f};
+      toast("✅ עודכן");
+    }else{
+      const ns=(await dbP("sailors",{...f}))[0];A.allSailors.push(ns);toast("✅ חניך נוסף!");
+    }
+    A.form=ef();A.editId=null;A.subView=null;renderPage();
+  }catch(e){toast("❌ "+e.message);}
+}
+async function delAdminSailor(id){
+  if(!confirm("למחוק חניך זה?"))return;
+  try{await dbD("sailors",`id=eq.${id}`);A.allSailors=A.allSailors.filter(s=>s.id!==id);renderPage();}
+  catch(e){toast("❌ "+e.message);}
+}
+function rAdminSailorForm(){
+  const f=A.form;const isEdit=!!A.editId;
+  return`
+    <button class="bbtn" onclick="A.subView=null;A.editId=null;A.form=ef();renderPage()">← חזרה</button>
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:20px">${isEdit?"✏️ עריכת חניך":"+ הוסף חניך"}</h2>
+    <div class="frow">
+      <div class="fg"><label class="fl">שם פרטי *</label><input class="fi" value="${esc(f.first_name)}" oninput="A.form.first_name=this.value"></div>
+      <div class="fg"><label class="fl">שם משפחה *</label><input class="fi" value="${esc(f.last_name)}" oninput="A.form.last_name=this.value"></div>
+    </div>
+    <div class="fg"><label class="fl">מגדר</label>
+      <div class="trow">
+        <button class="tbtn ${f.gender==="male"?"active":""}" data-g="male" onclick="setGender(\'male\')">👦 בן</button>
+        <button class="tbtn ${f.gender==="female"?"active":""}" data-g="female" onclick="setGender(\'female\')">👧 בת</button>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">סירה</label>
+      <select class="fi" onchange="A.form.boat=this.value">${BOATS.map(b=>`<option ${f.boat===b?"selected":""}>${b}</option>`).join("")}</select>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">תאריך לידה</label><input type="date" class="fi" value="${esc(f.birth_date)}" onchange="A.form.birth_date=this.value"></div>
+      <div class="fg"><label class="fl">הצטרפות</label><input type="date" class="fi" value="${esc(f.join_date||td())}" onchange="A.form.join_date=this.value"></div>
+    </div>
+    <div class="fg"><label class="fl">מידת חולצה</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${SIZES.map(sz=>`<button class="spill ${f.shirt_size===sz?"active":""}" data-s="${sz}" onclick="setSize(\'${sz}\')">${sz}</button>`).join("")}</div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">שם הורה</label><input class="fi" value="${esc(f.parent_name)}" oninput="A.form.parent_name=this.value"></div>
+      <div class="fg"><label class="fl">טלפון הורה</label><input type="tel" class="fi" value="${esc(f.parent_phone)}" oninput="A.form.parent_phone=this.value"></div>
+    </div>
+    <button class="btn btn-p" onclick="saveAdminSailor()">${isEdit?"💾 שמור שינויים":"✅ הוסף חניך"}</button>
+  `;
+}
+function rAdminSailors(){
+  if(A.subView==="addAdminSailor"||A.subView==="editAdminSailor")return rAdminSailorForm();
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="font-size:20px;font-weight:800">👥 חניכים (${A.allSailors.length})</h2>
+      <button class="btn btn-p btn-sm" onclick="A.form=ef();A.editId=null;A.subView=\'addAdminSailor\';renderPage()">+ הוסף</button>
+    </div>
+    ${A.allSailors.map(s=>{
+      const groups=A.allGroups.filter(g=>(g.sailorIds||[]).includes(s.id));
+      return`<div class="scard">
+        <div class="av av-${s.gender==="female"?"f":"m"}">${s.gender==="female"?"👧":"👦"}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:14px">${esc(s.first_name)} ${esc(s.last_name)}</div>
+          <div style="font-size:11px;color:var(--muted)">🚢 ${s.boat} · 👕 ${s.shirt_size}</div>
+          ${groups.length?`<div style="margin-top:3px">${groups.map(g=>`<span style="background:${g.color}22;border:1px solid ${g.color}55;border-radius:6px;padding:1px 6px;font-size:10px;color:${g.color};margin-left:3px">${esc(g.name)}</span>`).join("")}</div>`:""}
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-g btn-sm" onclick="A.form={...A.allSailors.find(x=>x.id===\'${s.id}\')};A.editId=\'${s.id}\';A.subView=\'editAdminSailor\';renderPage()">✏️</button>
+          <button class="btn btn-d btn-sm" onclick="delAdminSailor(\'${s.id}\')">✕</button>
+        </div>
+      </div>`;
+    }).join("")}
+    ${A.allSailors.length===0?`<div style="text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:48px">👥</div><p>אין חניכים</p></div>`:""}
+  `;
+}
+
+function rAdminHours(){
+  // group by coach
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:20px;font-weight:800">⏱️ שעות מדריכים</h2><button class="btn btn-ex btn-sm" onclick="exportAllHours()">📥 ייצוא</button></div>
+    ${A.allCoaches.map(c=>{
+      const cHours=A.workHours.filter(h=>h.coach_id===c.id);
+      const total=cHours.reduce((s,h)=>s+calcHours(h.start_time,h.end_time),0);
+      if(!cHours.length)return`<div class="card" style="margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700">${coachAvatar(c,24)}${esc(c.name)}</div>
+        <div style="font-size:12px;color:var(--muted)">אין רשומות</div>
+      </div>`;
+      // group by month
+      const byM={};
+      cHours.forEach(h=>{const m=h.date.substr(0,7);if(!byM[m])byM[m]=[];byM[m].push(h);});
+      return`<div class="card" style="border-right:3px solid var(--purple)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px">${coachAvatar(c,26)}${esc(c.name)}</div>
+          <div style="font-size:18px;font-weight:800;color:var(--blue-light)">${fmtH(total)}</div>
+        </div>
+        ${Object.keys(byM).sort((a,b)=>b.localeCompare(a)).map(m=>{
+          const hrs=byM[m];
+          const mT=hrs.reduce((s,h)=>s+calcHours(h.start_time,h.end_time),0);
+          const [yr,mn]=m.split("-");
+          const mName=new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"}).format(new Date(+yr,+mn-1,1));
+          return`<div style="margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px">${mName} — ${fmtH(mT)}</div>
+            ${hrs.map(h=>`
+              <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">
+                <span>${ff(h.date)} · ${h.start_time}–${h.end_time}${h.notes?" · "+esc(h.notes):""}</span>
+                <span style="color:var(--green);font-weight:700">${fmtH(calcHours(h.start_time,h.end_time))}</span>
+              </div>`).join("")}
+          </div>`;
+        }).join("")}
+      </div>`;
+    }).join("")}
+  `;
+}
+
+// ── Admin Settings ───────────────────────────────────────────
+function rAdminSettings(){
+  if(A.subView==="addGroup"||A.subView==="editGroup")return rGroupForm();
+  if(A.subView==="groupDetail"){
+    // use allGroups for admin
+    const g=A.allGroups.find(x=>x.id===A.activeGroupId);
+    if(!g){A.subView=null;renderPage();return"";}
+    const coach=A.allCoaches.find(c=>c.id===g.coach_id);
+    const sailors=A.allSailors.filter(s=>(g.sailorIds||[]).includes(s.id));
+    const dayStr=(g.days_of_week||[]).map(d=>DL[d]).join(", ");
+    const timeStr=g.start_time?(g.start_time+(g.end_time?"–"+g.end_time:"")):"";
+    return`
+      <button class="bbtn" onclick="A.subView=null;A.activeGroupId=null;renderPage()">← חזרה</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:14px;height:14px;border-radius:50%;background:${g.color}"></div>
+        <h2 style="font-size:20px;font-weight:800">${esc(g.name)}</h2>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">🧑‍🏫 ${esc(coach?.name||"")}${dayStr?" · 📆 "+dayStr:""}${timeStr?" · ⏰ "+timeStr:""}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <button class="btn btn-p" onclick="openSession(A.activeDate||td(),'${g.id}')">✅ נוכחות</button>
+        <button class="btn btn-g" onclick="A.gf={name:'${g.name.replace(/'/g,"\'")}',color:'${g.color}',days_of_week:[...(${JSON.stringify(g.days_of_week||[])})],start_time:'${g.start_time||""}',end_time:'${g.end_time||""}',start_date:'${g.start_date||""}',coach_id:'${g.coach_id||""}'};A.editGId='${g.id}';A.subView='editGroup';renderPage()">✏️ ערוך</button>
+      </div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">חניכים (${sailors.length})</div>
+      ${sailors.map(s=>`<div class="scard">
+        <div class="av av-${s.gender==="female"?"f":"m"}">${s.gender==="female"?"👧":"👦"}</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:14px">${esc(s.first_name)} ${esc(s.last_name)}</div>
+        <div style="font-size:11px;color:var(--muted)">🚢 ${s.boat}</div></div>
+      </div>`).join("")}
+    `;
+  }
+  // main settings view
+  const allG=[...A.allGroups].sort((a,b)=>(a.start_time||"99:99").localeCompare(b.start_time||"99:99"));
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="font-size:20px;font-weight:800">🏊 ניהול קבוצות</h2>
+      <button class="btn btn-p btn-sm" onclick="A.gf=egf();A.editGId=null;A.subView='addGroup';renderPage()">+ קבוצה חדשה</button>
+    </div>
+    ${allG.map(g=>{
+      const coach=A.allCoaches.find(c=>c.id===g.coach_id);
+      const dayStr=(g.days_of_week||[]).map(d=>DS[d]).join(" ");
+      const timeStr=g.start_time?(g.start_time+(g.end_time?"–"+g.end_time:"")):"";
+      return`<div class="gcard" onclick="A.activeGroupId='${g.id}';A.subView='groupDetail';renderPage()">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:12px;height:12px;border-radius:50%;background:${g.color};flex-shrink:0"></div>
+            <div>
+              <div style="font-weight:800;font-size:15px">${esc(g.name)}</div>
+              <div style="font-size:11px;color:var(--muted)">🧑‍🏫 ${esc(coach?.name||"")}${dayStr?" · "+dayStr:""}${timeStr?" · "+timeStr:""}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px" onclick="event.stopPropagation()">
+            <button class="btn btn-g btn-sm" onclick="A.gf={name:'${g.name.replace(/'/g,"\'")}',color:'${g.color}',days_of_week:[...(${JSON.stringify(g.days_of_week||[])})],start_time:'${g.start_time||""}',end_time:'${g.end_time||""}',start_date:'${g.start_date||""}',coach_id:'${g.coach_id||""}'};A.editGId='${g.id}';A.subView='editGroup';renderPage()">✏️</button>
+            <button class="btn btn-d btn-sm" onclick="delGroupAdmin('${g.id}')">מחק</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("")}
+  `;
+}
+async function delGroupAdmin(id){
+  if(!confirm("למחוק קבוצה זו?"))return;
+  try{
+    await dbD("groups",`id=eq.${id}`);
+    A.allGroups=A.allGroups.filter(g=>g.id!==id);
+    renderPage();toast("🗑️ נמחקה");
+  }catch(e){toast("❌ "+e.message);}
+}
+
+// ── Init ──────────────────────────────────────────────────────
+(async()=>{
+  const last=sloc();
+  if(last){
+    try{
+      const res=await dbG("coaches",`id=eq.${last}`);
+      if(res.length&&res[0].approved!==false){
+        A.coach=res[0];A.isAdmin=!!res[0].is_admin;
+        if(A.isAdmin){ADMIN_IDS=[last];await loadAdminData();showApp();checkBirthdays();return;}
+        await loadAll();await loadScheduleData();showApp();checkBirthdays();return;
+      }
+    }catch(e){}
+  }
+  renderLogin();
+})();
+// ── Profile ───────────────────────────────────────────────────
+async function saveCoachField(field, value){
+  try{
+    await dbPa("coaches","id=eq."+A.coach.id,{[field]:value||null});
+    A.coach[field]=value;
+    if(field==="birth_date") checkBirthdays();
+    toast("✅ נשמר");
+  }catch(e){toast("❌ "+e.message);}
+}
+
+async function uploadAvatar(input){
+  const file=input.files[0];if(!file)return;
+  toast("⏳ מעלה תמונה...");
+  try{
+    const reader=new FileReader();
+    reader.onload=async(e)=>{
+      // Compress image using canvas
+      const img2=new Image();
+      img2.onload=async()=>{
+        const canvas=document.createElement("canvas");
+        const MAX=400;
+        let w=img2.width,h=img2.height;
+        if(w>h){if(w>MAX){h=h*MAX/w;w=MAX;}}else{if(h>MAX){w=w*MAX/h;h=MAX;}}
+        canvas.width=w;canvas.height=h;
+        canvas.getContext("2d").drawImage(img2,0,0,w,h);
+        const base64=canvas.toDataURL("image/jpeg",0.85);
+        await saveCoachField("avatar_url",base64);
+        const hdrImg=document.getElementById("hdr-avatar-img");
+        if(hdrImg)hdrImg.innerHTML=`<img src="${base64}" style="width:100%;height:100%;object-fit:cover">`;
+        const sa=document.getElementById("settings-avatar");
+        if(sa)sa.innerHTML=`<img src="${base64}" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;bottom:0;right:0;background:var(--blue);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px">✏️</div>`;
+      };
+      img2.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }catch(e){toast("❌ "+e.message);}
+}
+
+function checkBirthdays(){
+  const today=td();
+  const todayMD=today.slice(5); // MM-DD
+  const coaches=A.allCoaches||[A.coach];
+  coaches.forEach(coach=>{
+    if(!coach.birth_date)return;
+    const bd=coach.birth_date.slice(5); // MM-DD
+    if(bd===todayMD){
+      setTimeout(()=>showBirthdayToast(coach.name),500);
+    }
+  });
+}
+
+function showBirthdayToast(name){
+  const t=document.getElementById("toast");
+  if(!t)return;
+  t.textContent="🎂 יום הולדת שמח ל"+name+"! 🎉";
+  t.style.background="linear-gradient(135deg,#f59e0b,#ec4899)";
+  t.classList.add("show");
+  setTimeout(()=>{t.classList.remove("show");t.style.background="";},5000);
+}
+
+</script>
+</body>
+</html>
