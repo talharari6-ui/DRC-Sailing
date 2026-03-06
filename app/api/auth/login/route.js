@@ -22,6 +22,13 @@ export async function POST(request) {
 
     // Handle errors
     if (error) {
+      console.error('Supabase error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
+
       if (error.code === 'PGRST116') {
         // No matching row
         return Response.json(
