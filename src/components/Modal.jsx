@@ -77,3 +77,5 @@ export function Modal({ isOpen, onClose, title, children }) {
     </div>
   )
 }
+
+export default Modal

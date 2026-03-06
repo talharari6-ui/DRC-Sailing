@@ -1,4 +1,4 @@
-export default function ViewModeToggle({ currentMode, onModeChange }) {
+function ViewModeToggle({ currentMode, onModeChange }) {
   const modes = [
     { value: 'month', label: 'חודש' },
     { value: 'week', label: 'שבוע' },
@@ -44,3 +44,5 @@ export default function ViewModeToggle({ currentMode, onModeChange }) {
     </div>
   )
 }
+
+export default ViewModeToggle

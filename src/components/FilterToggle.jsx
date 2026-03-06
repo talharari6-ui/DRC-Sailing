@@ -1,4 +1,4 @@
-export default function FilterToggle({ currentFilter, onFilterChange }) {
+function FilterToggle({ currentFilter, onFilterChange }) {
   const filters = [
     { value: 'all', label: 'כל המדריכים' },
     { value: 'my', label: 'שלי בלבד' }
@@ -43,3 +43,5 @@ export default function FilterToggle({ currentFilter, onFilterChange }) {
     </div>
   )
 }
+
+export default FilterToggle
