@@ -1,5 +1,5 @@
 import { AuthProvider } from '@/src/context/AuthContext'
-import { DataProvider } from '@/src/context/DataContext'
+// import { DataProvider } from '@/src/context/DataContext'
 import { Toast } from '@/src/components/Toast'
 import '@/src/styles/globals.css'
 
@@ -25,10 +25,10 @@ export default function RootLayout({ children }) {
       <body>
         <div id="__next">
           <AuthProvider>
-            <DataProvider>
-              {children}
-              <Toast />
-            </DataProvider>
+            {/* <DataProvider> */}
+            {children}
+            <Toast />
+            {/* </DataProvider> */}
           </AuthProvider>
         </div>
       </body>
