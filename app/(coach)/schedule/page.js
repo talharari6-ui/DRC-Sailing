@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/src/hooks/useAuth'
 
 export default function SchedulePage() {
-  const { coach } = useAuth()
+  const authResult = useAuth()
+  const coach = authResult?.coach
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(false)
 
