@@ -19,13 +19,21 @@ export default function SchedulePage() {
       setLoading(true)
       try {
         const res = await fetch('/api/sessions?include_details=true')
-        if (!res.ok) {
-          console.error('API error:', res.status, res.statusText)
-          setSessions([])
-          return
-        }
         const data = await res.json()
-        setSessions(Array.isArray(data) ? data : [])
+
+        // Check if response is successful and data is an array
+        if (!res.ok) {
+          console.error('API error:', res.status, data)
+          setSessions([])
+        } else if (Array.isArray(data)) {
+          setSessions(data)
+        } else if (data?.error) {
+          console.error('API returned error:', data.error)
+          setSessions([])
+        } else {
+          console.warn('Unexpected API response format:', data)
+          setSessions([])
+        }
       } catch (error) {
         console.error('Error loading sessions:', error)
         setSessions([])
