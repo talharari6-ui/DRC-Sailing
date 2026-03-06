@@ -8,7 +8,19 @@ export async function GET(request) {
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
 
-    let query = supabase.from('sessions').select('*')
+    const includeDetails = searchParams.get('include_details') === 'true'
+
+    let selectFields = '*'
+    if (includeDetails) {
+      selectFields = `
+        *,
+        groups(name, color),
+        coaches(name, email),
+        group_sailors(sailor_id, sailors(id, name, level))
+      `
+    }
+
+    let query = supabase.from('sessions').select(selectFields)
 
     if (groupId) query = query.eq('group_id', groupId)
     if (dateFrom) query = query.gte('date', dateFrom)
