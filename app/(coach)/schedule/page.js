@@ -147,6 +147,29 @@ export default function SchedulePage() {
     setDetailModalOpen(false)
   }
 
+  const getWeekDays = () => {
+    const today = currentDate
+    const dayOfWeek = today.getDay()
+    const startOfWeek = new Date(today)
+    startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)) // Start from Sunday
+
+    const weekDays = []
+    const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek)
+      date.setDate(startOfWeek.getDate() + i)
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      weekDays.push({
+        date: dateStr,
+        dayName: dayNames[date.getDay()],
+        dayNum: date.getDate(),
+        dateObj: date
+      })
+    }
+    return weekDays
+  }
+
   const filteredSessions = getFilteredSessions()
 
   return (
@@ -180,7 +203,116 @@ export default function SchedulePage() {
         />
       )}
 
-      {!loading && viewMode !== 'month' && (
+      {!loading && viewMode === 'week' && (
+        <div style={{ marginTop: '24px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '12px' }}>
+            📅 השבוע
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {getWeekDays().map((day) => {
+              const daySessions = getSessionsForDate(day.date)
+              return (
+                <div
+                  key={day.date}
+                  style={{
+                    background: 'var(--card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '12px',
+                    padding: '12px 16px',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: daySessions.length > 0 ? '12px' : '0'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '4px' }}>
+                        {day.dayName}
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                        {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        // Handle add group action
+                        console.log('Add group for', day.date)
+                      }}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'var(--blue)',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}
+                    >
+                      ➕ הוסף קבוצה
+                    </button>
+                  </div>
+
+                  {daySessions.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {daySessions.map(session => (
+                        <div
+                          key={session.id}
+                          onClick={() => {
+                            setSelectedSession(session)
+                            setDetailModalOpen(true)
+                          }}
+                          style={{
+                            background: 'var(--bg2)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            padding: '8px 12px',
+                            cursor: 'pointer',
+                            transition: 'opacity 0.2s',
+                            display: 'flex',
+                            gap: '8px',
+                            alignItems: 'center'
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
+                          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                        >
+                          <div
+                            style={{
+                              width: '3px',
+                              height: '40px',
+                              borderRadius: '2px',
+                              background: session.groups?.color || '#3b82f6',
+                            }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '2px' }}>
+                              {session.groups?.name || 'קבוצה'}
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                              {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ color: 'var(--muted)', fontSize: '12px', padding: '8px 0' }}>
+                      אין פעילויות
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {!loading && viewMode === 'day' && (
         <div style={{ marginTop: '24px' }}>
           <h2 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '12px' }}>
             📋 אירועים
