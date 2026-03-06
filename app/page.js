@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/src/hooks/useAuth'
 
+// Login page - יציאה לחוג שייט מרכז דניאל
 export default function LoginPage() {
   const router = useRouter()
   const { login, isAuthenticated, isLoading, error } = useAuth()
