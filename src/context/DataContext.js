@@ -15,15 +15,15 @@ export function DataProvider({ children }) {
   const [error, setError] = useState(null)
 
   const loadGroups = useCallback(async () => {
-    if (!isAuthenticated || !coach) return
+    if (!isAuthenticated || !coach?.id) return
     setLoading(true)
     try {
-      const url = coach.is_admin ? '/api/groups' : `/api/groups?coach_id=${coach.id}`
+      const url = coach?.is_admin ? '/api/groups' : `/api/groups?coach_id=${coach.id}`
       const res = await fetch(url)
       const data = await res.json()
       setGroups(data)
     } catch (err) {
-      setError(err.message)
+      setError(err?.message)
     } finally {
       setLoading(false)
     }
@@ -44,11 +44,11 @@ export function DataProvider({ children }) {
   }, [isAuthenticated])
 
   const loadSessions = useCallback(async (dateFrom, dateTo) => {
-    if (!isAuthenticated || !coach) return
+    if (!isAuthenticated || !coach?.id) return
     setLoading(true)
     try {
       const params = new URLSearchParams()
-      if (coach.id) params.append('coach_id', coach.id)
+      if (coach?.id) params.append('coach_id', coach.id)
       if (dateFrom) params.append('date_from', dateFrom)
       if (dateTo) params.append('date_to', dateTo)
 
@@ -56,7 +56,7 @@ export function DataProvider({ children }) {
       const data = await res.json()
       setSessions(data)
     } catch (err) {
-      setError(err.message)
+      setError(err?.message)
     } finally {
       setLoading(false)
     }
