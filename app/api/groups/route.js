@@ -4,10 +4,37 @@ function toDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-function getSeasonEndDate(start) {
-  // Season always ends on June 30. If season starts after June, end on next year's June 30.
-  const seasonEndYear = start.getMonth() > 5 ? start.getFullYear() + 1 : start.getFullYear()
-  return new Date(seasonEndYear, 5, 30, 12, 0, 0, 0)
+function normalizeStartToSeason(date) {
+  const normalized = new Date(date)
+  normalized.setHours(12, 0, 0, 0)
+
+  const month = normalized.getMonth()
+  const year = normalized.getFullYear()
+
+  // July-August are off-season; move to Sep 1 of the same year.
+  if (month === 6 || month === 7) {
+    return new Date(year, 8, 1, 12, 0, 0, 0)
+  }
+
+  return normalized
+}
+
+function getSeasonBounds(date) {
+  const month = date.getMonth()
+  const year = date.getFullYear()
+
+  // Season is Sep 1 -> Jun 30
+  if (month >= 8) {
+    return {
+      start: new Date(year, 8, 1, 12, 0, 0, 0),
+      end: new Date(year + 1, 5, 30, 12, 0, 0, 0),
+    }
+  }
+
+  return {
+    start: new Date(year - 1, 8, 1, 12, 0, 0, 0),
+    end: new Date(year, 5, 30, 12, 0, 0, 0),
+  }
 }
 
 function buildPlannedSessions({ groupId, daysOfWeek, startDate, startTime, endTime }) {
@@ -16,10 +43,12 @@ function buildPlannedSessions({ groupId, daysOfWeek, startDate, startTime, endTi
   if (!groupId || activeDays.length === 0) return sessions
 
   const rawStart = startDate ? new Date(`${startDate}T12:00:00`) : new Date()
-  const start = Number.isNaN(rawStart.getTime()) ? new Date() : rawStart
-  start.setHours(12, 0, 0, 0)
+  const safeStart = Number.isNaN(rawStart.getTime()) ? new Date() : rawStart
+  const normalizedStart = normalizeStartToSeason(safeStart)
 
-  const horizon = getSeasonEndDate(start)
+  const season = getSeasonBounds(normalizedStart)
+  const start = normalizedStart < season.start ? season.start : normalizedStart
+  const horizon = season.end
 
   for (let date = new Date(start); date <= horizon; date.setDate(date.getDate() + 1)) {
     if (!activeDays.includes(date.getDay())) continue
