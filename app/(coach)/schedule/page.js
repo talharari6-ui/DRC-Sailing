@@ -295,6 +295,21 @@ export default function SchedulePage() {
     setSailorModalOpen(true)
   }
 
+  const canManageSession = (session) => {
+    const groupCoachId = session?.groups?.coach_id || session?.coach_id
+    return coach?.is_admin || groupCoachId === coach?.id
+  }
+
+  const openSessionModal = (session) => {
+    setSelectedSession(session)
+    setDetailModalOpen(true)
+  }
+
+  const openSubstituteModal = (session) => {
+    setSelectedSession(session)
+    setSubstituteModalOpen(true)
+  }
+
   if (!coach) return <div className="p-5 text-center text-muted-foreground">{ '\u05d8\u05d5\u05e2\u05df...' }</div>
 
   return (
@@ -357,9 +372,24 @@ export default function SchedulePage() {
                   </div>
                   <div className="mt-3">
                     {daySessions.length > 0 ? daySessions.map((session) => (
-                      <div key={session.id} className="bg-secondary border border-border rounded-lg p-3 mt-2 cursor-pointer" onClick={() => { setSelectedSession(session); setDetailModalOpen(true) }}>
+                      <div key={session.id} className="bg-secondary border border-border rounded-lg p-3 mt-2 cursor-pointer" onClick={() => openSessionModal(session)}>
                         <div className="text-sm font-semibold">{session.groups?.name || '\u05e7\u05d1\u05d5\u05e6\u05d4'}</div>
                         <div className="text-xs text-muted-foreground">{session.start_time || '\u05d0\u05d9\u05df \u05e9\u05e2\u05d4'}</div>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {canManageSession(session) ? (
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSessionModal(session) }}>
+                              {'\u05e0\u05d9\u05d4\u05d5\u05dc \u05e7\u05d1\u05d5\u05e6\u05d4'}
+                            </Button>
+                          ) : null}
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSubstituteModal(session) }}>
+                            {canManageSession(session) ? '\u05de\u05d9\u05e0\u05d5\u05d9 \u05de\u05d7\u05dc\u05d9\u05e3' : '\u05d1\u05e7\u05e9\u05ea \u05d4\u05d7\u05dc\u05e4\u05d4'}
+                          </Button>
+                          {canManageSession(session) ? (
+                            <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSessionModal(session) }}>
+                              {'\u05d3\u05d7\u05d9\u05d9\u05ea \u05e4\u05e2\u05d9\u05dc\u05d5\u05ea'}
+                            </Button>
+                          ) : null}
+                        </div>
                       </div>
                     )) : <div className="text-xs text-muted-foreground mt-2">{ '\u05d0\u05d9\u05df \u05e4\u05e2\u05d9\u05dc\u05d5\u05d9\u05d5\u05ea' }</div>}
                   </div>
@@ -374,10 +404,25 @@ export default function SchedulePage() {
         <div className="space-y-3">
           <div className="flex justify-end"><Button size="sm" onClick={() => openAddGroupModal(currentDate)}>{ '\u05d4\u05d5\u05e1\u05e3 \u05e7\u05d1\u05d5\u05e6\u05d4 \u05dc\u05d9\u05d5\u05dd \u05d6\u05d4' }</Button></div>
           {currentDaySessions.length === 0 ? <div className="text-muted-foreground text-center p-5">{ '\u05d0\u05d9\u05df \u05e4\u05e2\u05d9\u05dc\u05d5\u05d9\u05d5\u05ea \u05d1\u05d9\u05d5\u05dd \u05d6\u05d4' }</div> : currentDaySessions.map((session) => (
-            <Card key={session.id} className="cursor-pointer" onClick={() => { setSelectedSession(session); setDetailModalOpen(true) }}>
+            <Card key={session.id} className="cursor-pointer" onClick={() => openSessionModal(session)}>
               <CardContent className="p-4">
                 <div className="text-sm font-bold">{session.groups?.name || '\u05e7\u05d1\u05d5\u05e6\u05d4'}</div>
-                <div className="text-xs text-muted-foreground">{session.date} • {session.start_time || '\u05d0\u05d9\u05df \u05e9\u05e2\u05d4'}</div>
+                <div className="text-xs text-muted-foreground">{session.date} â€¢ {session.start_time || '\u05d0\u05d9\u05df \u05e9\u05e2\u05d4'}</div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {canManageSession(session) ? (
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSessionModal(session) }}>
+                      {'\u05e0\u05d9\u05d4\u05d5\u05dc \u05e7\u05d1\u05d5\u05e6\u05d4'}
+                    </Button>
+                  ) : null}
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSubstituteModal(session) }}>
+                    {canManageSession(session) ? '\u05de\u05d9\u05e0\u05d5\u05d9 \u05de\u05d7\u05dc\u05d9\u05e3' : '\u05d1\u05e7\u05e9\u05ea \u05d4\u05d7\u05dc\u05e4\u05d4'}
+                  </Button>
+                  {canManageSession(session) ? (
+                    <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSessionModal(session) }}>
+                      {'\u05d3\u05d7\u05d9\u05d9\u05ea \u05e4\u05e2\u05d9\u05dc\u05d5\u05ea'}
+                    </Button>
+                  ) : null}
+                </div>
               </CardContent>
             </Card>
           ))}
