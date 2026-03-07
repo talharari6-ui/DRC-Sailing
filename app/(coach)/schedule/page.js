@@ -525,7 +525,6 @@ export default function SchedulePage() {
                   )
                 })}
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1">א׳=ראשון, ב׳=שני, ג׳=שלישי, ד׳=רביעי, ה׳=חמישי, ו׳=שישי, ש׳=שבת</p>
             </div>
 
             <div>
