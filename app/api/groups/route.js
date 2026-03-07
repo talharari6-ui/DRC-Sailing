@@ -4,10 +4,10 @@ function toDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-function buildPlannedSessions({ groupId, coachId, daysOfWeek, startDate, startTime, endTime }) {
+function buildPlannedSessions({ groupId, daysOfWeek, startDate, startTime, endTime }) {
   const sessions = []
   const activeDays = Array.isArray(daysOfWeek) ? daysOfWeek : []
-  if (!groupId || !coachId || activeDays.length === 0) return sessions
+  if (!groupId || activeDays.length === 0) return sessions
 
   const start = startDate ? new Date(`${startDate}T12:00:00`) : new Date()
   const horizon = new Date(start)
@@ -17,7 +17,6 @@ function buildPlannedSessions({ groupId, coachId, daysOfWeek, startDate, startTi
     if (!activeDays.includes(date.getDay())) continue
     sessions.push({
       group_id: groupId,
-      coach_id: coachId,
       date: toDateKey(date),
       start_time: startTime || null,
       end_time: endTime || null,
@@ -27,6 +26,23 @@ function buildPlannedSessions({ groupId, coachId, daysOfWeek, startDate, startTi
   }
 
   return sessions
+}
+
+async function insertSessionsWithFallback(supabase, sessions, coachId) {
+  // Attempt 1: payload with coach_id (for schemas that include it)
+  const withCoach = sessions.map((s) => ({ ...s, coach_id: coachId }))
+  let { error } = await supabase.from('sessions').insert(withCoach)
+  if (!error) return null
+
+  // Fallback: if coach_id column does not exist, retry without coach_id
+  const msg = (error.message || '').toLowerCase()
+  if (msg.includes("could not find") && msg.includes("coach_id")) {
+    const retry = await supabase.from('sessions').insert(sessions)
+    if (!retry.error) return null
+    return retry.error
+  }
+
+  return error
 }
 
 export async function GET(request) {
@@ -66,15 +82,17 @@ export async function POST(request) {
 
     const { data, error } = await supabase
       .from('groups')
-      .insert([{
-        name,
-        coach_id,
-        color: color || '#3b82f6',
-        days_of_week: days_of_week || [],
-        start_time: start_time || '',
-        end_time: end_time || '',
-        start_date: start_date || null,
-      }])
+      .insert([
+        {
+          name,
+          coach_id,
+          color: color || '#3b82f6',
+          days_of_week: days_of_week || [],
+          start_time: start_time || '',
+          end_time: end_time || '',
+          start_date: start_date || null,
+        },
+      ])
       .select()
 
     if (error) throw error
@@ -82,7 +100,6 @@ export async function POST(request) {
     const createdGroup = data[0]
     const sessionsToCreate = buildPlannedSessions({
       groupId: createdGroup?.id,
-      coachId: coach_id,
       daysOfWeek: days_of_week,
       startDate: start_date,
       startTime: start_time,
@@ -90,10 +107,7 @@ export async function POST(request) {
     })
 
     if (sessionsToCreate.length > 0) {
-      const { error: sessionsError } = await supabase
-        .from('sessions')
-        .insert(sessionsToCreate)
-
+      const sessionsError = await insertSessionsWithFallback(supabase, sessionsToCreate, coach_id)
       if (sessionsError) {
         console.error('Groups POST sessions seed error:', sessionsError)
         return Response.json(
