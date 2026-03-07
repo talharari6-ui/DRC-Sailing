@@ -29,20 +29,33 @@ function buildPlannedSessions({ groupId, daysOfWeek, startDate, startTime, endTi
 }
 
 async function insertSessionsWithFallback(supabase, sessions, coachId) {
-  // Attempt 1: payload with coach_id (for schemas that include it)
-  const withCoach = sessions.map((s) => ({ ...s, coach_id: coachId }))
-  let { error } = await supabase.from('sessions').insert(withCoach)
-  if (!error) return null
-
-  // Fallback: if coach_id column does not exist, retry without coach_id
-  const msg = (error.message || '').toLowerCase()
-  if (msg.includes("could not find") && msg.includes("coach_id")) {
-    const retry = await supabase.from('sessions').insert(sessions)
-    if (!retry.error) return null
-    return retry.error
+  const extractMissingColumn = (message) => {
+    const match = (message || '').match(/Could not find the '([^']+)' column/i)
+    return match?.[1] || null
   }
 
-  return error
+  // Start with all optional columns; strip missing ones dynamically.
+  let payload = sessions.map((s) => ({ ...s, coach_id: coachId }))
+  const removedColumns = new Set()
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const { error } = await supabase.from('sessions').insert(payload)
+    if (!error) return null
+
+    const missingColumn = extractMissingColumn(error.message)
+    if (!missingColumn || removedColumns.has(missingColumn)) {
+      return error
+    }
+
+    removedColumns.add(missingColumn)
+    payload = payload.map((session) => {
+      const next = { ...session }
+      delete next[missingColumn]
+      return next
+    })
+  }
+
+  return { message: 'Failed to insert sessions after schema fallback retries.' }
 }
 
 export async function GET(request) {
