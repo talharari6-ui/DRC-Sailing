@@ -149,9 +149,9 @@ export default function SchedulePage() {
 
   const getWeekDays = () => {
     const today = currentDate
-    const dayOfWeek = today.getDay()
+    const dayOfWeek = today.getDay() // 0 = Sunday, 6 = Saturday
     const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)) // Start from Sunday
+    startOfWeek.setDate(today.getDate() - dayOfWeek) // Go back to most recent Sunday
 
     const weekDays = []
     const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
