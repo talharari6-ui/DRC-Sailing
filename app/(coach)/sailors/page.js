@@ -17,12 +17,15 @@ export default function SailorsPage() {
     if (!coach) return
     setLoading(true)
     try {
-      const sailorRes = await fetch('/api/sailors')
-      const sailorData = await sailorRes.json()
+      const [sailorRes, groupRes] = await Promise.all([
+        fetch('/api/sailors'),
+        fetch(`/api/groups?coach_id=${coach.id}`)
+      ])
+      const [sailorData, groupData] = await Promise.all([
+        sailorRes.json(),
+        groupRes.json()
+      ])
       setSailors(sailorData)
-
-      const groupRes = await fetch(`/api/groups?coach_id=${coach.id}`)
-      const groupData = await groupRes.json()
       setGroups(groupData)
     } catch (error) {
       console.error('Error loading data:', error)

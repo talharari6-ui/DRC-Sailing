@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useAuth } from '@/src/hooks/useAuth'
 import { Calendar } from '@/src/components/Calendar'
 
@@ -139,7 +140,7 @@ export default function AdminDashboard() {
             { href: '/admin/absences', icon: '🚫', label: 'חיסורים' },
             { href: '/admin/substitutions', icon: '🔄', label: 'החלפות' },
           ].map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               style={{
@@ -160,7 +161,7 @@ export default function AdminDashboard() {
             >
               <span style={{ fontSize: '18px' }}>{link.icon}</span>
               <span style={{ fontSize: '13px', fontWeight: '700' }}>{link.label}</span>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

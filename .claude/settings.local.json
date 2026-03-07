@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npm install)",
-      "Bash(ls -la /c/Users/talha/Documents/projects/DRC-Sailing/.env*)"
+      "Bash(ls -la /c/Users/talha/Documents/projects/DRC-Sailing/.env*)",
+      "Bash(npx shadcn@latest:*)"
     ]
   }
 }

@@ -1,13 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { useAuth } from '@/src/hooks/useAuth'
 import ViewModeToggle from '@/src/components/ViewModeToggle'
 import FilterToggle from '@/src/components/FilterToggle'
 import { Calendar } from '@/src/components/Calendar'
-import SessionDetailModal from '@/src/components/SessionDetailModal'
-import SailorManagementModal from '@/src/components/SailorManagementModal'
-import SubstituteCoachModal from '@/src/components/SubstituteCoachModal'
+
+const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailModal'), { ssr: false })
+const SailorManagementModal = dynamic(() => import('@/src/components/SailorManagementModal'), { ssr: false })
+const SubstituteCoachModal = dynamic(() => import('@/src/components/SubstituteCoachModal'), { ssr: false })
 
 export default function SchedulePage() {
   const authResult = useAuth()
@@ -21,10 +23,6 @@ export default function SchedulePage() {
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [sailorModalOpen, setSailorModalOpen] = useState(false)
   const [substituteModalOpen, setSubstituteModalOpen] = useState(false)
-
-  if (!coach) {
-    return <div style={{ padding: '20px', color: 'var(--muted)', textAlign: 'center' }}>טוען...</div>
-  }
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -55,18 +53,18 @@ export default function SchedulePage() {
     loadSessions()
   }, [])
 
-  const getFilteredSessions = () => {
+  const filteredSessions = useMemo(() => {
     return sessions.filter(s => {
       if (filterMode === 'my') {
         return s.coach_id === coach?.id || s.substitute_coach_id === coach?.id
       }
       return true
     })
-  }
+  }, [sessions, filterMode, coach?.id])
 
-  const getSessionsForDate = (dateStr) => {
-    return getFilteredSessions().filter(s => s.date === dateStr)
-  }
+  const getSessionsForDate = useCallback((dateStr) => {
+    return filteredSessions.filter(s => s.date === dateStr)
+  }, [filteredSessions])
 
   const getDayContent = (dateStr, day) => {
     const daySessions = getSessionsForDate(dateStr)
@@ -170,7 +168,9 @@ export default function SchedulePage() {
     return weekDays
   }
 
-  const filteredSessions = getFilteredSessions()
+  if (!coach) {
+    return <div style={{ padding: '20px', color: 'var(--muted)', textAlign: 'center' }}>טוען...</div>
+  }
 
   return (
     <div>
