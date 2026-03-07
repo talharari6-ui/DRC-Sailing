@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -286,14 +286,14 @@ export default function SessionDetailModal({
             </div>
           ) : null}
 
-          <div className="flex flex-col gap-3 mt-6">
+          {!manageOpen ? (<div className="flex flex-col gap-3 mt-6">
             {(isGroupCoach || isSubstitute || isAdmin) ? <Button onClick={() => onEditSailors(session.id)}>{'\u05e2\u05e8\u05d5\u05da \u05d7\u05e0\u05d9\u05db\u05d9\u05dd'}</Button> : null}
             <Button variant="secondary" onClick={() => onSubstituteRequest(session.id)}>{canManageGroup ? '\u05de\u05d9\u05e0\u05d5\u05d9 \u05de\u05d7\u05dc\u05d9\u05e3' : '\u05d1\u05e7\u05e9\u05ea \u05d4\u05d7\u05dc\u05e4\u05d4'}</Button>
-            {canManageGroup ? <Button variant="outline" onClick={() => setManageOpen((v) => !v)}>{'\u05e0\u05d9\u05d4\u05d5\u05dc \u05e7\u05d1\u05d5\u05e6\u05d4'}</Button> : null}
+            {canManageGroup ? <Button variant="outline" onClick={() => setManageOpen(true)}>{'\u05e0\u05d9\u05d4\u05d5\u05dc \u05e7\u05d1\u05d5\u05e6\u05d4'}</Button> : null}
             {canDecline ? <Button variant="destructive" onClick={() => setDeclineOpen((v) => !v)}>{'\u05d3\u05d7\u05d9\u05d9\u05ea \u05e4\u05e2\u05d9\u05dc\u05d5\u05ea'}</Button> : null}
-          </div>
+          </div>) : null}
 
-          {declineOpen ? (
+          {!manageOpen && declineOpen ? (
             <div className="mt-3 rounded-md border border-border p-3">
               <Label htmlFor="decline-reason">{'\u05e1\u05d9\u05d1\u05ea \u05d3\u05d7\u05d9\u05d9\u05d4 (\u05d0\u05d5\u05e4\u05e6\u05d9\u05d5\u05e0\u05dc\u05d9)'}</Label>
               <Input id="decline-reason" className="mt-2" value={declineReason} onChange={(e) => setDeclineReason(e.target.value)} />
