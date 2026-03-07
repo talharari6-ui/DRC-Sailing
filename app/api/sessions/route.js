@@ -7,7 +7,7 @@ export async function GET(request) {
     const groupId = searchParams.get('group_id')
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
-
+    const adminApproved = searchParams.get('admin_approved')
     const includeDetails = searchParams.get('include_details') === 'true'
 
     const buildQuery = (fields) => {
@@ -15,20 +15,22 @@ export async function GET(request) {
       if (groupId) query = query.eq('group_id', groupId)
       if (dateFrom) query = query.gte('date', dateFrom)
       if (dateTo) query = query.lte('date', dateTo)
+      if (adminApproved === 'true') query = query.eq('admin_approved', true)
+      if (adminApproved === 'false') query = query.eq('admin_approved', false)
       return query.order('date', { ascending: false })
     }
 
     const selectCandidates = includeDetails
       ? [
           `*,
-           groups(name, color),
+           groups(id, name, color, coach_id, days_of_week, start_time, end_time, start_date),
            coaches(name, email),
            group_sailors(sailor_id, sailors(id, name, level))`,
           `*,
-           groups(name, color),
+           groups(id, name, color, coach_id, days_of_week, start_time, end_time, start_date),
            coaches(name, email)`,
           `*,
-           groups(name, color)`,
+           groups(id, name, color, coach_id, days_of_week, start_time, end_time, start_date)`,
           '*',
         ]
       : ['*']

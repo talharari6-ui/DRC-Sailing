@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useAuth } from '@/src/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -8,20 +9,55 @@ import {
 } from '@/components/ui/dialog'
 
 export default function SubstituteCoachModal({
-  sessionId,
+  session,
   isOpen,
   onClose,
-  coaches,
-  onSubstituteSelect,
+  onSuccess,
 }) {
+  const { coach } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [coaches, setCoaches] = useState([])
+  const [error, setError] = useState('')
 
-  const handleSelect = async (coachId) => {
-    if (!coachId || !onSubstituteSelect) return
+  useEffect(() => {
+    const load = async () => {
+      if (!isOpen || !session?.id) return
+      setError('')
+      try {
+        const res = await fetch(`/api/sessions/${session.id}/substitute`)
+        const data = await res.json()
+        if (!res.ok) throw new Error(data?.error || 'Failed to load coaches')
+        setCoaches(Array.isArray(data) ? data.filter((c) => c.id !== coach?.id) : [])
+      } catch (e) {
+        setError(e.message)
+      }
+    }
+
+    load()
+  }, [isOpen, session?.id, coach?.id])
+
+  const handleSelect = async (substituteCoachId) => {
+    if (!substituteCoachId || !session?.id) return
     setLoading(true)
+    setError('')
     try {
-      await onSubstituteSelect(sessionId, coachId)
+      const res = await fetch(`/api/sessions/${session.id}/substitute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          coach_id: substituteCoachId,
+          requester_id: coach?.id,
+          requester_is_admin: !!coach?.is_admin,
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || 'Failed to submit substitute request')
+
       onClose()
+      await onSuccess?.(data)
+    } catch (e) {
+      setError(e.message)
     } finally {
       setLoading(false)
     }
@@ -31,24 +67,24 @@ export default function SubstituteCoachModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md" dir="rtl">
         <DialogHeader>
-          <DialogTitle>בחר מדריך להחלפה</DialogTitle>
+          <DialogTitle>בחר מדריך מחליף</DialogTitle>
         </DialogHeader>
 
-        {coaches && coaches.length > 0 ? (
+        {error ? <div className="text-xs text-red-400">{error}</div> : null}
+
+        {coaches.length > 0 ? (
           <div className="flex flex-col gap-2">
-            {coaches.map((coach) => (
+            {coaches.map((item) => (
               <Button
-                key={coach.id}
+                key={item.id}
                 variant="secondary"
-                onClick={() => handleSelect(coach.id)}
+                onClick={() => handleSelect(item.id)}
                 disabled={loading}
                 className="justify-start text-start h-auto py-3"
               >
                 <div>
-                  <div className="font-medium">{coach.name}</div>
-                  {coach.email ? (
-                    <div className="text-xs text-muted-foreground mt-1">{coach.email}</div>
-                  ) : null}
+                  <div className="font-medium">{item.name}</div>
+                  {item.email ? <div className="text-xs text-muted-foreground mt-1">{item.email}</div> : null}
                 </div>
               </Button>
             ))}

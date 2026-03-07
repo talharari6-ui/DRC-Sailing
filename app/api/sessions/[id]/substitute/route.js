@@ -3,9 +3,7 @@ import { getSupabaseClient } from '@/src/lib/supabase'
 export async function GET(request, { params }) {
   try {
     const supabase = getSupabaseClient()
-    const { id: sessionId } = params
 
-    // Get all coaches that can be substitutes
     const { data, error } = await supabase
       .from('coaches')
       .select('id, name, email')
@@ -23,24 +21,45 @@ export async function POST(request, { params }) {
   try {
     const supabase = getSupabaseClient()
     const { id: sessionId } = params
-    const { coach_id } = await request.json()
+    const { coach_id, requester_id, requester_is_admin } = await request.json()
 
-    if (!coach_id) {
+    if (!coach_id || !requester_id) {
       return Response.json(
-        { error: 'מדריך נדרש' },
+        { error: 'Substitute coach and requester are required' },
         { status: 400 }
       )
     }
 
-    // Update session with substitute coach
+    const { data: session, error: sessionError } = await supabase
+      .from('sessions')
+      .select('id, groups(coach_id)')
+      .eq('id', sessionId)
+      .single()
+
+    if (sessionError) throw sessionError
+
+    const groupCoachId = session?.groups?.coach_id
+    const isGroupCoach = groupCoachId && groupCoachId === requester_id
+    const isAdmin = requester_is_admin === true
+    const canAssignDirectly = isAdmin || isGroupCoach
+
+    const updates = {
+      substitute_coach_id: coach_id,
+      admin_approved: canAssignDirectly ? true : false,
+    }
+
     const { data, error } = await supabase
       .from('sessions')
-      .update({ substitute_coach_id: coach_id })
+      .update(updates)
       .eq('id', sessionId)
       .select()
 
     if (error) throw error
-    return Response.json(data[0], { status: 200 })
+
+    return Response.json({
+      session: data?.[0] || null,
+      pending_approval: !canAssignDirectly,
+    })
   } catch (error) {
     console.error('Substitute coach POST error:', error)
     return Response.json({ error: error.message }, { status: 500 })

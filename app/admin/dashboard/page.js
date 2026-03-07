@@ -7,6 +7,13 @@ import { Calendar } from '@/src/components/Calendar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+
+function getPendingType(session) {
+  if (session.cancelled) return 'דחיית פעילות'
+  if (session.substitute_coach_id) return 'בקשת מחליף'
+  return 'בקשת שינוי'
+}
 
 export default function AdminDashboard() {
   const { coach } = useAuth()
@@ -16,8 +23,10 @@ export default function AdminDashboard() {
   const [coaches, setCoaches] = useState([])
   const [sailors, setSailors] = useState([])
   const [sessions, setSessions] = useState([])
+  const [pendingSessions, setPendingSessions] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [approvalLoadingId, setApprovalLoadingId] = useState('')
 
   useEffect(() => {
     const loadAdminData = async () => {
@@ -27,24 +36,27 @@ export default function AdminDashboard() {
         const monthStr = String(month + 1).padStart(2, '0')
         const yearStr = String(year)
 
-        const [groupRes, coachRes, sailorRes, sessRes] = await Promise.all([
+        const [groupRes, coachRes, sailorRes, sessRes, pendingRes] = await Promise.all([
           fetch('/api/groups'),
           fetch('/api/coaches'),
           fetch('/api/sailors'),
-          fetch(`/api/sessions?date_from=${yearStr}-${monthStr}-01&date_to=${yearStr}-${monthStr}-31`),
+          fetch(`/api/sessions?include_details=true&date_from=${yearStr}-${monthStr}-01&date_to=${yearStr}-${monthStr}-31`),
+          fetch('/api/sessions?include_details=true&admin_approved=false'),
         ])
 
-        const [groupData, coachData, sailorData, sessData] = await Promise.all([
+        const [groupData, coachData, sailorData, sessData, pendingData] = await Promise.all([
           groupRes.json(),
           coachRes.json(),
           sailorRes.json(),
           sessRes.json(),
+          pendingRes.json(),
         ])
 
-        setGroups(groupData)
-        setCoaches(coachData)
-        setSailors(sailorData)
-        setSessions(sessData)
+        setGroups(Array.isArray(groupData) ? groupData : [])
+        setCoaches(Array.isArray(coachData) ? coachData : [])
+        setSailors(Array.isArray(sailorData) ? sailorData : [])
+        setSessions(Array.isArray(sessData) ? sessData : [])
+        setPendingSessions(Array.isArray(pendingData) ? pendingData : [])
       } catch (err) {
         console.error('Error loading admin data:', err)
         setError('שגיאה בטעינת נתוני ניהול. נסה לרענן את הדף.')
@@ -54,6 +66,25 @@ export default function AdminDashboard() {
     }
     loadAdminData()
   }, [year, month])
+
+  const handleApproval = async (sessionId, action) => {
+    setApprovalLoadingId(`${sessionId}-${action}`)
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/approval`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || 'Approval action failed')
+
+      setPendingSessions((prev) => prev.filter((item) => item.id !== sessionId))
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setApprovalLoadingId('')
+    }
+  }
 
   const monthName = new Intl.DateTimeFormat('he-IL', {
     month: 'long',
@@ -76,13 +107,58 @@ export default function AdminDashboard() {
         <p className="text-muted-foreground text-sm">{monthName}</p>
       </div>
 
+      {pendingSessions.length > 0 ? (
+        <Alert className="mb-4 border-amber-400/50">
+          <AlertDescription className="text-amber-200">
+            {pendingSessions.length} בקשות ממתינות לאישור
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {pendingSessions.length > 0 ? (
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <h3 className="text-sm font-bold mb-3">ממתין לאישור מנהל</h3>
+            <div className="space-y-3">
+              {pendingSessions.slice(0, 10).map((session) => (
+                <div key={session.id} className="rounded-md border border-border p-3">
+                  <div className="text-sm font-semibold">{session.groups?.name || 'קבוצה'}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {session.date} • {getPendingType(session)}
+                  </div>
+                  {session.cancel_reason ? (
+                    <div className="text-xs mt-1 text-amber-200">סיבה: {session.cancel_reason}</div>
+                  ) : null}
+                  <div className="mt-2 flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleApproval(session.id, 'approve')}
+                      disabled={approvalLoadingId === `${session.id}-approve`}
+                    >
+                      אשר
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleApproval(session.id, 'reject')}
+                      disabled={approvalLoadingId === `${session.id}-reject`}
+                    >
+                      דחה
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       {error ? (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {statsData.map((stat, i) => (
           <Card key={i}>
@@ -95,7 +171,6 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Calendar */}
       {loading ? (
         <Card>
           <CardContent className="p-4">
@@ -125,7 +200,6 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* Quick Links */}
       <div className="mt-6">
         <h3 className="text-base font-extrabold mb-3">⚡ קישורים מהירים</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

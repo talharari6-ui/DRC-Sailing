@@ -1,4 +1,4 @@
-import { supabase } from '@/src/lib/supabase'
+import { getSupabaseClient } from '@/src/lib/supabase'
 
 export async function GET(request, { params }) {
   try {
@@ -25,9 +25,22 @@ export async function PATCH(request, { params }) {
     const { id } = params
     const body = await request.json()
 
+    const allowed = {
+      name: body.name,
+      color: body.color,
+      days_of_week: body.days_of_week,
+      start_time: body.start_time,
+      end_time: body.end_time,
+      start_date: body.start_date,
+    }
+
+    const updates = Object.fromEntries(
+      Object.entries(allowed).filter(([, value]) => value !== undefined)
+    )
+
     const { data, error } = await supabase
       .from('groups')
-      .update(body)
+      .update(updates)
       .eq('id', id)
       .select()
 
@@ -44,10 +57,8 @@ export async function DELETE(request, { params }) {
     const supabase = getSupabaseClient()
     const { id } = params
 
-    // Delete from group_sailors first
     await supabase.from('group_sailors').delete().eq('group_id', id)
 
-    // Then delete group
     const { error } = await supabase
       .from('groups')
       .delete()
