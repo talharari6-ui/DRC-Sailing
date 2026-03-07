@@ -4,18 +4,22 @@ function toDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
+function getSeasonEndDate(start) {
+  // Season always ends on June 30. If season starts after June, end on next year's June 30.
+  const seasonEndYear = start.getMonth() > 5 ? start.getFullYear() + 1 : start.getFullYear()
+  return new Date(seasonEndYear, 5, 30, 12, 0, 0, 0)
+}
+
 function buildPlannedSessions({ groupId, daysOfWeek, startDate, startTime, endTime }) {
   const sessions = []
   const activeDays = Array.isArray(daysOfWeek) ? daysOfWeek : []
   if (!groupId || activeDays.length === 0) return sessions
 
-  const requestedStart = startDate ? new Date(`${startDate}T12:00:00`) : new Date()
-  const today = new Date()
-  today.setHours(12, 0, 0, 0)
-  const start = requestedStart > today ? requestedStart : today
+  const rawStart = startDate ? new Date(`${startDate}T12:00:00`) : new Date()
+  const start = Number.isNaN(rawStart.getTime()) ? new Date() : rawStart
+  start.setHours(12, 0, 0, 0)
 
-  const horizon = new Date(start)
-  horizon.setDate(horizon.getDate() + 180)
+  const horizon = getSeasonEndDate(start)
 
   for (let date = new Date(start); date <= horizon; date.setDate(date.getDate() + 1)) {
     if (!activeDays.includes(date.getDay())) continue
