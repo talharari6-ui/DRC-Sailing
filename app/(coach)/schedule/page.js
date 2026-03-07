@@ -22,6 +22,8 @@ const SailorManagementModal = dynamic(() => import('@/src/components/SailorManag
 const SubstituteCoachModal = dynamic(() => import('@/src/components/SubstituteCoachModal'), { ssr: false })
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+const DAY_TOGGLE_LABELS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
+const GROUP_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899']
 
 function toDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
@@ -63,7 +65,7 @@ export default function SchedulePage() {
   const [groupSuccess, setGroupSuccess] = useState('')
   const [groupForm, setGroupForm] = useState({
     name: '',
-    color: '#3b82f6',
+    color: GROUP_COLORS[0],
     start_date: '',
     days_of_week: [],
     start_time: '',
@@ -219,13 +221,24 @@ export default function SchedulePage() {
     setGroupSuccess('')
     setGroupForm({
       name: '',
-      color: '#3b82f6',
+      color: GROUP_COLORS[0],
       start_date: toDateKey(dateObj),
       days_of_week: [dateObj.getDay()],
       start_time: '',
       end_time: '',
     })
     setGroupModalOpen(true)
+  }
+
+  const toggleGroupDay = (dayIndex) => {
+    setGroupForm((prev) => {
+      const exists = prev.days_of_week.includes(dayIndex)
+      const nextDays = exists
+        ? prev.days_of_week.filter((d) => d !== dayIndex)
+        : [...prev.days_of_week, dayIndex].sort((a, b) => a - b)
+
+      return { ...prev, days_of_week: nextDays }
+    })
   }
 
   const createGroup = async (e) => {
@@ -235,6 +248,11 @@ export default function SchedulePage() {
 
     if (!groupForm.name.trim()) {
       setGroupError('יש להזין שם קבוצה')
+      return
+    }
+
+    if (groupForm.days_of_week.length === 0) {
+      setGroupError('יש לבחור לפחות יום פעילות אחד')
       return
     }
 
@@ -318,32 +336,35 @@ export default function SchedulePage() {
               return (
                 <Card key={day.date}>
                   <CardContent className="p-4">
-                    <div className={`flex justify-between items-center ${daySessions.length > 0 ? 'mb-3' : ''}`}>
-                      <div>
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        className="text-right"
+                        onClick={() => {
+                          setCurrentDate(day.dateObj)
+                          setViewMode('day')
+                        }}
+                      >
                         <div className="text-sm font-bold">{day.dayName}</div>
                         <div className="text-xs text-muted-foreground">
                           {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')}
                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setCurrentDate(day.dateObj)
-                            setViewMode('day')
-                          }}
-                        >
-                          מעבר ליום
-                        </Button>
-                        <Button size="sm" onClick={() => openAddGroupModal(day.dateObj)}>
-                          הוסף קבוצה
-                        </Button>
-                      </div>
+                      </button>
+                    </div>
+
+                    <div className="relative mt-3 mb-3">
+                      <div className="border-t border-border" />
+                      <Button
+                        size="sm"
+                        className="absolute -top-3 left-0 h-6 px-2 text-xs"
+                        onClick={() => openAddGroupModal(day.dateObj)}
+                      >
+                        + קבוצה
+                      </Button>
                     </div>
 
                     {daySessions.length > 0 ? (
-                      <div className="flex flex-col gap-2.5">
+                      <div className="flex flex-col gap-2.5 pt-1">
                         {daySessions.map((session) => (
                           <div
                             key={session.id}
@@ -430,51 +451,69 @@ export default function SchedulePage() {
       ) : null}
 
       <Dialog open={groupModalOpen} onOpenChange={setGroupModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>הוספת קבוצה חדשה</DialogTitle>
+            <DialogTitle className="text-right">🏡 קבוצה חדשה</DialogTitle>
           </DialogHeader>
-          <form className="space-y-3" onSubmit={createGroup}>
+
+          <form className="space-y-4" onSubmit={createGroup}>
             <div>
-              <Label>שם קבוצה</Label>
+              <Label>שם הקבוצה *</Label>
               <Input
                 value={groupForm.name}
                 onChange={(e) => setGroupForm((s) => ({ ...s, name: e.target.value }))}
-                placeholder="לדוגמה: Optimist מתחילים"
+                placeholder="לדוגמה: אופטימיסט מתקדמים"
+                required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label>תאריך התחלה</Label>
-                <Input
-                  type="date"
-                  value={groupForm.start_date}
-                  onChange={(e) => setGroupForm((s) => ({ ...s, start_date: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label>צבע</Label>
-                <Input
-                  type="color"
-                  value={groupForm.color}
-                  onChange={(e) => setGroupForm((s) => ({ ...s, color: e.target.value }))}
-                  className="h-10"
-                />
+            <div>
+              <Label>צבע</Label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {GROUP_COLORS.map((color) => {
+                  const isSelected = groupForm.color === color
+                  return (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setGroupForm((s) => ({ ...s, color }))}
+                      className={`h-8 w-8 rounded-full ring-2 transition-all ${isSelected ? 'ring-white scale-105' : 'ring-transparent'}`}
+                      style={{ backgroundColor: color }}
+                      aria-label={`בחר צבע ${color}`}
+                    />
+                  )
+                })}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label>שעת התחלה</Label>
+            <div>
+              <Label>ימי פעילות</Label>
+              <div className="mt-2 grid grid-cols-7 gap-1.5">
+                {DAY_TOGGLE_LABELS.map((label, dayIndex) => {
+                  const active = groupForm.days_of_week.includes(dayIndex)
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => toggleGroupDay(dayIndex)}
+                      className={`h-8 rounded-md text-xs font-bold border transition-colors ${active ? 'bg-blue-600 text-white border-blue-500' : 'bg-background text-muted-foreground border-border hover:bg-secondary'}`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">א׳=ראשון, ב׳=שני, ג׳=שלישי, ד׳=רביעי, ה׳=חמישי, ו׳=שישי, ש׳=שבת</p>
+            </div>
+
+            <div>
+              <Label>שעות פעילות</Label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
                 <Input
                   type="time"
                   value={groupForm.start_time}
                   onChange={(e) => setGroupForm((s) => ({ ...s, start_time: e.target.value }))}
                 />
-              </div>
-              <div>
-                <Label>שעת סיום</Label>
                 <Input
                   type="time"
                   value={groupForm.end_time}
@@ -483,10 +522,20 @@ export default function SchedulePage() {
               </div>
             </div>
 
+            <div>
+              <Label>תאריך תחילת פעילות</Label>
+              <Input
+                type="date"
+                value={groupForm.start_date}
+                onChange={(e) => setGroupForm((s) => ({ ...s, start_date: e.target.value }))}
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">הקבוצה תופיע בלוח מתאריך זה</p>
+            </div>
+
             {groupError ? <div className="text-xs text-red-400">{groupError}</div> : null}
 
             <Button type="submit" className="w-full" disabled={groupSaving}>
-              {groupSaving ? 'שומר...' : 'שמור קבוצה'}
+              {groupSaving ? 'שומר...' : 'צור קבוצה'}
             </Button>
           </form>
         </DialogContent>
