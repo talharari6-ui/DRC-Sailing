@@ -1,6 +1,6 @@
 'use client'
 
-import { DAY_NAMES } from '@/src/lib/constants'
+import { Button } from '@/components/ui/button'
 
 export function Calendar({
   year,
@@ -22,92 +22,44 @@ export function Calendar({
   const dayHeaders = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש']
 
   return (
-    <div style={{ marginBottom: '16px' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          marginBottom: '12px',
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          borderRadius: '12px',
-          padding: '8px 12px',
-        }}
-      >
-        <button
+    <div className="mb-4">
+      {/* Month navigation */}
+      <div className="flex items-center gap-2 mb-3 bg-card border border-border rounded-xl p-2.5 px-4">
+        <Button
+          variant="outline"
+          size="sm"
           onClick={onPrevMonth}
-          style={{
-            background: 'rgba(255, 255, 255, 0.06)',
-            border: '1px solid var(--border)',
-            color: 'var(--text)',
-            borderRadius: '8px',
-            padding: '8px 14px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            flexShrink: 0,
-          }}
+          className="shrink-0 text-base"
         >
           →
-        </button>
-        <div
-          style={{
-            flex: 1,
-            textAlign: 'center',
-            fontWeight: '800',
-            fontSize: '16px',
-          }}
-        >
+        </Button>
+        <div className="flex-1 text-center font-extrabold text-base">
           {monthName}
         </div>
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={onNextMonth}
-          style={{
-            background: 'rgba(255, 255, 255, 0.06)',
-            border: '1px solid var(--border)',
-            color: 'var(--text)',
-            borderRadius: '8px',
-            padding: '8px 14px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            flexShrink: 0,
-          }}
+          className="shrink-0 text-base"
         >
           ←
-        </button>
+        </Button>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '3px',
-          marginBottom: '3px',
-        }}
-      >
+      {/* Day headers */}
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-1">
         {dayHeaders.map((day) => (
           <div
             key={day}
-            style={{
-              textAlign: 'center',
-              fontSize: '11px',
-              fontWeight: '800',
-              color: 'var(--muted)',
-              padding: '5px 0',
-            }}
+            className="text-center text-xs font-extrabold text-muted-foreground py-1"
           >
             {day}
           </div>
         ))}
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '3px',
-        }}
-      >
+      {/* Calendar grid */}
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
         {Array.from({ length: totalCells }).map((_, i) => {
           const day = i - firstDay + 1
           const isValid = day >= 1 && day <= daysInMonth
@@ -123,28 +75,9 @@ export function Calendar({
             <div
               key={i}
               onClick={() => onDateClick && onDateClick(dateStr)}
-              style={{
-                minHeight: '70px',
-                padding: '5px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                border: '1px solid var(--border)',
-                background: 'var(--card)',
-                transition: 'background 0.15s',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+              className="min-h-[72px] sm:min-h-20 p-1.5 sm:p-2 rounded-lg cursor-pointer border border-border bg-card transition-opacity hover:opacity-80 flex flex-col"
             >
-              <div
-                style={{
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: 'var(--text)',
-                  marginBottom: '4px',
-                }}
-              >
+              <div className="text-xs font-semibold text-foreground mb-1">
                 {day}
               </div>
               {content}

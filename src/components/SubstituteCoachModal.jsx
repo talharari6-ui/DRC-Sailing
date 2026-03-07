@@ -1,5 +1,6 @@
 import Modal from './Modal'
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 
 export default function SubstituteCoachModal({
   sessionId,
@@ -9,14 +10,12 @@ export default function SubstituteCoachModal({
   onSubstituteSelect
 }) {
   const [loading, setLoading] = useState(false)
-  const [selectedCoachId, setSelectedCoachId] = useState('')
 
   const handleSelect = async (coachId) => {
     if (!coachId) return
     setLoading(true)
     try {
       await onSubstituteSelect(sessionId, coachId)
-      setSelectedCoachId('')
       onClose()
     } finally {
       setLoading(false)
@@ -24,55 +23,31 @@ export default function SubstituteCoachModal({
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="בחר מדריך להחלפה"
-    >
-      <div style={{ direction: 'rtl', padding: '0 16px 16px' }}>
+    <Modal isOpen={isOpen} onClose={onClose} title="בחר מדריך להחלפה">
+      <div className="px-4 pb-4" dir="rtl">
         {coaches && coaches.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="flex flex-col gap-2">
             {coaches.map((coach) => (
-              <button
+              <Button
                 key={coach.id}
+                variant="secondary"
                 onClick={() => handleSelect(coach.id)}
                 disabled={loading}
-                style={{
-                  padding: '12px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: 'var(--bg2)',
-                  color: 'var(--text)',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  textAlign: 'right',
-                  transition: 'all 0.2s'
-                }}
+                className="justify-start text-start h-auto py-3"
               >
-                <div style={{ fontWeight: '500' }}>{coach.name}</div>
-                {coach.email && (
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: 'var(--muted)',
-                      marginTop: '4px'
-                    }}
-                  >
-                    {coach.email}
-                  </div>
-                )}
-              </button>
+                <div>
+                  <div className="font-medium">{coach.name}</div>
+                  {coach.email ? (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {coach.email}
+                    </div>
+                  ) : null}
+                </div>
+              </Button>
             ))}
           </div>
         ) : (
-          <div
-            style={{
-              textAlign: 'center',
-              color: 'var(--muted)',
-              padding: '20px',
-              fontSize: '14px'
-            }}
-          >
+          <div className="text-center text-muted-foreground py-5 text-sm">
             אין מדריכים זמינים
           </div>
         )}

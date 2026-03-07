@@ -1,5 +1,8 @@
 import Modal from './Modal'
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 export default function SailorManagementModal({
   groupId,
@@ -10,7 +13,7 @@ export default function SailorManagementModal({
   onRemoveSailor,
   availableSailors
 }) {
-  const [newSailorMode, setNewSailorMode] = useState('existing') // existing or new
+  const [newSailorMode, setNewSailorMode] = useState('existing')
   const [selectedSailorId, setSelectedSailorId] = useState('')
   const [newSailorData, setNewSailorData] = useState({
     name: '',
@@ -44,119 +47,63 @@ export default function SailorManagementModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="ערוך חניכים">
-      <div style={{ direction: 'rtl', padding: '0 16px 16px' }}>
+      <div className="px-4 pb-5 sm:px-6 sm:pb-6" dir="rtl">
         {/* Current Sailors */}
-        <div style={{ marginBottom: '20px' }}>
-          <div
-            style={{
-              fontSize: '12px',
-              fontWeight: '600',
-              marginBottom: '8px',
-              color: 'var(--text)'
-            }}
-          >
+        <div className="mb-5">
+          <div className="text-xs font-semibold mb-2 text-foreground">
             חניכים בקבוצה
           </div>
           {sailors && sailors.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div className="flex flex-col gap-2.5">
               {sailors.map((sailor) => (
                 <div
                   key={sailor.id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '10px',
-                    backgroundColor: 'var(--bg2)',
-                    borderRadius: '6px'
-                  }}
+                  className="flex justify-between items-center p-3 bg-secondary rounded-md"
                 >
-                  <span style={{ fontSize: '14px' }}>{sailor.name}</span>
-                  <button
+                  <span className="text-sm">{sailor.name}</span>
+                  <Button
+                    size="sm"
+                    variant="destructive"
                     onClick={() => onRemoveSailor(groupId, sailor.id)}
                     disabled={loading}
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      backgroundColor: '#f44336',
-                      color: '#fff',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}
+                    className="h-7 text-xs"
                   >
                     הסר
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ color: 'var(--muted)', fontSize: '12px' }}>
+            <div className="text-muted-foreground text-xs">
               אין חניכים בקבוצה זו
             </div>
           )}
         </div>
 
         {/* Add Sailor Mode Toggle */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            marginBottom: '16px'
-          }}
-        >
-          <button
-            onClick={() => setNewSailorMode('existing')}
-            style={{
-              flex: 1,
-              padding: '8px',
-              borderRadius: '6px',
-              border: 'none',
-              backgroundColor:
-                newSailorMode === 'existing' ? 'var(--blue-light)' : 'var(--bg2)',
-              color: newSailorMode === 'existing' ? '#fff' : 'var(--text)',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: '500'
-            }}
+        <div className="mb-4">
+          <ToggleGroup
+            type="single"
+            value={newSailorMode}
+            onValueChange={(v) => v && setNewSailorMode(v)}
+            className="w-full"
           >
-            חניך קיים
-          </button>
-          <button
-            onClick={() => setNewSailorMode('new')}
-            style={{
-              flex: 1,
-              padding: '8px',
-              borderRadius: '6px',
-              border: 'none',
-              backgroundColor:
-                newSailorMode === 'new' ? 'var(--blue-light)' : 'var(--bg2)',
-              color: newSailorMode === 'new' ? '#fff' : 'var(--text)',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: '500'
-            }}
-          >
-            חניך חדש
-          </button>
+            <ToggleGroupItem value="existing" className="flex-1 text-xs data-[state=on]:bg-drc-blue-light data-[state=on]:text-white">
+              חניך קיים
+            </ToggleGroupItem>
+            <ToggleGroupItem value="new" className="flex-1 text-xs data-[state=on]:bg-drc-blue-light data-[state=on]:text-white">
+              חניך חדש
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
 
-        {/* Add Sailor - Existing */}
-        {newSailorMode === 'existing' && (
-          <div style={{ marginBottom: '16px' }}>
+        {/* Add Existing Sailor */}
+        {newSailorMode === 'existing' ? (
+          <div className="mb-4">
             <select
               value={selectedSailorId}
               onChange={(e) => setSelectedSailorId(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                marginBottom: '8px',
-                borderRadius: '6px',
-                border: '1px solid var(--border)',
-                backgroundColor: 'var(--bg2)',
-                color: 'var(--text)',
-                fontSize: '14px'
-              }}
+              className="w-full p-2.5 mb-2 rounded-md border border-border bg-secondary text-foreground text-sm"
             >
               <option value="">בחר חניך...</option>
               {availableSailors &&
@@ -166,109 +113,49 @@ export default function SailorManagementModal({
                   </option>
                 ))}
             </select>
-            <button
+            <Button
               onClick={handleAddExisting}
               disabled={!selectedSailorId || loading}
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: 'var(--blue-light)',
-                color: '#fff',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
-                opacity: !selectedSailorId || loading ? 0.5 : 1
-              }}
+              className="w-full"
             >
               הוסף
-            </button>
+            </Button>
           </div>
-        )}
+        ) : null}
 
-        {/* Add Sailor - New */}
-        {newSailorMode === 'new' && (
-          <div style={{ marginBottom: '16px' }}>
-            <input
+        {/* Add New Sailor */}
+        {newSailorMode === 'new' ? (
+          <div className="mb-4 space-y-2">
+            <Input
               type="text"
               placeholder="שם"
               value={newSailorData.name}
-              onChange={(e) =>
-                setNewSailorData({ ...newSailorData, name: e.target.value })
-              }
-              style={{
-                width: '100%',
-                padding: '10px',
-                marginBottom: '8px',
-                borderRadius: '6px',
-                border: '1px solid var(--border)',
-                backgroundColor: 'var(--bg2)',
-                color: 'var(--text)',
-                fontSize: '14px'
-              }}
+              onChange={(e) => setNewSailorData({ ...newSailorData, name: e.target.value })}
             />
-            <input
+            <Input
               type="number"
               placeholder="גיל"
               value={newSailorData.age}
-              onChange={(e) =>
-                setNewSailorData({ ...newSailorData, age: e.target.value })
-              }
-              style={{
-                width: '100%',
-                padding: '10px',
-                marginBottom: '8px',
-                borderRadius: '6px',
-                border: '1px solid var(--border)',
-                backgroundColor: 'var(--bg2)',
-                color: 'var(--text)',
-                fontSize: '14px'
-              }}
+              onChange={(e) => setNewSailorData({ ...newSailorData, age: e.target.value })}
             />
             <select
               value={newSailorData.level}
-              onChange={(e) =>
-                setNewSailorData({ ...newSailorData, level: e.target.value })
-              }
-              style={{
-                width: '100%',
-                padding: '10px',
-                marginBottom: '8px',
-                borderRadius: '6px',
-                border: '1px solid var(--border)',
-                backgroundColor: 'var(--bg2)',
-                color: 'var(--text)',
-                fontSize: '14px'
-              }}
+              onChange={(e) => setNewSailorData({ ...newSailorData, level: e.target.value })}
+              className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm"
             >
               <option value="beginner">מתחיל</option>
               <option value="intermediate">בינוני</option>
               <option value="advanced">מתקדם</option>
             </select>
-            <button
+            <Button
               onClick={handleAddNew}
               disabled={!newSailorData.name || !newSailorData.age || loading}
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: 'var(--blue-light)',
-                color: '#fff',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
-                opacity:
-                  !newSailorData.name || !newSailorData.age || loading
-                    ? 0.5
-                    : 1
-              }}
+              className="w-full"
             >
               הוסף
-            </button>
+            </Button>
           </div>
-        )}
+        ) : null}
       </div>
     </Modal>
   )

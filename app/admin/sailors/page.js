@@ -1,111 +1,144 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export default function AdminSailors() {
   const [sailors, setSailors] = useState([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
+    const loadSailors = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const res = await fetch('/api/sailors')
+        const data = await res.json()
+        setSailors(data)
+      } catch (err) {
+        console.error('Error loading sailors:', err)
+        setError('שגיאה בטעינת החניכים. נסה לרענן את הדף.')
+      } finally {
+        setLoading(false)
+      }
+    }
     loadSailors()
   }, [])
 
-  const loadSailors = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/sailors')
-      const data = await res.json()
-      setSailors(data)
-    } catch (error) {
-      console.error('Error loading sailors:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div>
-      <div style={{ marginBottom: '16px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: '800' }}>👥 ניהול חניכים</h1>
-        <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
-          {sailors.length} חניכים בסה"כ
-        </p>
+      <div className="mb-6">
+        <h1 className="text-xl font-extrabold">👥 ניהול חניכים</h1>
+        <p className="text-muted-foreground text-sm">{sailors.length} חניכים בסה"כ</p>
       </div>
 
+      {error ? (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)' }}>
-          טוען...
-        </div>
-      ) : sailors.length === 0 ? (
-        <div
-          style={{
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)',
-            padding: '32px 16px',
-            textAlign: 'center',
-          }}
-        >
-          <div style={{ fontSize: '40px', marginBottom: '12px' }}>👥</div>
-          <p style={{ color: 'var(--muted)', fontSize: '14px' }}>אין חניכים</p>
-        </div>
-      ) : (
-        <div>
-          {sailors.map((sailor) => (
-            <div
-              key={sailor.id}
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '12px 16px',
-                marginBottom: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-              }}
-            >
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #2563eb30, #1e40af40)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '18px',
-                  flexShrink: 0,
-                }}
-              >
-                {sailor.gender === 'female' ? '👧' : '👦'}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '14px', fontWeight: '700' }}>
-                  {sailor.first_name} {sailor.last_name}
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-4 flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-1/2" />
                 </div>
-                {sailor.parent_name && (
-                  <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
-                    הורה: {sailor.parent_name}
-                  </div>
-                )}
-              </div>
-              {sailor.shirt_size && (
-                <div
-                  style={{
-                    fontSize: '11px',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    color: 'var(--text)',
-                  }}
-                >
-                  מידה {sailor.shirt_size}
-                </div>
-              )}
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
+      ) : sailors.length === 0 ? (
+        <Card>
+          <CardContent className="py-8 text-center">
+            <div className="text-4xl mb-3">👥</div>
+            <p className="text-muted-foreground text-sm">אין חניכים</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Mobile: card list */}
+          <div className="md:hidden space-y-3">
+            {sailors.map((sailor) => (
+              <Card key={sailor.id}>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <Avatar>
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-lg">
+                      {sailor.gender === 'female' ? '👧' : '👦'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold">
+                      {sailor.first_name} {sailor.last_name}
+                    </div>
+                    {sailor.parent_name ? (
+                      <div className="text-xs text-muted-foreground">
+                        הורה: {sailor.parent_name}
+                      </div>
+                    ) : null}
+                  </div>
+                  {sailor.shirt_size ? (
+                    <Badge variant="outline" className="text-xs">
+                      מידה {sailor.shirt_size}
+                    </Badge>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Desktop: table */}
+          <Card className="hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>שם</TableHead>
+                  <TableHead>הורה</TableHead>
+                  <TableHead>מידת חולצה</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sailors.map((sailor) => (
+                  <TableRow key={sailor.id}>
+                    <TableCell className="font-medium">
+                      {sailor.gender === 'female' ? '👧' : '👦'}{' '}
+                      {sailor.first_name} {sailor.last_name}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {sailor.parent_name || 'לא מוגדר'}
+                    </TableCell>
+                    <TableCell>
+                      {sailor.shirt_size ? (
+                        <Badge variant="outline" className="text-xs">
+                          {sailor.shirt_size}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </>
       )}
     </div>
   )

@@ -2,103 +2,102 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/src/hooks/useAuth'
+import { Card, CardContent } from '@/components/ui/card'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function SailorsPage() {
   const { coach } = useAuth()
   const [sailors, setSailors] = useState([])
   const [groups, setGroups] = useState([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
+    const loadData = async () => {
+      if (!coach) return
+      setLoading(true)
+      setError(null)
+      try {
+        const [sailorRes, groupRes] = await Promise.all([
+          fetch('/api/sailors'),
+          fetch(`/api/groups?coach_id=${coach.id}`)
+        ])
+        const [sailorData, groupData] = await Promise.all([
+          sailorRes.json(),
+          groupRes.json()
+        ])
+        setSailors(sailorData)
+        setGroups(groupData)
+      } catch (err) {
+        console.error('Error loading data:', err)
+        setError('שגיאה בטעינת הנתונים. נסה לרענן את הדף.')
+      } finally {
+        setLoading(false)
+      }
+    }
     loadData()
   }, [coach])
 
-  const loadData = async () => {
-    if (!coach) return
-    setLoading(true)
-    try {
-      const sailorRes = await fetch('/api/sailors')
-      const sailorData = await sailorRes.json()
-      setSailors(sailorData)
-
-      const groupRes = await fetch(`/api/groups?coach_id=${coach.id}`)
-      const groupData = await groupRes.json()
-      setGroups(groupData)
-    } catch (error) {
-      console.error('Error loading data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div>
-      <div style={{ marginBottom: '16px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: '800' }}>👥 חניכים</h1>
-        <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
+      <div className="mb-6">
+        <h1 className="text-xl font-extrabold">👥 חניכים</h1>
+        <p className="text-muted-foreground text-sm">
           {sailors.length} חניכים בסה"כ
         </p>
       </div>
 
+      {error ? (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)' }}>
-          טוען...
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-4 flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       ) : sailors.length === 0 ? (
-        <div
-          style={{
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)',
-            padding: '32px 16px',
-            textAlign: 'center',
-          }}
-        >
-          <div style={{ fontSize: '40px', marginBottom: '12px' }}>👥</div>
-          <p style={{ color: 'var(--muted)', fontSize: '14px' }}>אין חניכים מוגדרים</p>
-        </div>
+        <Card>
+          <CardContent className="py-8 text-center">
+            <div className="text-4xl mb-3">👥</div>
+            <p className="text-muted-foreground text-sm">אין חניכים מוגדרים</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div>
+        <div className="space-y-3">
           {sailors.map((sailor) => (
-            <div
-              key={sailor.id}
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '12px 16px',
-                marginBottom: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-              }}
-            >
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #2563eb30, #1e40af40)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '18px',
-                  flexShrink: 0,
-                }}
-              >
-                {sailor.gender === 'female' ? '👧' : '👦'}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '2px' }}>
-                  {sailor.first_name} {sailor.last_name}
-                </div>
-                {sailor.parent_name && (
-                  <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
-                    הורה: {sailor.parent_name}
+            <Card key={sailor.id}>
+              <CardContent className="p-4 flex items-center gap-3">
+                <Avatar>
+                  <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-lg">
+                    {sailor.gender === 'female' ? '👧' : '👦'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="text-sm font-bold mb-0.5">
+                    {sailor.first_name} {sailor.last_name}
                   </div>
-                )}
-              </div>
-            </div>
+                  {sailor.parent_name ? (
+                    <div className="text-xs text-muted-foreground">
+                      הורה: {sailor.parent_name}
+                    </div>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}

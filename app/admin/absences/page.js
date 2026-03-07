@@ -1,25 +1,21 @@
 'use client'
 
+import { Card, CardContent } from '@/components/ui/card'
+
 export default function AdminAbsences() {
   return (
     <div>
-      <div style={{ marginBottom: '16px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: '800' }}>🚫 חיסורים</h1>
+      <div className="mb-6">
+        <h1 className="text-xl font-extrabold">🚫 חיסורים</h1>
       </div>
-      <div
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)',
-          padding: '32px 16px',
-          textAlign: 'center',
-        }}
-      >
-        <div style={{ fontSize: '40px', marginBottom: '12px' }}>🚫</div>
-        <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
-          עמוד חיסורים - דוח מפורט של כל החיסורים במערכת
-        </p>
-      </div>
+      <Card>
+        <CardContent className="py-8 text-center">
+          <div className="text-4xl mb-3">🚫</div>
+          <p className="text-muted-foreground text-sm">
+            עמוד חיסורים - דוח מפורט של כל החיסורים במערכת
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

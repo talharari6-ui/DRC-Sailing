@@ -1,6 +1,8 @@
 'use client'
 
 import React from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -19,58 +21,29 @@ export class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          background: 'var(--bg)',
-          padding: '20px',
-          flexDirection: 'column',
-          textAlign: 'center',
-        }}>
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '12px',
-            padding: '24px',
-            maxWidth: '500px',
-          }}>
-            <h1 style={{ color: 'var(--red)', marginBottom: '12px' }}>שגיאה</h1>
-            <p style={{ color: 'var(--text)', marginBottom: '12px', fontSize: '14px' }}>
-              {this.state.error?.message || 'אירעה שגיאה לא צפויה'}
-            </p>
-            <details style={{ textAlign: 'left', marginTop: '16px' }}>
-              <summary style={{ cursor: 'pointer', color: 'var(--muted)' }}>
-                פרטים טכניים
-              </summary>
-              <pre style={{
-                background: 'rgba(0, 0, 0, 0.3)',
-                padding: '12px',
-                borderRadius: '8px',
-                fontSize: '11px',
-                overflow: 'auto',
-                marginTop: '12px',
-                color: 'var(--muted)',
-              }}>
-                {this.state.error?.stack}
-              </pre>
-            </details>
-            <button
-              onClick={() => window.location.reload()}
-              style={{
-                marginTop: '16px',
-                padding: '10px 20px',
-                background: 'var(--blue)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-              }}
-            >
-              רענן דף
-            </button>
-          </div>
+        <div className="flex items-center justify-center h-screen bg-background p-5 flex-col text-center">
+          <Card className="border-drc-red/30 bg-drc-red/10 max-w-[500px]">
+            <CardContent className="p-6">
+              <h1 className="text-drc-red mb-3 text-lg font-bold">שגיאה</h1>
+              <p className="text-foreground mb-3 text-sm">
+                {this.state.error?.message || 'אירעה שגיאה לא צפויה'}
+              </p>
+              <details className="text-start mt-4">
+                <summary className="cursor-pointer text-muted-foreground text-sm">
+                  פרטים טכניים
+                </summary>
+                <pre className="bg-black/30 p-3 rounded-lg text-[11px] overflow-auto mt-3 text-muted-foreground">
+                  {this.state.error?.stack}
+                </pre>
+              </details>
+              <Button
+                onClick={() => window.location.reload()}
+                className="mt-4"
+              >
+                רענן דף
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       )
     }
