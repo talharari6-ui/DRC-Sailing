@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 
 const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailModal'), { ssr: false })
 const SailorManagementModal = dynamic(() => import('@/src/components/SailorManagementModal'), { ssr: false })
@@ -44,6 +45,26 @@ function startOfWeek(date) {
   d.setHours(0, 0, 0, 0)
   d.setDate(d.getDate() - day)
   return d
+}
+
+function getColorClass(color) {
+  switch ((color || '').toLowerCase()) {
+    case '#10b981':
+      return 'bg-emerald-500'
+    case '#f59e0b':
+      return 'bg-amber-500'
+    case '#ef4444':
+      return 'bg-red-500'
+    case '#8b5cf6':
+      return 'bg-violet-500'
+    case '#06b6d4':
+      return 'bg-cyan-500'
+    case '#ec4899':
+      return 'bg-pink-500'
+    case '#3b82f6':
+    default:
+      return 'bg-blue-500'
+  }
 }
 
 export default function SchedulePage() {
@@ -157,8 +178,10 @@ export default function SchedulePage() {
               setSelectedSession(s)
               setDetailModalOpen(true)
             }}
-            className="text-white px-1 py-0.5 rounded-sm cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap"
-            style={{ background: s.groups?.color || '#3b82f6' }}
+            className={cn(
+              'text-white px-1 py-0.5 rounded-sm cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap',
+              getColorClass(s.groups?.color)
+            )}
           >
             {s.groups?.name?.substring(0, 8)}
           </div>
@@ -374,10 +397,8 @@ export default function SchedulePage() {
                             }}
                             className="bg-secondary border border-border rounded-lg p-3 cursor-pointer hover:opacity-80 transition-opacity flex gap-3 items-center"
                           >
-                            <div
-                              className="w-[3px] h-10 rounded-sm shrink-0"
-                              style={{ background: session.groups?.color || '#3b82f6' }}
-                            />
+                            <div className={cn('w-[3px] h-10 rounded-sm shrink-0', getColorClass(session.groups?.color))} />
+
                             <div className="flex-1">
                               <div className="text-sm font-semibold mb-0.5">{session.groups?.name || 'קבוצה'}</div>
                               <div className="text-xs text-muted-foreground">
@@ -433,10 +454,8 @@ export default function SchedulePage() {
                   }}
                 >
                   <CardContent className="p-4 flex items-center gap-3">
-                    <div
-                      className="w-1 h-14 rounded-sm shrink-0"
-                      style={{ background: session.groups?.color || '#3b82f6' }}
-                    />
+                    <div className={cn('w-1 h-14 rounded-sm shrink-0', getColorClass(session.groups?.color))} />
+
                     <div className="flex-1">
                       <div className="text-sm font-bold mb-1">{session.groups?.name || 'קבוצה'}</div>
                       <div className="text-xs text-muted-foreground mb-1">{session.date} • {session.start_time || 'אין שעה'}</div>
@@ -477,8 +496,11 @@ export default function SchedulePage() {
                       key={color}
                       type="button"
                       onClick={() => setGroupForm((s) => ({ ...s, color }))}
-                      className={`h-8 w-8 rounded-full ring-2 transition-all ${isSelected ? 'ring-white scale-105' : 'ring-transparent'}`}
-                      style={{ backgroundColor: color }}
+                      className={cn(
+                        'h-8 w-8 rounded-full ring-2 transition-all',
+                        getColorClass(color),
+                        isSelected ? 'ring-white scale-105' : 'ring-transparent'
+                      )}
                       aria-label={`בחר צבע ${color}`}
                     />
                   )
