@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Button } from '@/components/ui/button'
 
@@ -19,11 +19,18 @@ export function Calendar({
     year: 'numeric',
   }).format(new Date(year, month, 1))
 
-  const dayHeaders = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש']
+  const dayHeaders = [
+    '\u05d0',
+    '\u05d1',
+    '\u05d2',
+    '\u05d3',
+    '\u05d4',
+    '\u05d5',
+    '\u05e9',
+  ]
 
   return (
     <div className="mb-4">
-      {/* Month navigation */}
       <div className="flex items-center gap-2 mb-3 bg-card border border-border rounded-xl p-2.5 px-4">
         <Button
           variant="outline"
@@ -31,7 +38,7 @@ export function Calendar({
           onClick={onPrevMonth}
           className="shrink-0 text-base"
         >
-          →
+          {'\u2192'}
         </Button>
         <div className="flex-1 text-center font-extrabold text-base">
           {monthName}
@@ -42,11 +49,10 @@ export function Calendar({
           onClick={onNextMonth}
           className="shrink-0 text-base"
         >
-          ←
+          {'\u2190'}
         </Button>
       </div>
 
-      {/* Day headers */}
       <div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-1">
         {dayHeaders.map((day) => (
           <div
@@ -58,7 +64,6 @@ export function Calendar({
         ))}
       </div>
 
-      {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
         {Array.from({ length: totalCells }).map((_, i) => {
           const day = i - firstDay + 1

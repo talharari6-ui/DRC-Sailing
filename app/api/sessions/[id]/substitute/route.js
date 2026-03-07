@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@/src/lib/supabase'
+﻿import { getSupabaseClient } from '@/src/lib/supabase'
 
 export async function GET(request, { params }) {
   try {
@@ -6,7 +6,7 @@ export async function GET(request, { params }) {
 
     const { data, error } = await supabase
       .from('coaches')
-      .select('id, name, email')
+      .select('id, name')
       .order('name')
 
     if (error) throw error

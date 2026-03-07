@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -245,11 +245,11 @@ export default function SessionDetailModal({
           <div className="mb-5">
             <div className="grid grid-cols-2 gap-4 mb-3">
               <div>
-                <div className="text-muted-foreground text-xs">\u05ea\u05d0\u05e8\u05d9\u05da</div>
+                <div className="text-muted-foreground text-xs">{'\u05ea\u05d0\u05e8\u05d9\u05da'}</div>
                 <div className="text-foreground text-sm">{session.date}</div>
               </div>
               <div>
-                <div className="text-muted-foreground text-xs">\u05e9\u05e2\u05d4</div>
+                <div className="text-muted-foreground text-xs">{'\u05e9\u05e2\u05d4'}</div>
                 <div className="text-foreground text-sm">
                   {formatTime(session.start_time)} - {formatTime(session.end_time)}
                 </div>
@@ -263,7 +263,7 @@ export default function SessionDetailModal({
 
           {canMarkAttendance ? (
             <div className="mb-5">
-              <div className="text-xs font-semibold mb-2 text-foreground">\u05e0\u05d5\u05db\u05d7\u05d5\u05ea \u05d7\u05e0\u05d9\u05db\u05d9\u05dd</div>
+              <div className="text-xs font-semibold mb-2 text-foreground">{'\u05e0\u05d5\u05db\u05d7\u05d5\u05ea \u05d7\u05e0\u05d9\u05db\u05d9\u05dd'}</div>
               {session.group_sailors && session.group_sailors.length > 0 ? (
                 <div className="flex flex-col gap-2.5">
                   {session.group_sailors.map((gs) => {
@@ -273,46 +273,46 @@ export default function SessionDetailModal({
                       <div key={sailor.id} className="flex justify-between items-center p-2 bg-secondary rounded-md text-sm">
                         <span>{sailor.name}</span>
                         <div className="flex gap-1">
-                          <Button size="sm" variant={attendance[sailor.id]?.present === true ? 'default' : 'outline'} onClick={() => handleMarkAttendance(sailor.id, true)} disabled={marking}>?</Button>
-                          <Button size="sm" variant={attendance[sailor.id]?.present === false ? 'destructive' : 'outline'} onClick={() => handleMarkAttendance(sailor.id, false, '\u05d4\u05d9\u05e2\u05d3\u05e8\u05d5\u05ea')} disabled={marking}>?</Button>
+                          <Button size="sm" variant={attendance[sailor.id]?.present === true ? 'default' : 'outline'} onClick={() => handleMarkAttendance(sailor.id, true)} disabled={marking}>{'\\u2713'}</Button>
+                          <Button size="sm" variant={attendance[sailor.id]?.present === false ? 'destructive' : 'outline'} onClick={() => handleMarkAttendance(sailor.id, false, '\u05d4\u05d9\u05e2\u05d3\u05e8\u05d5\u05ea')} disabled={marking}>{'\u2715'}</Button>
                         </div>
                       </div>
                     )
                   })}
                 </div>
               ) : (
-                <div className="text-muted-foreground text-xs">\u05d0\u05d9\u05df \u05d7\u05e0\u05d9\u05db\u05d9\u05dd \u05d1\u05e7\u05d1\u05d5\u05e6\u05d4</div>
+                <div className="text-muted-foreground text-xs">{'\u05d0\u05d9\u05df \u05d7\u05e0\u05d9\u05db\u05d9\u05dd \u05d1\u05e7\u05d1\u05d5\u05e6\u05d4'}</div>
               )}
             </div>
           ) : null}
 
           <div className="flex flex-col gap-3 mt-6">
-            {(isGroupCoach || isSubstitute || isAdmin) ? <Button onClick={() => onEditSailors(session.id)}>\u05e2\u05e8\u05d5\u05da \u05d7\u05e0\u05d9\u05db\u05d9\u05dd</Button> : null}
+            {(isGroupCoach || isSubstitute || isAdmin) ? <Button onClick={() => onEditSailors(session.id)}>{'\u05e2\u05e8\u05d5\u05da \u05d7\u05e0\u05d9\u05db\u05d9\u05dd'}</Button> : null}
             <Button variant="secondary" onClick={() => onSubstituteRequest(session.id)}>{canManageGroup ? '\u05de\u05d9\u05e0\u05d5\u05d9 \u05de\u05d7\u05dc\u05d9\u05e3' : '\u05d1\u05e7\u05e9\u05ea \u05d4\u05d7\u05dc\u05e4\u05d4'}</Button>
-            {canManageGroup ? <Button variant="outline" onClick={() => setManageOpen((v) => !v)}>\u05e0\u05d9\u05d4\u05d5\u05dc \u05e7\u05d1\u05d5\u05e6\u05d4</Button> : null}
-            {canDecline ? <Button variant="destructive" onClick={() => setDeclineOpen((v) => !v)}>\u05d3\u05d7\u05d9\u05d9\u05ea \u05e4\u05e2\u05d9\u05dc\u05d5\u05ea</Button> : null}
+            {canManageGroup ? <Button variant="outline" onClick={() => setManageOpen((v) => !v)}>{'\u05e0\u05d9\u05d4\u05d5\u05dc \u05e7\u05d1\u05d5\u05e6\u05d4'}</Button> : null}
+            {canDecline ? <Button variant="destructive" onClick={() => setDeclineOpen((v) => !v)}>{'\u05d3\u05d7\u05d9\u05d9\u05ea \u05e4\u05e2\u05d9\u05dc\u05d5\u05ea'}</Button> : null}
           </div>
 
           {declineOpen ? (
             <div className="mt-3 rounded-md border border-border p-3">
-              <Label htmlFor="decline-reason">\u05e1\u05d9\u05d1\u05ea \u05d3\u05d7\u05d9\u05d9\u05d4 (\u05d0\u05d5\u05e4\u05e6\u05d9\u05d5\u05e0\u05dc\u05d9)</Label>
+              <Label htmlFor="decline-reason">{'\u05e1\u05d9\u05d1\u05ea \u05d3\u05d7\u05d9\u05d9\u05d4 (\u05d0\u05d5\u05e4\u05e6\u05d9\u05d5\u05e0\u05dc\u05d9)'}</Label>
               <Input id="decline-reason" className="mt-2" value={declineReason} onChange={(e) => setDeclineReason(e.target.value)} />
               <div className="mt-2 flex gap-2">
                 <Button size="sm" onClick={handleDeclineSubmit} disabled={declineLoading}>{declineLoading ? '\u05e9\u05d5\u05dc\u05d7...' : '\u05d0\u05e9\u05e8 \u05d3\u05d7\u05d9\u05d9\u05d4'}</Button>
-                <Button size="sm" variant="ghost" onClick={() => setDeclineOpen(false)}>\u05d1\u05d9\u05d8\u05d5\u05dc</Button>
+                <Button size="sm" variant="ghost" onClick={() => setDeclineOpen(false)}>{'\u05d1\u05d9\u05d8\u05d5\u05dc'}</Button>
               </div>
-              {!isAdmin ? <p className="mt-2 text-[11px] text-amber-300">\u05d4\u05d1\u05e7\u05e9\u05d4 \u05ea\u05d9\u05e9\u05dc\u05d7 \u05dc\u05d0\u05d9\u05e9\u05d5\u05e8 \u05de\u05e0\u05d4\u05dc</p> : null}
+              {!isAdmin ? <p className="mt-2 text-[11px] text-amber-300">{'\u05d4\u05d1\u05e7\u05e9\u05d4 \u05ea\u05d9\u05e9\u05dc\u05d7 \u05dc\u05d0\u05d9\u05e9\u05d5\u05e8 \u05de\u05e0\u05d4\u05dc'}</p> : null}
             </div>
           ) : null}
 
           {manageOpen ? (
             <div className="mt-3 rounded-md border border-border p-3 space-y-3">
               <div>
-                <Label>\u05e9\u05dd \u05e7\u05d1\u05d5\u05e6\u05d4</Label>
+                <Label>{'\u05e9\u05dd \u05e7\u05d1\u05d5\u05e6\u05d4'}</Label>
                 <Input value={groupForm.name} onChange={(e) => setGroupForm((prev) => ({ ...prev, name: e.target.value }))} />
               </div>
               <div>
-                <Label>\u05d9\u05de\u05d9 \u05e4\u05e2\u05d9\u05dc\u05d5\u05ea</Label>
+                <Label>{'\u05d9\u05de\u05d9 \u05e4\u05e2\u05d9\u05dc\u05d5\u05ea'}</Label>
                 <div className="mt-2 grid grid-cols-7 gap-1.5">
                   {DAY_TOGGLE_LABELS.map((label, dayIndex) => {
                     const active = groupForm.days_of_week.includes(dayIndex)
@@ -321,16 +321,16 @@ export default function SessionDetailModal({
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div><Label>\u05d4\u05ea\u05d7\u05dc\u05d4</Label><Input value={groupForm.start_time} onChange={(e) => setGroupForm((prev) => ({ ...prev, start_time: e.target.value }))} /></div>
-                <div><Label>\u05e1\u05d9\u05d5\u05dd</Label><Input value={groupForm.end_time} onChange={(e) => setGroupForm((prev) => ({ ...prev, end_time: e.target.value }))} /></div>
+                <div><Label>{'\u05d4\u05ea\u05d7\u05dc\u05d4'}</Label><Input value={groupForm.start_time} onChange={(e) => setGroupForm((prev) => ({ ...prev, start_time: e.target.value }))} /></div>
+                <div><Label>{'\u05e1\u05d9\u05d5\u05dd'}</Label><Input value={groupForm.end_time} onChange={(e) => setGroupForm((prev) => ({ ...prev, end_time: e.target.value }))} /></div>
               </div>
               <div>
-                <Label>\u05ea\u05d0\u05e8\u05d9\u05da \u05d4\u05ea\u05d7\u05dc\u05d4</Label>
+                <Label>{'\u05ea\u05d0\u05e8\u05d9\u05da \u05d4\u05ea\u05d7\u05dc\u05d4'}</Label>
                 <Input type="date" value={groupForm.start_date} onChange={(e) => setGroupForm((prev) => ({ ...prev, start_date: e.target.value }))} />
               </div>
               <div className="flex gap-2">
                 <Button size="sm" onClick={handleSaveGroup} disabled={groupSaving}>{groupSaving ? '\u05e9\u05d5\u05de\u05e8...' : '\u05e9\u05de\u05d5\u05e8'}</Button>
-                <Button size="sm" variant="ghost" onClick={() => setManageOpen(false)}>\u05d1\u05d9\u05d8\u05d5\u05dc</Button>
+                <Button size="sm" variant="ghost" onClick={() => setManageOpen(false)}>{'\u05d1\u05d9\u05d8\u05d5\u05dc'}</Button>
               </div>
             </div>
           ) : null}

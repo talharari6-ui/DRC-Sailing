@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
@@ -407,7 +407,7 @@ export default function SchedulePage() {
             <Card key={session.id} className="cursor-pointer" onClick={() => openSessionModal(session)}>
               <CardContent className="p-4">
                 <div className="text-sm font-bold">{session.groups?.name || '\u05e7\u05d1\u05d5\u05e6\u05d4'}</div>
-                <div className="text-xs text-muted-foreground">{session.date} â€¢ {session.start_time || '\u05d0\u05d9\u05df \u05e9\u05e2\u05d4'}</div>
+                <div className="text-xs text-muted-foreground">{session.date} {' • '} {session.start_time || '\\u05d0\\u05d9\\u05df \\u05e9\\u05e2\\u05d4'}</div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {canManageSession(session) ? (
                     <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSessionModal(session) }}>
