@@ -3,6 +3,7 @@
 import { useAuth } from '@/src/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export function ProtectedRoute({ children, requireAdmin = false }) {
   const router = useRouter()
@@ -20,35 +21,8 @@ export function ProtectedRoute({ children, requireAdmin = false }) {
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          background: 'var(--bg)',
-        }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <div
-            style={{
-              display: 'inline-block',
-              width: '40px',
-              height: '40px',
-              border: '3px solid rgba(59, 130, 246, 0.2)',
-              borderTopColor: '#3b82f6',
-              borderRadius: '50%',
-              animation: 'spin 0.7s linear infinite',
-            }}
-          ></div>
-        </div>
-        <style>{`
-          @keyframes spin {
-            to {
-              transform: rotate(360deg);
-            }
-          }
-        `}</style>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="animate-spin w-10 h-10 border-[3px] border-drc-blue/20 border-t-drc-blue rounded-full" />
       </div>
     )
   }

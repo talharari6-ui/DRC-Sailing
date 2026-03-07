@@ -1,90 +1,58 @@
 'use client'
 
 import { useAuth } from '@/src/hooks/useAuth'
+import { Card, CardContent } from '@/components/ui/card'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 
 export default function ProfilePage() {
   const { coach } = useAuth()
 
   return (
     <div>
-      <div style={{ marginBottom: '16px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: '800' }}>👤 פרופיל</h1>
+      <div className="mb-6">
+        <h1 className="text-xl font-extrabold">👤 פרופיל</h1>
       </div>
 
-      <div
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)',
-          padding: '20px',
-          marginBottom: '16px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-          <div
-            style={{
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #2563eb30, #1e40af40)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '28px',
-            }}
-          >
-            👨‍🏫
+      <Card className="mb-4">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-4 mb-5">
+            <Avatar className="w-16 h-16">
+              <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-3xl">
+                👨‍🏫
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="text-lg font-extrabold">
+                {coach?.name || 'משתמש'}
+              </div>
+              <Badge variant="outline" className="mt-1">
+                {coach?.is_admin ? '🔐 מנהל' : 'מדריך'}
+              </Badge>
+            </div>
           </div>
+
+          <Separator className="mb-4" />
+
           <div>
-            <div style={{ fontSize: '18px', fontWeight: '800' }}>
-              {coach?.name || 'משתמש'}
+            <div className="text-xs text-muted-foreground mb-2">דוא"ל</div>
+            <div className="text-sm mb-4">{coach?.email || 'לא מוגדר'}</div>
+
+            <div className="text-xs text-muted-foreground mb-2">מזהה</div>
+            <div className="text-xs font-mono text-drc-blue-light bg-black/20 p-2 rounded-md">
+              {coach?.id}
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '4px' }}>
-              {coach?.is_admin ? '🔐 מנהל' : 'מדריך'}
-            </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-          <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px' }}>
-            דוא"ל
-          </div>
-          <div style={{ fontSize: '14px', marginBottom: '16px' }}>
-            {coach?.email || 'לא מוגדר'}
-          </div>
-
-          <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px' }}>
-            מזהה
-          </div>
-          <div
-            style={{
-              fontSize: '12px',
-              fontFamily: 'monospace',
-              color: 'var(--blue-light)',
-              background: 'rgba(0, 0, 0, 0.2)',
-              padding: '8px',
-              borderRadius: '6px',
-            }}
-          >
-            {coach?.id}
-          </div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)',
-          padding: '32px 16px',
-          textAlign: 'center',
-        }}
-      >
-        <div style={{ fontSize: '40px', marginBottom: '12px' }}>🏗️</div>
-        <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
-          עמוד הפרופיל בעדכון...
-        </p>
-      </div>
+      <Card>
+        <CardContent className="py-8 text-center">
+          <div className="text-4xl mb-3">🏗️</div>
+          <p className="text-muted-foreground text-sm">עמוד הפרופיל בעדכון...</p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

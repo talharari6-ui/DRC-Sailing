@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/src/hooks/useAuth'
+import { Button } from '@/components/ui/button'
 
 export function Header({ title, subtitle = '' }) {
   const router = useRouter()
@@ -13,52 +14,25 @@ export function Header({ title, subtitle = '' }) {
   }
 
   return (
-    <div
-      style={{
-        background: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--border)',
-        padding: '12px 16px',
-        paddingTop: 'max(12px, env(safe-area-inset-top))',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        flexShrink: 0,
-      }}
-    >
-      <div style={{ flex: 1 }}>
-        <div
-          style={{
-            fontSize: '15px',
-            fontWeight: '800',
-            color: 'var(--blue-light)',
-          }}
-        >
+    <div className="bg-black/50 backdrop-blur-drc border-b border-border px-4 sm:px-6 py-3 pt-[max(12px,env(safe-area-inset-top))] flex items-center gap-3 shrink-0">
+      <div className="flex-1">
+        <div className="text-base font-extrabold text-drc-blue-light">
           {title}
         </div>
-        {subtitle && (
-          <div style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '2px' }}>
+        {subtitle ? (
+          <div className="text-xs text-muted-foreground mt-0.5">
             {subtitle}
           </div>
-        )}
+        ) : null}
       </div>
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={handleLogout}
-        style={{
-          background: 'none',
-          border: 'none',
-          color: 'var(--muted)',
-          fontSize: '12px',
-          cursor: 'pointer',
-          padding: '4px 8px',
-          borderRadius: '6px',
-          transition: 'background 0.2s',
-        }}
-        onMouseEnter={(e) => (e.target.style.background = 'rgba(255, 255, 255, 0.1)')}
-        onMouseLeave={(e) => (e.target.style.background = 'none')}
+        className="text-muted-foreground text-xs"
       >
         התנתקות
-      </button>
+      </Button>
     </div>
   )
 }

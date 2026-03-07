@@ -9,19 +9,12 @@ export default function CoachLayout({ children }) {
   return (
     <ErrorBoundary>
       <ProtectedRoute>
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="h-screen flex flex-col">
           <Header title="חוג שייט" subtitle="מרכז דניאל" />
-          <div
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              WebkitOverflowScrolling: 'touch',
-              padding: '16px',
-              paddingBottom: 'calc(150px + var(--safe))',
-              background: 'linear-gradient(160deg, var(--bg) 0%, var(--bg2) 50%, var(--bg3) 100%)',
-            }}
-          >
-            {children}
+          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden p-4 md:p-6 pb-[calc(80px+var(--safe))] bg-gradient-to-br from-drc-bg via-drc-bg2 to-drc-bg3">
+            <div className="page-container">
+              {children}
+            </div>
           </div>
           <BottomNav />
         </div>

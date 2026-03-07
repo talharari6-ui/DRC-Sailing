@@ -6,6 +6,9 @@ import { useAuth } from '@/src/hooks/useAuth'
 import ViewModeToggle from '@/src/components/ViewModeToggle'
 import FilterToggle from '@/src/components/FilterToggle'
 import { Calendar } from '@/src/components/Calendar'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailModal'), { ssr: false })
 const SailorManagementModal = dynamic(() => import('@/src/components/SailorManagementModal'), { ssr: false })
@@ -66,12 +69,12 @@ export default function SchedulePage() {
     return filteredSessions.filter(s => s.date === dateStr)
   }, [filteredSessions])
 
-  const getDayContent = (dateStr, day) => {
+  const getDayContent = (dateStr) => {
     const daySessions = getSessionsForDate(dateStr)
     if (daySessions.length === 0) return null
 
     return (
-      <div style={{ fontSize: '10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <div className="text-xs flex flex-col gap-0.5">
         {daySessions.slice(0, 2).map(s => (
           <div
             key={s.id}
@@ -79,25 +82,17 @@ export default function SchedulePage() {
               setSelectedSession(s)
               setDetailModalOpen(true)
             }}
-            style={{
-              background: s.groups?.color || '#3b82f6',
-              color: '#fff',
-              padding: '2px 3px',
-              borderRadius: '2px',
-              cursor: 'pointer',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
+            className="text-white px-1 py-0.5 rounded-sm cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap"
+            style={{ background: s.groups?.color || '#3b82f6' }}
           >
             {s.groups?.name?.substring(0, 5)}
           </div>
         ))}
-        {daySessions.length > 2 && (
-          <div style={{ fontSize: '9px', color: 'var(--muted)' }}>
+        {daySessions.length > 2 ? (
+          <div className="text-xs text-muted-foreground">
             +{daySessions.length - 2}
           </div>
-        )}
+        ) : null}
       </div>
     )
   }
@@ -107,9 +102,6 @@ export default function SchedulePage() {
     if (daySession.length === 1) {
       setSelectedSession(daySession[0])
       setDetailModalOpen(true)
-    } else if (daySession.length > 1) {
-      // Show list of sessions for this day
-      setSelectedSession(null)
     }
   }
 
@@ -145,40 +137,38 @@ export default function SchedulePage() {
     setDetailModalOpen(false)
   }
 
-  const getWeekDays = () => {
+  const weekDays = useMemo(() => {
     const today = currentDate
     const dayOfWeek = today.getDay()
     const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)) // Start from Sunday
+    startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1))
 
-    const weekDays = []
+    const days = []
     const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek)
       date.setDate(startOfWeek.getDate() + i)
       const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-      weekDays.push({
+      days.push({
         date: dateStr,
         dayName: dayNames[date.getDay()],
         dayNum: date.getDate(),
         dateObj: date
       })
     }
-    return weekDays
-  }
+    return days
+  }, [currentDate])
 
   if (!coach) {
-    return <div style={{ padding: '20px', color: 'var(--muted)', textAlign: 'center' }}>טוען...</div>
+    return <div className="p-5 text-muted-foreground text-center">טוען...</div>
   }
 
   return (
     <div>
-      <div style={{ marginBottom: '16px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '4px' }}>
-          📅 לוח שנתי
-        </h1>
-        <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
+      <div className="mb-6">
+        <h1 className="text-xl font-extrabold mb-1">📅 לוח שנתי</h1>
+        <p className="text-muted-foreground text-sm">
           ברוכים הבאים, {coach?.name}!
         </p>
       </div>
@@ -186,13 +176,11 @@ export default function SchedulePage() {
       <ViewModeToggle currentMode={viewMode} onModeChange={setViewMode} />
       <FilterToggle currentFilter={filterMode} onFilterChange={setFilterMode} />
 
-      {loading && (
-        <div style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)' }}>
-          טוען...
-        </div>
-      )}
+      {loading ? (
+        <div className="text-center p-5 text-muted-foreground">טוען...</div>
+      ) : null}
 
-      {!loading && viewMode === 'month' && (
+      {!loading && viewMode === 'month' ? (
         <Calendar
           year={currentDate.getFullYear()}
           month={currentDate.getMonth()}
@@ -201,176 +189,107 @@ export default function SchedulePage() {
           onDateClick={handleDateClick}
           getDayContent={getDayContent}
         />
-      )}
+      ) : null}
 
-      {!loading && viewMode === 'week' && (
-        <div style={{ marginTop: '24px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '12px' }}>
-            📅 השבוע
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {getWeekDays().map((day) => {
+      {!loading && viewMode === 'week' ? (
+        <div className="mt-6">
+          <h2 className="text-base font-extrabold mb-3">📅 השבוע</h2>
+          <div className="flex flex-col gap-3">
+            {weekDays.map((day) => {
               const daySessions = getSessionsForDate(day.date)
               return (
-                <div
-                  key={day.date}
-                  style={{
-                    background: 'var(--card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '12px',
-                    padding: '12px 16px',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: daySessions.length > 0 ? '12px' : '0'
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '4px' }}>
-                        {day.dayName}
+                <Card key={day.date}>
+                  <CardContent className="p-4">
+                    <div className={`flex justify-between items-center ${daySessions.length > 0 ? 'mb-3' : ''}`}>
+                      <div>
+                        <div className="text-sm font-bold">{day.dayName}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                        {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')}
-                      </div>
+                      <Button size="sm" onClick={() => console.log('Add group for', day.date)}>
+                        ➕ הוסף קבוצה
+                      </Button>
                     </div>
-                    <button
-                      onClick={() => {
-                        // Handle add group action
-                        console.log('Add group for', day.date)
-                      }}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        background: 'var(--blue)',
-                        color: '#fff',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        fontWeight: '600'
-                      }}
-                    >
-                      ➕ הוסף קבוצה
-                    </button>
-                  </div>
 
-                  {daySessions.length > 0 ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {daySessions.map(session => (
-                        <div
-                          key={session.id}
-                          onClick={() => {
-                            setSelectedSession(session)
-                            setDetailModalOpen(true)
-                          }}
-                          style={{
-                            background: 'var(--bg2)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '8px',
-                            padding: '8px 12px',
-                            cursor: 'pointer',
-                            transition: 'opacity 0.2s',
-                            display: 'flex',
-                            gap: '8px',
-                            alignItems: 'center'
-                          }}
-                          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
-                          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-                        >
+                    {daySessions.length > 0 ? (
+                      <div className="flex flex-col gap-2.5">
+                        {daySessions.map(session => (
                           <div
-                            style={{
-                              width: '3px',
-                              height: '40px',
-                              borderRadius: '2px',
-                              background: session.groups?.color || '#3b82f6',
+                            key={session.id}
+                            onClick={() => {
+                              setSelectedSession(session)
+                              setDetailModalOpen(true)
                             }}
-                          />
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '2px' }}>
-                              {session.groups?.name || 'קבוצה'}
-                            </div>
-                            <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
-                              {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
+                            className="bg-secondary border border-border rounded-lg p-3 cursor-pointer hover:opacity-80 transition-opacity flex gap-3 items-center"
+                          >
+                            <div
+                              className="w-[3px] h-10 rounded-sm shrink-0"
+                              style={{ background: session.groups?.color || '#3b82f6' }}
+                            />
+                            <div className="flex-1">
+                              <div className="text-sm font-semibold mb-0.5">
+                                {session.groups?.name || 'קבוצה'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div style={{ color: 'var(--muted)', fontSize: '12px', padding: '8px 0' }}>
-                      אין פעילויות
-                    </div>
-                  )}
-                </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-muted-foreground text-xs py-2">
+                        אין פעילויות
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               )
             })}
           </div>
         </div>
-      )}
+      ) : null}
 
-      {!loading && viewMode === 'day' && (
-        <div style={{ marginTop: '24px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '12px' }}>
-            📋 אירועים
-          </h2>
+      {!loading && viewMode === 'day' ? (
+        <div className="mt-6">
+          <h2 className="text-base font-extrabold mb-3">📋 אירועים</h2>
           {filteredSessions.length === 0 ? (
-            <div style={{ color: 'var(--muted)', textAlign: 'center', padding: '20px' }}>
-              אין אירועים
-            </div>
+            <div className="text-muted-foreground text-center p-5">אין אירועים</div>
           ) : (
-            <div>
+            <div className="space-y-3">
               {filteredSessions.map(session => (
-                <div
+                <Card
                   key={session.id}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => {
                     setSelectedSession(session)
                     setDetailModalOpen(true)
                   }}
-                  style={{
-                    background: 'var(--card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '12px',
-                    padding: '12px 16px',
-                    marginBottom: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.2s'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                 >
-                  <div
-                    style={{
-                      width: '4px',
-                      height: '60px',
-                      borderRadius: '2px',
-                      background: session.groups?.color || '#3b82f6',
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '4px' }}>
-                      {session.groups?.name || 'קבוצה'}
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div
+                      className="w-1 h-14 rounded-sm shrink-0"
+                      style={{ background: session.groups?.color || '#3b82f6' }}
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-bold mb-1">
+                        {session.groups?.name || 'קבוצה'}
+                      </div>
+                      <div className="text-xs text-muted-foreground mb-1">
+                        {session.date} • {session.start_time || 'אין שעה'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        מדריך: {session.coaches?.name || 'לא מוגדר'}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '4px' }}>
-                      {session.date} • {session.start_time || 'אין שעה'}
-                    </div>
-                    <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                      מדריך: {session.coaches?.name || 'לא מוגדר'}
-                    </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
         </div>
-      )}
+      ) : null}
 
       <SessionDetailModal
         session={selectedSession}

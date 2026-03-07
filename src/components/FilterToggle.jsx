@@ -1,45 +1,31 @@
+'use client'
+
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+
 function FilterToggle({ currentFilter, onFilterChange }) {
   const filters = [
     { value: 'all', label: 'כל המדריכים' },
-    { value: 'my', label: 'שלי בלבד' }
+    { value: 'my', label: 'שלי בלבד' },
   ]
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: '8px',
-        padding: '12px',
-        direction: 'rtl',
-        justifyContent: 'center'
-      }}
-    >
-      {filters.map((filter) => (
-        <button
-          key={filter.value}
-          onClick={() => onFilterChange(filter.value)}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            border: 'none',
-            backgroundColor:
-              currentFilter === filter.value
-                ? 'var(--blue-light)'
-                : 'var(--bg2)',
-            color:
-              currentFilter === filter.value
-                ? '#fff'
-                : 'var(--text)',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: currentFilter === filter.value ? '600' : '400',
-            transition: 'all 0.2s',
-            minWidth: '80px'
-          }}
-        >
-          {filter.label}
-        </button>
-      ))}
+    <div className="flex justify-center py-2 sm:py-3" dir="rtl">
+      <ToggleGroup
+        type="single"
+        value={currentFilter}
+        onValueChange={(value) => value && onFilterChange(value)}
+        className="gap-2"
+      >
+        {filters.map((filter) => (
+          <ToggleGroupItem
+            key={filter.value}
+            value={filter.value}
+            className="px-4 py-2 min-w-[80px] text-sm data-[state=on]:bg-drc-blue-light data-[state=on]:text-white"
+          >
+            {filter.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
     </div>
   )
 }

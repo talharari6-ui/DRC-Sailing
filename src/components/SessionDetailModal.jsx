@@ -1,5 +1,7 @@
 import Modal from './Modal'
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 export default function SessionDetailModal({
   session,
@@ -41,222 +43,104 @@ export default function SessionDetailModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={session.groups?.name || 'קבוצה'}>
-      <div style={{ direction: 'rtl', padding: '0 16px 16px' }}>
+      <div className="px-4 pb-5 sm:px-6 sm:pb-6" dir="rtl">
         {/* Session Info */}
-        <div style={{ marginBottom: '20px' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '12px',
-              marginBottom: '12px'
-            }}
-          >
+        <div className="mb-5">
+          <div className="grid grid-cols-2 gap-4 mb-3">
             <div>
-              <div style={{ color: 'var(--muted)', fontSize: '12px' }}>
-                תאריך
-              </div>
-              <div style={{ color: 'var(--text)', fontSize: '14px' }}>
-                {session.date}
-              </div>
+              <div className="text-muted-foreground text-xs">תאריך</div>
+              <div className="text-foreground text-sm">{session.date}</div>
             </div>
             <div>
-              <div style={{ color: 'var(--muted)', fontSize: '12px' }}>
-                שעה
-              </div>
-              <div style={{ color: 'var(--text)', fontSize: '14px' }}>
-                {formatTime(session.start_time)} -{' '}
-                {formatTime(session.end_time)}
+              <div className="text-muted-foreground text-xs">שעה</div>
+              <div className="text-foreground text-sm">
+                {formatTime(session.start_time)} - {formatTime(session.end_time)}
               </div>
             </div>
           </div>
           <div>
-            <div style={{ color: 'var(--muted)', fontSize: '12px' }}>
-              מדריך
-            </div>
-            <div style={{ color: 'var(--text)', fontSize: '14px' }}>
+            <div className="text-muted-foreground text-xs">מדריך</div>
+            <div className="text-foreground text-sm">
               {session.coaches?.name || 'לא מוגדר'}
             </div>
           </div>
         </div>
 
-        {/* Sailors/Attendance */}
-        {canMarkAttendance && (
-          <div style={{ marginBottom: '20px' }}>
-            <div
-              style={{
-                fontSize: '12px',
-                fontWeight: '600',
-                marginBottom: '8px',
-                color: 'var(--text)'
-              }}
-            >
+        {/* Attendance */}
+        {canMarkAttendance ? (
+          <div className="mb-5">
+            <div className="text-xs font-semibold mb-2 text-foreground">
               נוכחות חניכים
             </div>
             {session.group_sailors && session.group_sailors.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="flex flex-col gap-2.5">
                 {session.group_sailors.map((gs) => {
                   const sailor = gs.sailors
                   if (!sailor) return null
                   return (
                     <div
                       key={sailor.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '8px',
-                        backgroundColor: 'var(--bg2)',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
+                      className="flex justify-between items-center p-2 bg-secondary rounded-md text-sm"
                     >
                       <span>{sailor.name}</span>
-                      <div style={{ display: 'flex', gap: '4px' }}>
-                        <button
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant={attendance[sailor.id]?.present === true ? 'default' : 'outline'}
                           onClick={() => handleMarkAttendance(sailor.id, true)}
                           disabled={marking}
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            border: 'none',
-                            backgroundColor:
-                              attendance[sailor.id]?.present === true
-                                ? '#4CAF50'
-                                : 'var(--border)',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
+                          className={attendance[sailor.id]?.present === true ? 'bg-drc-green hover:bg-drc-green/80 h-8 px-3' : 'h-8 px-3'}
                         >
                           ✓
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleMarkAttendance(sailor.id, false, 'היעדרות')
-                          }
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={attendance[sailor.id]?.present === false ? 'destructive' : 'outline'}
+                          onClick={() => handleMarkAttendance(sailor.id, false, 'היעדרות')}
                           disabled={marking}
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            border: 'none',
-                            backgroundColor:
-                              attendance[sailor.id]?.present === false
-                                ? '#f44336'
-                                : 'var(--border)',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
+                          className="h-8 px-3"
                         >
                           ✗
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   )
                 })}
               </div>
             ) : (
-              <div style={{ color: 'var(--muted)', fontSize: '12px' }}>
+              <div className="text-muted-foreground text-xs">
                 אין חניכים בקבוצה
               </div>
             )}
           </div>
-        )}
+        ) : null}
 
         {/* Action Buttons */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            marginTop: '20px'
-          }}
-        >
-          {isOwnSession && (
+        <div className="flex flex-col gap-3 mt-6">
+          {isOwnSession ? (
             <>
-              <button
-                onClick={() => onEditSailors(session.id)}
-                style={{
-                  padding: '10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: 'var(--blue-light)',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
+              <Button onClick={() => onEditSailors(session.id)}>
                 ✏️ ערוך חניכים
-              </button>
-              <button
-                onClick={() => onSubstituteRequest(session.id)}
-                style={{
-                  padding: '10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: 'var(--bg2)',
-                  color: 'var(--text)',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
+              </Button>
+              <Button variant="secondary" onClick={() => onSubstituteRequest(session.id)}>
                 🔄 בקשה להחלפה
-              </button>
-              <button
-                onClick={() => onDecline(session.id)}
-                style={{
-                  padding: '10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: '#f44336',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
+              </Button>
+              <Button variant="destructive" onClick={() => onDecline(session.id)}>
                 ⛔ דחייה
-              </button>
+              </Button>
             </>
-          )}
+          ) : null}
 
-          {isSubstitute && (
+          {isSubstitute ? (
             <>
-              <button
-                onClick={() => onEditSailors(session.id)}
-                style={{
-                  padding: '10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: 'var(--blue-light)',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
+              <Button onClick={() => onEditSailors(session.id)}>
                 ✏️ ערוך חניכים
-              </button>
-              <button
-                onClick={() => onDecline(session.id)}
-                style={{
-                  padding: '10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: '#f44336',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
+              </Button>
+              <Button variant="destructive" onClick={() => onDecline(session.id)}>
                 ⛔ דחייה
-              </button>
+              </Button>
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </Modal>
