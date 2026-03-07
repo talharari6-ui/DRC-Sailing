@@ -1,4 +1,4 @@
-import { supabase } from '@/src/lib/supabase'
+﻿import { getSupabaseClient } from '@/src/lib/supabase'
 
 export async function PATCH(request, { params }) {
   try {

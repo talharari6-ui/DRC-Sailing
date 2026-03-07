@@ -32,7 +32,7 @@ export async function POST(request, { params }) {
 
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
-      .select('id, groups(coach_id)')
+      .select('id, cancelled, admin_approved, substitute_coach_id, groups(coach_id)')
       .eq('id', sessionId)
       .single()
 
@@ -42,6 +42,17 @@ export async function POST(request, { params }) {
     const isGroupCoach = groupCoachId && groupCoachId === requester_id
     const isAdmin = requester_is_admin === true
     const canAssignDirectly = isAdmin || isGroupCoach
+    const isOpenForSubstitute =
+      session?.admin_approved === false &&
+      session?.cancelled === false &&
+      !session?.substitute_coach_id
+
+    if (!canAssignDirectly && !isOpenForSubstitute) {
+      return Response.json(
+        { error: 'This session is not open for substitute requests.' },
+        { status: 403 }
+      )
+    }
 
     const updates = {
       substitute_coach_id: coach_id,

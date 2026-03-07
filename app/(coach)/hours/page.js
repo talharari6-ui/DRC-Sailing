@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import { useAuth } from '@/src/hooks/useAuth'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -65,6 +65,7 @@ export default function HoursPage() {
   const [loading, setLoading] = useState(false)
   const [savingDates, setSavingDates] = useState({})
   const [error, setError] = useState(null)
+  const autoSaveTimersRef = useRef({})
 
   const bounds = useMemo(() => monthBounds(selectedMonth), [selectedMonth])
 
@@ -95,7 +96,7 @@ export default function HoursPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data?.error || 'טעינת שעות נכשלה')
+        throw new Error(data?.error || '×˜×¢×™× ×ª ×©×¢×•×ª × ×›×©×œ×”')
       }
 
       const sorted = Array.isArray(data)
@@ -106,7 +107,7 @@ export default function HoursPage() {
       setEdits({})
     } catch (err) {
       console.error('Error loading hours:', err)
-      setError('שגיאה בטעינת שעות העבודה. נסה לרענן את הדף.')
+      setError('×©×’×™××” ×‘×˜×¢×™× ×ª ×©×¢×•×ª ×”×¢×‘×•×“×”. × ×¡×” ×œ×¨×¢× ×Ÿ ××ª ×”×“×£.')
     } finally {
       setLoading(false)
     }
@@ -165,7 +166,7 @@ export default function HoursPage() {
     const normalizedEnd = parseSmartTime(row.end_time)
 
     if ((normalizedStart && !normalizedEnd) || (!normalizedStart && normalizedEnd)) {
-      setError('יש להזין גם שעת התחלה וגם שעת סיום')
+      setError('×™×© ×œ×”×–×™×Ÿ ×’× ×©×¢×ª ×”×ª×—×œ×” ×•×’× ×©×¢×ª ×¡×™×•×')
       return
     }
 
@@ -177,7 +178,7 @@ export default function HoursPage() {
         if (row.id) {
           const delRes = await fetch(`/api/hours/${row.id}`, { method: 'DELETE' })
           const delData = await delRes.json()
-          if (!delRes.ok) throw new Error(delData?.error || 'מחיקה נכשלה')
+          if (!delRes.ok) throw new Error(delData?.error || '×ž×—×™×§×” × ×›×©×œ×”')
         }
         await loadHours()
         return
@@ -212,7 +213,7 @@ export default function HoursPage() {
 
       const data = await res.json()
       if (!res.ok) {
-        throw new Error(data?.error || 'שמירה נכשלה')
+        throw new Error(data?.error || '×©×ž×™×¨×” × ×›×©×œ×”')
       }
 
       await loadHours()
@@ -237,7 +238,7 @@ export default function HoursPage() {
       const res = await fetch(`/api/hours/${row.id}`, { method: 'DELETE' })
       const data = await res.json()
       if (!res.ok) {
-        throw new Error(data?.error || 'מחיקה נכשלה')
+        throw new Error(data?.error || '×ž×—×™×§×” × ×›×©×œ×”')
       }
       await loadHours()
     } catch (err) {
@@ -253,7 +254,7 @@ export default function HoursPage() {
     const end = parseSmartTime(source.end_time)
 
     if (!start || !end) {
-      setError('יש להזין שעות תקינות לפני שכפול')
+      setError('×™×© ×œ×”×–×™×Ÿ ×©×¢×•×ª ×ª×§×™× ×•×ª ×œ×¤× ×™ ×©×›×¤×•×œ')
       return
     }
 
@@ -278,22 +279,47 @@ export default function HoursPage() {
     })
   }
 
+
+  useEffect(() => {
+    const timers = autoSaveTimersRef.current
+
+    Object.keys(edits).forEach((dateKey) => {
+      const row = getRowValue(dateKey)
+      const existing = hoursMap[dateKey] || {}
+      const changed =
+        (row.start_time || '') !== (existing.start_time || '') ||
+        (row.end_time || '') !== (existing.end_time || '') ||
+        (row.notes || '') !== (existing.notes || '')
+
+      if (!changed || savingDates[dateKey]) return
+
+      if (timers[dateKey]) clearTimeout(timers[dateKey])
+      timers[dateKey] = setTimeout(() => {
+        saveDay(dateKey)
+      }, 900)
+    })
+
+    return () => {
+      Object.values(timers).forEach((t) => clearTimeout(t))
+    }
+  }, [edits, hoursMap, savingDates])
+
   return (
     <div>
       <div className="mb-4">
-        <h1 className="text-xl font-extrabold">⏰ שעות עבודה</h1>
+        <h1 className="text-xl font-extrabold">â° ×©×¢×•×ª ×¢×‘×•×“×”</h1>
       </div>
 
       <div className="mb-4 flex items-center gap-2 bg-card border border-border rounded-xl p-2.5 px-4">
         <Button variant="outline" size="sm" onClick={() => setSelectedMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}>
-          →
+          â†’
         </Button>
         <div className="flex-1 text-center">
           <div className="font-bold text-sm">{monthLabel}</div>
-          <div className="text-xs text-muted-foreground">סה"כ חודשי: {totalHours.toFixed(1)} שעות</div>
+          <div className="text-xs text-muted-foreground">×¡×”"×› ×—×•×“×©×™: {totalHours.toFixed(1)} ×©×¢×•×ª</div>
         </div>
         <Button variant="outline" size="sm" onClick={() => setSelectedMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}>
-          ←
+          â†
         </Button>
       </div>
 
@@ -332,43 +358,40 @@ export default function HoursPage() {
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label>שעת התחלה</Label>
+                      <Label>×©×¢×ª ×”×ª×—×œ×”</Label>
                       <Input
                         value={row.start_time}
                         onChange={(e) => updateEdit(day.key, 'start_time', e.target.value)}
                         onBlur={() => normalizeTimeField(day.key, 'start_time')}
-                        placeholder="10 או 1030"
                       />
                     </div>
                     <div>
-                      <Label>שעת סיום</Label>
+                      <Label>×©×¢×ª ×¡×™×•×</Label>
                       <Input
                         value={row.end_time}
                         onChange={(e) => updateEdit(day.key, 'end_time', e.target.value)}
                         onBlur={() => normalizeTimeField(day.key, 'end_time')}
-                        placeholder="14 או 1430"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label>הערה</Label>
+                    <Label>×”×¢×¨×”</Label>
                     <Input
                       value={row.notes}
                       onChange={(e) => updateEdit(day.key, 'notes', e.target.value)}
-                      placeholder="הערה חופשית"
                     />
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" onClick={() => saveDay(day.key)} disabled={isSaving}>
-                      {isSaving ? 'שומר...' : 'שמור'}
+                      {isSaving ? '×©×•×ž×¨...' : '×©×ž×•×¨'}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => copyForward(day.key)}>
-                      שכפל לימים זהים בהמשך החודש
+                      ×©×›×¤×œ ×œ×™×ž×™× ×–×”×™× ×‘×”×ž×©×š ×”×—×•×“×©
                     </Button>
                     <Button size="sm" variant="destructive" onClick={() => deleteDay(day.key)} disabled={isSaving}>
-                      מחק
+                      ×ž×—×§
                     </Button>
                   </div>
                 </CardContent>

@@ -300,6 +300,49 @@ export default function SchedulePage() {
     return coach?.is_admin || groupCoachId === coach?.id
   }
 
+  const getSessionInlineStatus = (session) => {
+    if (!session) return null
+
+    if (session.admin_approved === false && session.cancelled) {
+      return { text: '\u05d1\u05e7\u05e9\u05ea \u05d3\u05d7\u05d9\u05d9\u05d4 \u05de\u05de\u05ea\u05d9\u05e0\u05d4 \u05dc\u05d0\u05d9\u05e9\u05d5\u05e8 \u05de\u05e0\u05d4\u05dc', tone: 'text-amber-300' }
+    }
+
+    if (session.admin_approved === false && session.substitute_coach_id) {
+      return { text: '\u05d1\u05e7\u05e9\u05ea \u05d4\u05d7\u05dc\u05e4\u05d4 \u05de\u05de\u05ea\u05d9\u05e0\u05d4 \u05dc\u05d0\u05d9\u05e9\u05d5\u05e8 \u05de\u05e0\u05d4\u05dc', tone: 'text-amber-300' }
+    }
+
+    if (session.cancelled) {
+      return { text: '\u05e4\u05e2\u05d9\u05dc\u05d5\u05ea \u05d6\u05d5 \u05e0\u05d3\u05d7\u05ea\u05d4', tone: 'text-red-300' }
+    }
+
+    return null
+  }
+
+  const isSessionOpenForSubstitute = (session) => {
+    return session?.admin_approved === false && !session?.cancelled && !session?.substitute_coach_id
+  }
+
+  const toggleSessionOpenForSubstitute = async (session) => {
+    try {
+      const openNow = isSessionOpenForSubstitute(session)
+      const updates = openNow
+        ? { admin_approved: true }
+        : { admin_approved: false, substitute_coach_id: null, cancelled: false }
+
+      const res = await fetch(`/api/sessions/${session.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || '\u05e0\u05db\u05e9\u05dc\u05d4 \u05e2\u05d3\u05db\u05d5\u05df \u05de\u05e6\u05d1 \u05d4\u05d7\u05dc\u05e4\u05d4')
+      await loadSessions()
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   const openSessionModal = (session) => {
     setSelectedSession(session)
     setDetailModalOpen(true)
@@ -373,6 +416,10 @@ export default function SchedulePage() {
                   <div className="mt-3">
                     {daySessions.length > 0 ? daySessions.map((session) => (
                       <div key={session.id} className="bg-secondary border border-border rounded-lg p-3 mt-2 cursor-pointer" onClick={() => openSessionModal(session)}>
+                        {(() => {
+                          const sessionStatus = getSessionInlineStatus(session)
+                          return sessionStatus ? <div className={`text-xs mb-1 ${sessionStatus.tone}`}>{sessionStatus.text}</div> : null
+                        })()}
                         <div className="text-sm font-semibold">{session.groups?.name || '\u05e7\u05d1\u05d5\u05e6\u05d4'}</div>
                         <div className="text-xs text-muted-foreground">{session.start_time || '\u05d0\u05d9\u05df \u05e9\u05e2\u05d4'}</div>
                         <div className="mt-2 flex flex-wrap gap-1.5">
@@ -381,9 +428,15 @@ export default function SchedulePage() {
                               {'\u05e0\u05d9\u05d4\u05d5\u05dc \u05e7\u05d1\u05d5\u05e6\u05d4'}
                             </Button>
                           ) : null}
-                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSubstituteModal(session) }}>
-                            {canManageSession(session) ? '\u05de\u05d9\u05e0\u05d5\u05d9 \u05de\u05d7\u05dc\u05d9\u05e3' : '\u05d1\u05e7\u05e9\u05ea \u05d4\u05d7\u05dc\u05e4\u05d4'}
-                          </Button>
+                          {canManageSession(session) ? (
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); toggleSessionOpenForSubstitute(session) }}>
+                              {isSessionOpenForSubstitute(session) ? '\u05e1\u05d2\u05d5\u05e8 \u05d4\u05d7\u05dc\u05e4\u05d4' : '\u05e4\u05ea\u05d7 \u05dc\u05d4\u05d7\u05dc\u05e4\u05d4'}
+                            </Button>
+                          ) : isSessionOpenForSubstitute(session) ? (
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSubstituteModal(session) }}>
+                              {'\u05d1\u05e7\u05e9\u05ea \u05d4\u05d7\u05dc\u05e4\u05d4'}
+                            </Button>
+                          ) : null}
                           {canManageSession(session) ? (
                             <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSessionModal(session) }}>
                               {'\u05d3\u05d7\u05d9\u05d9\u05ea \u05e4\u05e2\u05d9\u05dc\u05d5\u05ea'}
@@ -406,8 +459,12 @@ export default function SchedulePage() {
           {currentDaySessions.length === 0 ? <div className="text-muted-foreground text-center p-5">{ '\u05d0\u05d9\u05df \u05e4\u05e2\u05d9\u05dc\u05d5\u05d9\u05d5\u05ea \u05d1\u05d9\u05d5\u05dd \u05d6\u05d4' }</div> : currentDaySessions.map((session) => (
             <Card key={session.id} className="cursor-pointer" onClick={() => openSessionModal(session)}>
               <CardContent className="p-4">
+                {(() => {
+                  const sessionStatus = getSessionInlineStatus(session)
+                  return sessionStatus ? <div className={`text-xs mb-1 ${sessionStatus.tone}`}>{sessionStatus.text}</div> : null
+                })()}
                 <div className="text-sm font-bold">{session.groups?.name || '\u05e7\u05d1\u05d5\u05e6\u05d4'}</div>
-                <div className="text-xs text-muted-foreground">{session.date} {' • '} {session.start_time || '\\u05d0\\u05d9\\u05df \\u05e9\\u05e2\\u05d4'}</div>
+                <div className="text-xs text-muted-foreground">{session.date} {' • '} {session.start_time || '\u05d0\u05d9\u05df \u05e9\u05e2\u05d4'}</div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {canManageSession(session) ? (
                     <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSessionModal(session) }}>
