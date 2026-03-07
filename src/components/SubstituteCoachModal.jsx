@@ -1,18 +1,23 @@
-import Modal from './Modal'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 export default function SubstituteCoachModal({
   sessionId,
   isOpen,
   onClose,
   coaches,
-  onSubstituteSelect
+  onSubstituteSelect,
 }) {
   const [loading, setLoading] = useState(false)
 
   const handleSelect = async (coachId) => {
-    if (!coachId) return
+    if (!coachId || !onSubstituteSelect) return
     setLoading(true)
     try {
       await onSubstituteSelect(sessionId, coachId)
@@ -23,8 +28,12 @@ export default function SubstituteCoachModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="בחר מדריך להחלפה">
-      <div className="px-4 pb-4" dir="rtl">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md" dir="rtl">
+        <DialogHeader>
+          <DialogTitle>בחר מדריך להחלפה</DialogTitle>
+        </DialogHeader>
+
         {coaches && coaches.length > 0 ? (
           <div className="flex flex-col gap-2">
             {coaches.map((coach) => (
@@ -38,20 +47,16 @@ export default function SubstituteCoachModal({
                 <div>
                   <div className="font-medium">{coach.name}</div>
                   {coach.email ? (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {coach.email}
-                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">{coach.email}</div>
                   ) : null}
                 </div>
               </Button>
             ))}
           </div>
         ) : (
-          <div className="text-center text-muted-foreground py-5 text-sm">
-            אין מדריכים זמינים
-          </div>
+          <div className="text-center text-muted-foreground py-5 text-sm">אין מדריכים זמינים</div>
         )}
-      </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   )
 }
