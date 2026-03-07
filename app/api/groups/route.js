@@ -59,7 +59,7 @@ export async function POST(request) {
 
     if (!name || !coach_id) {
       return Response.json(
-        { error: 'שם קבוצה ומדריך נדרשים' },
+        { error: 'Group name and coach are required' },
         { status: 400 }
       )
     }
@@ -96,6 +96,13 @@ export async function POST(request) {
 
       if (sessionsError) {
         console.error('Groups POST sessions seed error:', sessionsError)
+        return Response.json(
+          {
+            error: `Failed to auto-create sessions: ${sessionsError.message}`,
+            group_id: createdGroup?.id,
+          },
+          { status: 500 }
+        )
       }
     }
 
