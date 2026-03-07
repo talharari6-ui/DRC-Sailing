@@ -1,38 +1,43 @@
 {
-  "name": "drc-sailing",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix"
-  },
-  "dependencies": {
-    "@base-ui/react": "^1.2.0",
-    "@supabase/supabase-js": "^2.38.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.577.0",
-    "next": "^14.0.0",
-    "next-themes": "^0.4.6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "shadcn": "^4.0.0",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "^3.5.0",
-    "tailwindcss-animate": "^1.0.7",
-    "tw-animate-css": "^1.4.0"
-  },
-  "devDependencies": {
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "autoprefixer": "^10.4.14",
-    "eslint": "^8.50.0",
-    "eslint-config-next": "^14.0.0",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.0",
-    "typescript": "^5.2.0"
-  }
+    "name":  "drc-sailing",
+    "version":  "0.1.0",
+    "private":  true,
+    "scripts":  {
+                    "dev":  "next dev",
+                    "build":  "next build",
+                    "start":  "next start",
+                    "lint":  "next lint",
+                    "lint:fix":  "next lint --fix",
+                    "e2e":  "playwright test",
+                    "e2e:headed":  "playwright test --headed",
+                    "e2e:ui":  "playwright test --ui",
+                    "e2e:gate":  "playwright test tests/e2e/smoke.spec.ts tests/e2e/schedule-visual.spec.ts"
+                },
+    "dependencies":  {
+                         "@base-ui/react":  "^1.2.0",
+                         "@supabase/supabase-js":  "^2.38.0",
+                         "class-variance-authority":  "^0.7.1",
+                         "clsx":  "^2.1.1",
+                         "lucide-react":  "^0.577.0",
+                         "next":  "^14.0.0",
+                         "next-themes":  "^0.4.6",
+                         "react":  "^18.2.0",
+                         "react-dom":  "^18.2.0",
+                         "shadcn":  "^4.0.0",
+                         "sonner":  "^2.0.7",
+                         "tailwind-merge":  "^3.5.0",
+                         "tailwindcss-animate":  "^1.0.7",
+                         "tw-animate-css":  "^1.4.0"
+                     },
+    "devDependencies":  {
+                            "@playwright/test":  "^1.54.2",
+                            "@types/react":  "^18.2.0",
+                            "@types/react-dom":  "^18.2.0",
+                            "autoprefixer":  "^10.4.14",
+                            "eslint":  "^8.50.0",
+                            "eslint-config-next":  "^14.0.0",
+                            "postcss":  "^8.4.31",
+                            "tailwindcss":  "^3.3.0",
+                            "typescript":  "^5.2.0"
+                        }
 }
