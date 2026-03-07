@@ -37,8 +37,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-drc-bg via-drc-bg2 to-drc-bg3 p-5">
-      <div className="w-full max-w-sm">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-5">
+      <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-10">
           <div className="text-5xl mb-3">⛵</div>
@@ -49,7 +49,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <Card className="bg-card/50 backdrop-blur-sm border-border">
+        <Card className="bg-slate-950/80 backdrop-blur-sm border-slate-700/60 shadow-[0_18px_45px_rgba(0,0,0,0.45)]">
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -99,3 +99,4 @@ export default function LoginPage() {
     </div>
   )
 }
+
