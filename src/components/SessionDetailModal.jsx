@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -93,12 +93,12 @@ export default function SessionDetailModal({
   const canMarkAttendance = isGroupCoach || isSubstitute || isAdmin
   const canManageGroup = isGroupCoach || isAdmin
   const canDecline = canManageGroup
-
-  const requestStatus = useMemo(() => {
-    if (session.admin_approved === false && session.cancelled) return '\u05d1\u05e7\u05e9\u05ea \u05d3\u05d7\u05d9\u05d9\u05d4 \u05de\u05de\u05ea\u05d9\u05e0\u05d4 \u05dc\u05d0\u05d9\u05e9\u05d5\u05e8 \u05de\u05e0\u05d4\u05dc'
-    if (session.admin_approved === false && session.substitute_coach_id) return '\u05d1\u05e7\u05e9\u05ea \u05d4\u05d7\u05dc\u05e4\u05d4 \u05de\u05de\u05ea\u05d9\u05e0\u05d4 \u05dc\u05d0\u05d9\u05e9\u05d5\u05e8 \u05de\u05e0\u05d4\u05dc'
-    return ''
-  }, [session])
+  const requestStatus =
+    session.admin_approved === false && session.cancelled
+      ? '\u05d1\u05e7\u05e9\u05ea \u05d3\u05d7\u05d9\u05d9\u05d4 \u05de\u05de\u05ea\u05d9\u05e0\u05d4 \u05dc\u05d0\u05d9\u05e9\u05d5\u05e8 \u05de\u05e0\u05d4\u05dc'
+      : session.admin_approved === false && session.substitute_coach_id
+        ? '\u05d1\u05e7\u05e9\u05ea \u05d4\u05d7\u05dc\u05e4\u05d4 \u05de\u05de\u05ea\u05d9\u05e0\u05d4 \u05dc\u05d0\u05d9\u05e9\u05d5\u05e8 \u05de\u05e0\u05d4\u05dc'
+        : ''
 
   const formatTime = (time) => {
     if (!time) return ''
@@ -273,8 +273,8 @@ export default function SessionDetailModal({
                       <div key={sailor.id} className="flex justify-between items-center p-2 bg-secondary rounded-md text-sm">
                         <span>{sailor.name}</span>
                         <div className="flex gap-1">
-                          <Button size="sm" variant={attendance[sailor.id]?.present === true ? 'default' : 'outline'} onClick={() => handleMarkAttendance(sailor.id, true)} disabled={marking}>✓</Button>
-                          <Button size="sm" variant={attendance[sailor.id]?.present === false ? 'destructive' : 'outline'} onClick={() => handleMarkAttendance(sailor.id, false, '\u05d4\u05d9\u05e2\u05d3\u05e8\u05d5\u05ea')} disabled={marking}>✕</Button>
+                          <Button size="sm" variant={attendance[sailor.id]?.present === true ? 'default' : 'outline'} onClick={() => handleMarkAttendance(sailor.id, true)} disabled={marking}>?</Button>
+                          <Button size="sm" variant={attendance[sailor.id]?.present === false ? 'destructive' : 'outline'} onClick={() => handleMarkAttendance(sailor.id, false, '\u05d4\u05d9\u05e2\u05d3\u05e8\u05d5\u05ea')} disabled={marking}>?</Button>
                         </div>
                       </div>
                     )
