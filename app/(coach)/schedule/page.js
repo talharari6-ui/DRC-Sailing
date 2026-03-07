@@ -139,9 +139,9 @@ export default function SchedulePage() {
 
   const weekDays = useMemo(() => {
     const today = currentDate
-    const dayOfWeek = today.getDay()
+    const dayOfWeek = today.getDay() // 0 = Sunday, 6 = Saturday
     const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1))
+    startOfWeek.setDate(today.getDate() - dayOfWeek) // Go back to most recent Sunday
 
     const days = []
     const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
