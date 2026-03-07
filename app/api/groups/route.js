@@ -9,7 +9,11 @@ function buildPlannedSessions({ groupId, daysOfWeek, startDate, startTime, endTi
   const activeDays = Array.isArray(daysOfWeek) ? daysOfWeek : []
   if (!groupId || activeDays.length === 0) return sessions
 
-  const start = startDate ? new Date(`${startDate}T12:00:00`) : new Date()
+  const requestedStart = startDate ? new Date(`${startDate}T12:00:00`) : new Date()
+  const today = new Date()
+  today.setHours(12, 0, 0, 0)
+  const start = requestedStart > today ? requestedStart : today
+
   const horizon = new Date(start)
   horizon.setDate(horizon.getDate() + 180)
 
