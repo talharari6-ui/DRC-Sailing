@@ -66,6 +66,39 @@ function getColorClass(color) {
       return 'bg-blue-500'
   }
 }
+function parseGroupTimeInput(value) {
+  if (!value) return ''
+  const digits = String(value).replace(/\D/g, '')
+  if (!digits) return ''
+
+  let hour = null
+  let minute = 0
+
+  if (digits.length <= 2) {
+    hour = Number(digits)
+    if (hour >= 1 && hour <= 6) {
+      hour += 12
+    }
+  } else if (digits.length === 3) {
+    hour = Number(digits.slice(0, 1))
+    minute = Number(digits.slice(1, 3))
+  } else {
+    hour = Number(digits.slice(0, 2))
+    minute = Number(digits.slice(2, 4))
+  }
+
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return null
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null
+
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+}
+
+function toMinutes(timeValue) {
+  if (!timeValue) return null
+  const [h, m] = timeValue.split(':').map(Number)
+  if (Number.isNaN(h) || Number.isNaN(m)) return null
+  return h * 60 + m
+}
 
 export default function SchedulePage() {
   const authResult = useAuth()
@@ -279,6 +312,36 @@ export default function SchedulePage() {
       return
     }
 
+    const normalizedStartTime = parseGroupTimeInput(groupForm.start_time)
+    const normalizedEndTime = parseGroupTimeInput(groupForm.end_time)
+
+    if ((groupForm.start_time && normalizedStartTime === null) || (groupForm.end_time && normalizedEndTime === null)) {
+      setGroupError('פורמט שעה לא תקין. אפשר להזין למשל 1, 13 או 1300')
+      return
+    }
+
+    if ((normalizedStartTime && !normalizedEndTime) || (!normalizedStartTime && normalizedEndTime)) {
+      setGroupError('יש להזין גם שעת התחלה וגם שעת סיום')
+      return
+    }
+
+    if (normalizedStartTime && normalizedEndTime) {
+      const minAllowed = 7 * 60
+      const maxAllowed = 22 * 60
+      const startMinutes = toMinutes(normalizedStartTime)
+      const endMinutes = toMinutes(normalizedEndTime)
+
+      if (startMinutes < minAllowed || startMinutes > maxAllowed || endMinutes < minAllowed || endMinutes > maxAllowed) {
+        setGroupError('שעות הפעילות חייבות להיות בין 07:00 ל-22:00')
+        return
+      }
+
+      if (endMinutes <= startMinutes) {
+        setGroupError('שעת הסיום חייבת להיות אחרי שעת ההתחלה')
+        return
+      }
+    }
+
     try {
       setGroupSaving(true)
       const res = await fetch('/api/groups', {
@@ -290,8 +353,8 @@ export default function SchedulePage() {
           color: groupForm.color,
           start_date: groupForm.start_date,
           days_of_week: groupForm.days_of_week,
-          start_time: groupForm.start_time || '',
-          end_time: groupForm.end_time || '',
+          start_time: normalizedStartTime || '',
+          end_time: normalizedEndTime || '',
         }),
       })
 
@@ -531,14 +594,30 @@ export default function SchedulePage() {
               <Label>שעות פעילות</Label>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <Input
-                  type="time"
+                  type="text"
+                  inputMode="numeric"
                   value={groupForm.start_time}
+                  placeholder="לדוגמה: 1 / 13 / 1300"
                   onChange={(e) => setGroupForm((s) => ({ ...s, start_time: e.target.value }))}
+                  onBlur={() => {
+                    const parsed = parseGroupTimeInput(groupForm.start_time)
+                    if (parsed) {
+                      setGroupForm((s) => ({ ...s, start_time: parsed }))
+                    }
+                  }}
                 />
                 <Input
-                  type="time"
+                  type="text"
+                  inputMode="numeric"
                   value={groupForm.end_time}
+                  placeholder="לדוגמה: 14 / 1430"
                   onChange={(e) => setGroupForm((s) => ({ ...s, end_time: e.target.value }))}
+                  onBlur={() => {
+                    const parsed = parseGroupTimeInput(groupForm.end_time)
+                    if (parsed) {
+                      setGroupForm((s) => ({ ...s, end_time: parsed }))
+                    }
+                  }}
                 />
               </div>
             </div>
