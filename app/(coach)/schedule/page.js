@@ -42,11 +42,18 @@ const normalizeTimeInput = (value) => {
   if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return ''
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
+const toDateStr = (dateObj) => {
+  const y = dateObj.getFullYear()
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0')
+  const d = String(dateObj.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
 
 export default function SchedulePage() {
   const authResult = useAuth()
   const coach = authResult?.coach
   const [sessions, setSessions] = useState([])
+  const [groups, setGroups] = useState([])
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('week')
   const [filterMode, setFilterMode] = useState('all')
@@ -68,43 +75,104 @@ export default function SchedulePage() {
   const [selectedMonthDate, setSelectedMonthDate] = useState(() => new Date().toISOString().split('T')[0])
   const [managerRequestNotice, setManagerRequestNotice] = useState('')
 
-  useEffect(() => {
-    const loadSessions = async () => {
-      setLoading(true)
-      try {
-        const res = await fetch('/api/sessions?include_details=true')
-        const data = await res.json()
+  const loadBoardData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const [sessionsRes, groupsRes] = await Promise.all([
+        fetch('/api/sessions?include_details=true'),
+        fetch('/api/groups'),
+      ])
+      const sessionsData = await sessionsRes.json()
+      const groupsData = await groupsRes.json()
 
-        if (!res.ok) {
-          console.error('API error:', res.status, data)
-          setSessions([])
-        } else if (Array.isArray(data)) {
-          setSessions(data)
-        } else if (data?.error) {
-          console.error('API returned error:', data.error)
-          setSessions([])
-        } else {
-          console.warn('Unexpected API response format:', data)
-          setSessions([])
-        }
-      } catch (error) {
-        console.error('Error loading sessions:', error)
+      if (!sessionsRes.ok) {
+        console.error('Sessions API error:', sessionsRes.status, sessionsData)
         setSessions([])
-      } finally {
-        setLoading(false)
+      } else if (Array.isArray(sessionsData)) {
+        setSessions(sessionsData)
+      } else {
+        setSessions([])
       }
+
+      if (!groupsRes.ok) {
+        console.error('Groups API error:', groupsRes.status, groupsData)
+        setGroups([])
+      } else if (Array.isArray(groupsData)) {
+        setGroups(groupsData)
+      } else {
+        setGroups([])
+      }
+    } catch (error) {
+      console.error('Error loading board data:', error)
+      setSessions([])
+      setGroups([])
+    } finally {
+      setLoading(false)
     }
-    loadSessions()
   }, [])
 
+  useEffect(() => {
+    loadBoardData()
+  }, [loadBoardData])
+
+  const mergedSessions = useMemo(() => {
+    const realSessions = Array.isArray(sessions) ? sessions : []
+    const allGroups = Array.isArray(groups) ? groups : []
+    const now = new Date()
+    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+    const weekStart = new Date(now)
+    weekStart.setDate(now.getDate() - now.getDay())
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 6)
+    const rangeStart = monthStart < weekStart ? monthStart : weekStart
+    const rangeEnd = monthEnd > weekEnd ? monthEnd : weekEnd
+
+    const existingKeys = new Set(
+      realSessions
+        .filter((s) => s.group_id && s.date)
+        .map((s) => `${s.group_id}__${s.date}`)
+    )
+
+    const virtualSessions = []
+    for (const group of allGroups) {
+      const groupDays = Array.isArray(group.days_of_week) ? group.days_of_week : []
+      const groupStart = group.start_date ? new Date(`${group.start_date}T12:00:00`) : null
+      const iter = new Date(rangeStart)
+      while (iter <= rangeEnd) {
+        const dateStr = toDateStr(iter)
+        const iterDow = iter.getDay()
+        const afterStart = !groupStart || iter >= groupStart
+        const isMatchingDay = groupDays.length > 0 ? groupDays.includes(iterDow) : dateStr === group.start_date
+        const key = `${group.id}__${dateStr}`
+        if (afterStart && isMatchingDay && !existingKeys.has(key)) {
+          virtualSessions.push({
+            id: `virtual-${group.id}-${dateStr}`,
+            group_id: group.id,
+            date: dateStr,
+            coach_id: group.coach_id,
+            start_time: group.start_time || '',
+            end_time: group.end_time || '',
+            groups: { name: group.name, color: group.color || '#3b82f6' },
+            coaches: { name: 'לא מוגדר' },
+            is_virtual: true,
+          })
+        }
+        iter.setDate(iter.getDate() + 1)
+      }
+    }
+
+    return [...realSessions, ...virtualSessions]
+  }, [sessions, groups, currentDate])
+
   const filteredSessions = useMemo(() => {
-    return sessions.filter(s => {
+    return mergedSessions.filter(s => {
       if (filterMode === 'my') {
         return s.coach_id === coach?.id || s.substitute_coach_id === coach?.id
       }
       return true
     })
-  }, [sessions, filterMode, coach?.id])
+  }, [mergedSessions, filterMode, coach?.id])
 
   const getSessionsForDate = useCallback((dateStr) => {
     return filteredSessions.filter(s => s.date === dateStr)
@@ -338,18 +406,8 @@ export default function SchedulePage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error || 'Failed to create group')
-      const immediateDate = payload.start_date || selectedGroupDay?.date || null
-      if (immediateDate) {
-        const syntheticSession = {
-          id: `new-group-${data.id}-${Date.now()}`,
-          date: immediateDate,
-          start_time: payload.start_time || '',
-          coach_id: coach.id,
-          groups: { name: data.name, color: data.color || payload.color || '#3b82f6' },
-          coaches: { name: coach?.name || 'לא מוגדר' },
-        }
-        setSessions((prev) => [syntheticSession, ...prev])
-      }
+      setGroups((prev) => [data, ...prev])
+      await loadBoardData()
 
       setAddGroupDialogOpen(false)
     } catch (error) {
