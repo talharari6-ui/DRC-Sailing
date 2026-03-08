@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Calendar as CalendarIcon, Plus, ClipboardList } from 'lucide-react'
 
@@ -64,6 +65,8 @@ export default function SchedulePage() {
   const [newGroupStartDate, setNewGroupStartDate] = useState('')
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [groupFormError, setGroupFormError] = useState('')
+  const [selectedMonthDate, setSelectedMonthDate] = useState(() => new Date().toISOString().split('T')[0])
+  const [managerRequestNotice, setManagerRequestNotice] = useState('')
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -107,6 +110,79 @@ export default function SchedulePage() {
     return filteredSessions.filter(s => s.date === dateStr)
   }, [filteredSessions])
 
+  const todayDateStr = useMemo(() => new Date().toISOString().split('T')[0], [])
+  const todaySessions = useMemo(() => getSessionsForDate(todayDateStr), [getSessionsForDate, todayDateStr])
+  const selectedMonthDateSessions = useMemo(
+    () => getSessionsForDate(selectedMonthDate),
+    [getSessionsForDate, selectedMonthDate]
+  )
+
+  const monthSelectedDateObj = useMemo(() => new Date(`${selectedMonthDate}T12:00:00`), [selectedMonthDate])
+  const monthSelectedDay = useMemo(() => ({
+    date: selectedMonthDate,
+    dayName: HEBREW_DAY_NAMES[monthSelectedDateObj.getDay()],
+    dayNum: monthSelectedDateObj.getDate(),
+    monthNum: String(monthSelectedDateObj.getMonth() + 1).padStart(2, '0'),
+    dateObj: monthSelectedDateObj,
+  }), [monthSelectedDateObj, selectedMonthDate])
+
+  const renderSessionActions = (session) => {
+    const canManageSession = session.coach_id === coach?.id
+    return (
+      <div className="mt-2 space-y-2">
+        <div className="text-xs text-muted-foreground mb-1">
+          {canManageSession ? 'פעולות זמינות:' : 'רק מדריך הקבוצה יכול לבצע פעולות'}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            type="button"
+            disabled={!canManageSession}
+            onClick={() => {
+              setSelectedSession(session)
+              setDetailModalOpen(true)
+            }}
+          >
+            מילוי נוכחות
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            type="button"
+            disabled={!canManageSession}
+            onClick={() => {
+              setSelectedSession(session)
+              setSailorModalOpen(true)
+            }}
+          >
+            הוספה / הסרה חניכים
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            type="button"
+            disabled={!canManageSession}
+            onClick={() => handlePostponeRequest(session)}
+          >
+            דחיית פעילות
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            type="button"
+            disabled={!canManageSession}
+            onClick={() => handleSwitchRequest(session)}
+          >
+            פתיחה להחלפת מדריך
+          </Button>
+        </div>
+        <div className="text-[11px] text-muted-foreground">
+          דחייה/החלפה מחייבות אישור מנהל בטרמינל המנהל
+        </div>
+      </div>
+    )
+  }
+
   const getDayContent = (dateStr) => {
     const daySessions = getSessionsForDate(dateStr)
     if (daySessions.length === 0) return null
@@ -136,11 +212,7 @@ export default function SchedulePage() {
   }
 
   const handleDateClick = (dateStr) => {
-    const daySession = getSessionsForDate(dateStr)
-    if (daySession.length === 1) {
-      setSelectedSession(daySession[0])
-      setDetailModalOpen(true)
-    }
+    setSelectedMonthDate(dateStr)
   }
 
   const handleAttendanceUpdate = async (sessionId, sailorId, present, reason) => {
@@ -175,6 +247,16 @@ export default function SchedulePage() {
     setDetailModalOpen(false)
   }
 
+  const handlePostponeRequest = (session) => {
+    if (session.coach_id !== coach?.id) return
+    setManagerRequestNotice(`בקשת דחייה נשלחה לאישור מנהל עבור ${session.groups?.name || 'קבוצה'}`)
+  }
+
+  const handleSwitchRequest = (session) => {
+    if (session.coach_id !== coach?.id) return
+    setManagerRequestNotice(`בקשת החלפה נשלחה לאישור מנהל עבור ${session.groups?.name || 'קבוצה'}`)
+  }
+
   const weekDays = useMemo(() => {
     const today = currentDate
     const dayOfWeek = today.getDay() // 0 = Sunday, 6 = Saturday
@@ -198,27 +280,6 @@ export default function SchedulePage() {
     return days
   }, [currentDate])
 
-  const daySessionsByDate = useMemo(() => {
-    const grouped = filteredSessions.reduce((acc, session) => {
-      if (!acc[session.date]) acc[session.date] = []
-      acc[session.date].push(session)
-      return acc
-    }, {})
-
-    return Object.entries(grouped)
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([date, sessionsForDate]) => {
-        const dateObj = new Date(`${date}T12:00:00`)
-        return {
-          date,
-          dateObj,
-          dayName: HEBREW_DAY_NAMES[dateObj.getDay()],
-          dayNum: dateObj.getDate(),
-          monthNum: String(dateObj.getMonth() + 1).padStart(2, '0'),
-          sessions: sessionsForDate,
-        }
-      })
-  }, [filteredSessions])
 
   const openAddGroupDialog = (day = null) => {
     setSelectedGroupDay(day)
@@ -314,20 +375,69 @@ export default function SchedulePage() {
 
       <ViewModeToggle currentMode={viewMode} onModeChange={setViewMode} />
       <FilterToggle currentFilter={filterMode} onFilterChange={setFilterMode} />
+      {managerRequestNotice ? (
+        <Alert className="mb-4">
+          <AlertDescription>{managerRequestNotice}</AlertDescription>
+        </Alert>
+      ) : null}
 
       {loading ? (
         <div className="text-center p-5 text-muted-foreground">טוען...</div>
       ) : null}
 
       {!loading && viewMode === 'month' ? (
-        <Calendar
-          year={currentDate.getFullYear()}
-          month={currentDate.getMonth()}
-          onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-          onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-          onDateClick={handleDateClick}
-          getDayContent={getDayContent}
-        />
+        <div className="space-y-3">
+          <Card>
+            <CardContent className="p-4">
+              <div className="mb-3">
+                <div className="flex items-center gap-3" dir="ltr">
+                  <Button size="sm" onClick={() => openAddGroupDialog(monthSelectedDay)}>
+                    <Plus size={16} className="inline" /> הוסף קבוצה
+                  </Button>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+              </div>
+              <div className="mb-3">
+                <div className="text-sm font-bold">{monthSelectedDay.dayName}</div>
+                <div className="text-xs text-muted-foreground">
+                  {monthSelectedDay.dayNum}.{monthSelectedDay.monthNum} ({monthSelectedDay.date})
+                </div>
+              </div>
+              {selectedMonthDateSessions.length === 0 ? (
+                <div className="text-muted-foreground text-xs py-2">אין פעילויות ביום זה</div>
+              ) : (
+                <div className="space-y-3">
+                  {selectedMonthDateSessions.map((session) => (
+                    <div
+                      key={session.id}
+                      className="bg-secondary border border-border rounded-lg p-3 flex gap-3 items-center"
+                    >
+                      <div
+                        className="w-[3px] h-12 rounded-sm shrink-0"
+                        style={{ background: session.groups?.color || '#3b82f6' }}
+                      />
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold mb-0.5">{session.groups?.name || 'קבוצה'}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
+                        </div>
+                        {renderSessionActions(session)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          <Calendar
+            year={currentDate.getFullYear()}
+            month={currentDate.getMonth()}
+            onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+            onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+            onDateClick={handleDateClick}
+            getDayContent={getDayContent}
+          />
+        </div>
       ) : null}
 
       {!loading && viewMode === 'week' ? (
@@ -361,11 +471,7 @@ export default function SchedulePage() {
                         {daySessions.map(session => (
                           <div
                             key={session.id}
-                            onClick={() => {
-                              setSelectedSession(session)
-                              setDetailModalOpen(true)
-                            }}
-                            className="bg-secondary border border-border rounded-lg p-3 cursor-pointer hover:opacity-80 transition-opacity flex gap-3 items-center"
+                            className="bg-secondary border border-border rounded-lg p-3 flex gap-3 items-center"
                           >
                             <div
                               className="w-[3px] h-10 rounded-sm shrink-0"
@@ -378,6 +484,7 @@ export default function SchedulePage() {
                               <div className="text-xs text-muted-foreground">
                                 {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
                               </div>
+                              {renderSessionActions(session)}
                             </div>
                           </div>
                         ))}
@@ -397,66 +504,47 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'day' ? (
         <div className="mt-6">
-          <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><ClipboardList size={20} /> אירועים</h2>
-          {daySessionsByDate.length === 0 ? (
-            <div className="text-muted-foreground text-center p-5">אין אירועים</div>
+          <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><ClipboardList size={20} /> היום</h2>
+          {todaySessions.length === 0 ? (
+            <div className="text-muted-foreground text-center p-5">אין פעילויות להיום</div>
           ) : (
-            <div className="space-y-3">
-              {daySessionsByDate.map((dayBlock) => (
-                <Card key={dayBlock.date}>
-                  <CardContent className="p-4">
-                    <div className="mb-3">
-                      <div className="flex items-center gap-3" dir="ltr">
-                        <Button size="sm" onClick={() => openAddGroupDialog({
-                          date: dayBlock.date,
-                          dayName: dayBlock.dayName,
-                          dayNum: dayBlock.dayNum,
-                          dateObj: dayBlock.dateObj,
-                        })}>
-                          <Plus size={16} className="inline" /> הוסף קבוצה
-                        </Button>
-                        <div className="h-px flex-1 bg-border" />
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <div className="text-sm font-bold">{dayBlock.dayName}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {dayBlock.dayNum}.{dayBlock.monthNum} ({dayBlock.date})
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      {dayBlock.sessions.map(session => (
-                        <div
-                          key={session.id}
-                          className="cursor-pointer hover:opacity-80 transition-opacity bg-secondary border border-border rounded-lg p-3 flex items-center gap-3"
-                          onClick={() => {
-                            setSelectedSession(session)
-                            setDetailModalOpen(true)
-                          }}
-                        >
-                          <div
-                            className="w-1 h-14 rounded-sm shrink-0"
-                            style={{ background: session.groups?.color || '#3b82f6' }}
-                          />
-                          <div className="flex-1">
-                            <div className="text-sm font-bold mb-1">
-                              {session.groups?.name || 'קבוצה'}
-                            </div>
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {session.start_time || 'אין שעה'}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              מדריך: {session.coaches?.name || 'לא מוגדר'}
-                            </div>
-                          </div>
+            <Card>
+              <CardContent className="p-4">
+                <div className="mb-3">
+                  <div className="flex items-center gap-3" dir="ltr">
+                    <Button size="sm" onClick={() => openAddGroupDialog({
+                      date: todayDateStr,
+                      dayName: HEBREW_DAY_NAMES[new Date().getDay()],
+                      dayNum: new Date().getDate(),
+                      dateObj: new Date(),
+                    })}>
+                      <Plus size={16} className="inline" /> הוסף קבוצה
+                    </Button>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {todaySessions.map((session) => (
+                    <div
+                      key={session.id}
+                      className="bg-secondary border border-border rounded-lg p-3 flex items-center gap-3"
+                    >
+                      <div
+                        className="w-1 h-14 rounded-sm shrink-0"
+                        style={{ background: session.groups?.color || '#3b82f6' }}
+                      />
+                      <div className="flex-1">
+                        <div className="text-sm font-bold mb-1">{session.groups?.name || 'קבוצה'}</div>
+                        <div className="text-xs text-muted-foreground mb-1">
+                          {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
                         </div>
-                      ))}
+                        {renderSessionActions(session)}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       ) : null}
