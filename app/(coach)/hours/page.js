@@ -357,12 +357,12 @@ export default function HoursPage() {
 
                 return (
                   <div key={day.key} className="rounded-md border p-1.5">
-                    <div className="grid grid-cols-[58px_72px_72px_48px_minmax(70px,1fr)_84px] gap-1 items-center">
-                      <div className="text-[11px] text-muted-foreground leading-tight">
+                    <div className="grid grid-cols-[58px_72px_72px_48px_minmax(70px,1fr)_84px] gap-1 items-center justify-items-end text-right">
+                      <div className="text-[11px] text-muted-foreground leading-tight text-right">
                         <div className="truncate font-semibold text-foreground text-[11px]">{day.weekdayName.slice(0, 3)}</div>
                         <div>{day.dayNumber}.{viewMonth + 1}</div>
                       </div>
-                      <div>
+                      <div className="w-full">
                         <Input
                           className="h-7 text-xs px-1.5"
                           type="text"
@@ -380,7 +380,7 @@ export default function HoursPage() {
                           }}
                         />
                       </div>
-                      <div>
+                      <div className="w-full">
                         <Input
                           className="h-7 text-xs px-1.5"
                           type="text"
@@ -398,12 +398,12 @@ export default function HoursPage() {
                           }}
                         />
                       </div>
-                      <div>
-                        <div className="h-7 rounded-md border border-input px-1.5 flex items-center justify-center text-[11px]">
+                      <div className="w-full">
+                        <div className="h-7 rounded-md border border-input px-1.5 flex items-center justify-end text-[11px]">
                           {dailyHours.toFixed(1)}
                         </div>
                       </div>
-                      <div>
+                      <div className="w-full">
                         <textarea
                           className="w-full h-7 rounded-md border border-input bg-transparent px-1.5 py-1 text-[11px] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
                           placeholder="הערה"
@@ -412,8 +412,8 @@ export default function HoursPage() {
                           onBlur={() => saveDate(day.key)}
                         />
                       </div>
-                      <div>
-                        <div className="flex gap-1 justify-end">
+                      <div className="w-full">
+                        <div className="flex gap-1 justify-end w-full">
                           {hasHours ? (
                             <Button
                               size="sm"
