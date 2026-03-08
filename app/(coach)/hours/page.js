@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '@/src/hooks/useAuth'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -8,23 +8,49 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 
-const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+const MONTH_NAMES_HE = [
+  'ינואר',
+  'פברואר',
+  'מרץ',
+  'אפריל',
+  'מאי',
+  'יוני',
+  'יולי',
+  'אוגוסט',
+  'ספטמבר',
+  'אוקטובר',
+  'נובמבר',
+  'דצמבר',
 ]
+
+const WEEKDAY_NAMES_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
 function toDateKey(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+function normalizeTimeInput(value) {
+  const digits = String(value || '').replace(/\D/g, '')
+  if (!digits) return ''
+
+  if (digits.length <= 2) {
+    const hour = Number(digits)
+    if (Number.isNaN(hour) || hour > 23) return ''
+    return `${String(hour).padStart(2, '0')}:00`
+  }
+
+  if (digits.length === 3) {
+    const hour = Number(digits.slice(0, 1))
+    const minute = Number(digits.slice(1, 3))
+    if (hour > 23 || minute > 59) return ''
+    return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+  }
+
+  const padded = digits.slice(0, 4)
+  const hour = Number(padded.slice(0, 2))
+  const minute = Number(padded.slice(2, 4))
+  if (hour > 23 || minute > 59) return ''
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
 }
 
 function getHoursBetween(startTime, endTime) {
@@ -45,8 +71,10 @@ export default function HoursPage() {
   const [entries, setEntries] = useState({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [savingDate, setSavingDate] = useState(null)
   const [workingDate, setWorkingDate] = useState(null)
+  const dirtyRef = useRef(new Set())
+  const entriesRef = useRef(entries)
+  entriesRef.current = entries
 
   const monthStart = useMemo(() => toDateKey(viewYear, viewMonth, 1), [viewYear, viewMonth])
   const monthEnd = useMemo(() => {
@@ -58,16 +86,17 @@ export default function HoursPage() {
     const daysCount = new Date(viewYear, viewMonth + 1, 0).getDate()
     return Array.from({ length: daysCount }, (_, index) => {
       const dayNumber = index + 1
-      const key = toDateKey(viewYear, viewMonth, dayNumber)
+      const date = new Date(viewYear, viewMonth, dayNumber)
       return {
-        key,
+        key: toDateKey(viewYear, viewMonth, dayNumber),
         dayNumber,
-        weekday: new Date(viewYear, viewMonth, dayNumber).toLocaleDateString('en-US', { weekday: 'long' }),
+        weekdayIndex: date.getDay(),
+        weekdayName: WEEKDAY_NAMES_HE[date.getDay()],
       }
     })
   }, [viewYear, viewMonth])
 
-  const monthTitle = `${MONTH_NAMES[viewMonth]} ${viewYear}`
+  const monthTitle = `${MONTH_NAMES_HE[viewMonth]} ${viewYear}`
 
   const loadHours = useCallback(async () => {
     if (!coach?.id) return
@@ -86,12 +115,14 @@ export default function HoursPage() {
           end_time: row.end_time || '',
           notes: row.notes || '',
           change_note: row.change_note || '',
+          has_change_note: Boolean(row.change_note),
         }
       }
       setEntries(map)
+      dirtyRef.current.clear()
     } catch (err) {
       console.error('Hours load error:', err)
-      setError('Failed to load hours for this month.')
+      setError('טעינת השעות נכשלה')
     } finally {
       setLoading(false)
     }
@@ -107,7 +138,7 @@ export default function HoursPage() {
     }, 0)
   }, [entries])
 
-  const updateEntryField = (date, field, value) => {
+  const updateField = (date, field, value, markDirty = true) => {
     setEntries((prev) => ({
       ...prev,
       [date]: {
@@ -115,21 +146,19 @@ export default function HoursPage() {
         end_time: prev[date]?.end_time || '',
         notes: prev[date]?.notes || '',
         change_note: prev[date]?.change_note || '',
+        has_change_note: prev[date]?.has_change_note || false,
         [field]: value,
       },
     }))
+    if (markDirty) dirtyRef.current.add(date)
   }
 
-  const saveDay = async (date) => {
+  const saveDate = useCallback(async (date, sourceEntries = null) => {
     if (!coach?.id) return
-    const entry = entries[date] || {}
-    if (!entry.start_time || !entry.end_time) {
-      setError('Start and finish hours are required to save.')
-      return
-    }
-
-    setError(null)
-    setSavingDate(date)
+    const dataStore = sourceEntries || entriesRef.current
+    const entry = dataStore[date]
+    if (!entry?.start_time || !entry?.end_time) return
+    setWorkingDate(date)
     try {
       const response = await fetch('/api/hours', {
         method: 'PUT',
@@ -140,22 +169,70 @@ export default function HoursPage() {
           start_time: entry.start_time,
           end_time: entry.end_time,
           notes: entry.notes || '',
-          change_note: entry.change_note || '',
+          change_note: entry.has_change_note ? entry.change_note || '' : '',
         }),
       })
       if (!response.ok) throw new Error('Failed to save')
-      await loadHours()
+      dirtyRef.current.delete(date)
     } catch (err) {
       console.error('Hours save error:', err)
-      setError(`Failed saving ${date}.`)
+      setError(`שמירה נכשלה עבור ${date}`)
     } finally {
-      setSavingDate(null)
+      setWorkingDate(null)
     }
-  }
+  }, [coach?.id])
+
+  const flushAllDirty = useCallback(async () => {
+    if (!coach?.id) return
+    const dirtyDates = Array.from(dirtyRef.current)
+    if (dirtyDates.length === 0) return
+    const current = entriesRef.current
+    const batch = dirtyDates
+      .map((date) => {
+        const item = current[date]
+        if (!item?.start_time || !item?.end_time) return null
+        return {
+          coach_id: coach.id,
+          date,
+          start_time: item.start_time,
+          end_time: item.end_time,
+          notes: item.notes || '',
+          change_note: item.has_change_note ? item.change_note || '' : '',
+        }
+      })
+      .filter(Boolean)
+
+    if (batch.length === 0) return
+    try {
+      const response = await fetch('/api/hours', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batch }),
+      })
+      if (!response.ok) throw new Error('Failed batch save')
+      dirtyRef.current.clear()
+    } catch (err) {
+      console.error('Hours batch save error:', err)
+      setError('שמירה אוטומטית נכשלה')
+    }
+  }, [coach?.id])
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        flushAllDirty()
+      }
+    }
+    window.addEventListener('beforeunload', flushAllDirty)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      window.removeEventListener('beforeunload', flushAllDirty)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [flushAllDirty])
 
   const clearDay = async (date) => {
     if (!coach?.id) return
-    setError(null)
     setWorkingDate(date)
     try {
       const response = await fetch('/api/hours', {
@@ -169,64 +246,37 @@ export default function HoursPage() {
         delete next[date]
         return next
       })
+      dirtyRef.current.delete(date)
     } catch (err) {
       console.error('Hours clear error:', err)
-      setError(`Failed clearing ${date}.`)
+      setError(`ניקוי נכשל עבור ${date}`)
     } finally {
       setWorkingDate(null)
     }
   }
 
   const duplicateSameWeekday = async (sourceDate) => {
-    if (!coach?.id) return
     const source = entries[sourceDate]
     if (!source?.start_time || !source?.end_time) return
-
-    const sourceDay = new Date(sourceDate).getDay()
+    const sourceWeekday = new Date(sourceDate).getDay()
     const updates = {}
     for (const day of days) {
       if (day.key === sourceDate) continue
-      const weekday = new Date(day.key).getDay()
-      if (weekday === sourceDay) {
+      if (day.weekdayIndex === sourceWeekday) {
         updates[day.key] = {
-          start_time: source.start_time,
-          end_time: source.end_time,
-          notes: source.notes || '',
-          change_note: source.change_note || '',
+          ...source,
         }
+        dirtyRef.current.add(day.key)
       }
     }
-
     setEntries((prev) => ({ ...prev, ...updates }))
-    setWorkingDate(sourceDate)
-    setError(null)
-    try {
-      const payload = Object.entries(updates).map(([date, entry]) => ({
-        coach_id: coach.id,
-        date,
-        start_time: entry.start_time,
-        end_time: entry.end_time,
-        notes: entry.notes,
-        change_note: entry.change_note,
-      }))
-      if (payload.length > 0) {
-        const response = await fetch('/api/hours', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ batch: payload }),
-        })
-        if (!response.ok) throw new Error('Failed duplicate save')
-      }
-      await loadHours()
-    } catch (err) {
-      console.error('Hours duplicate error:', err)
-      setError('Failed to duplicate hours.')
-    } finally {
-      setWorkingDate(null)
-    }
+    setTimeout(() => {
+      flushAllDirty()
+    }, 0)
   }
 
-  const goToPreviousMonth = () => {
+  const goToPreviousMonth = async () => {
+    await flushAllDirty()
     if (viewMonth === 0) {
       setViewMonth(11)
       setViewYear((prev) => prev - 1)
@@ -235,7 +285,8 @@ export default function HoursPage() {
     setViewMonth((prev) => prev - 1)
   }
 
-  const goToNextMonth = () => {
+  const goToNextMonth = async () => {
+    await flushAllDirty()
     if (viewMonth === 11) {
       setViewMonth(0)
       setViewYear((prev) => prev + 1)
@@ -245,20 +296,20 @@ export default function HoursPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3" dir="rtl">
       <div className="flex items-center justify-between">
-        <Button variant="outline" size="icon-sm" onClick={goToPreviousMonth}>
-          <ChevronLeft />
+        <Button variant="outline" size="icon-sm" onClick={goToNextMonth} title="חודש הבא">
+          <ChevronRight />
         </Button>
         <div className="text-center">
-          <h1 className="text-xl font-extrabold flex items-center justify-center gap-2">
-            <Clock size={22} />
+          <h1 className="text-lg font-extrabold flex items-center justify-center gap-2">
             {monthTitle}
+            <Clock size={18} />
           </h1>
-          <p className="text-sm text-muted-foreground">Monthly total: {monthlyTotal.toFixed(1)}h</p>
+          <p className="text-xs text-muted-foreground">סה״כ לחודש: {monthlyTotal.toFixed(1)} שעות</p>
         </div>
-        <Button variant="outline" size="icon-sm" onClick={goToNextMonth}>
-          <ChevronRight />
+        <Button variant="outline" size="icon-sm" onClick={goToPreviousMonth} title="חודש קודם">
+          <ChevronLeft />
         </Button>
       </div>
 
@@ -269,94 +320,131 @@ export default function HoursPage() {
       ) : null}
 
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-3">
-            {loading ? (
-              <div className="text-sm text-muted-foreground">Loading month...</div>
-            ) : (
-              days.map((day) => {
-                const dayEntry = entries[day.key] || {
+        <CardContent className="pt-3">
+          {loading ? (
+            <div className="text-sm text-muted-foreground">טוען...</div>
+          ) : (
+            <div className="space-y-2">
+              <div className="hidden md:grid md:grid-cols-[110px_100px_100px_1fr_auto] gap-2 text-xs text-muted-foreground px-2">
+                <div>יום</div>
+                <div>התחלה</div>
+                <div>סיום</div>
+                <div>הערה</div>
+                <div>פעולות</div>
+              </div>
+
+              {days.map((day) => {
+                const row = entries[day.key] || {
                   start_time: '',
                   end_time: '',
                   notes: '',
                   change_note: '',
+                  has_change_note: false,
                 }
-                const hasHours = Boolean(dayEntry.start_time && dayEntry.end_time)
-                const busy = savingDate === day.key || workingDate === day.key
+                const hasHours = Boolean(row.start_time && row.end_time)
+                const busy = workingDate === day.key
 
                 return (
-                  <div key={day.key} className="rounded-lg border p-3 space-y-2">
-                    <div className="font-semibold text-sm">
-                      {day.weekday}, {day.dayNumber}
+                  <div
+                    key={day.key}
+                    className="grid grid-cols-1 md:grid-cols-[110px_100px_100px_1fr_auto] gap-2 rounded-md border p-2 items-start"
+                  >
+                    <div className="text-sm font-semibold pt-1">
+                      {day.weekdayName}, {day.dayNumber}
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-xs text-muted-foreground">Start</label>
-                        <Input
-                          type="time"
-                          value={dayEntry.start_time}
-                          onChange={(event) => updateEntryField(day.key, 'start_time', event.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">Finish</label>
-                        <Input
-                          type="time"
-                          value={dayEntry.end_time}
-                          onChange={(event) => updateEntryField(day.key, 'end_time', event.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-xs text-muted-foreground">Comment</label>
+
+                    <Input
+                      className="h-8 text-sm"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="10 / 1030"
+                      value={row.start_time}
+                      onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
+                      onBlur={(event) => {
+                        const normalized = normalizeTimeInput(event.target.value)
+                        updateField(day.key, 'start_time', normalized)
+                        saveDate(day.key, {
+                          ...entriesRef.current,
+                          [day.key]: { ...entriesRef.current[day.key], start_time: normalized },
+                        })
+                      }}
+                    />
+
+                    <Input
+                      className="h-8 text-sm"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="10 / 1030"
+                      value={row.end_time}
+                      onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
+                      onBlur={(event) => {
+                        const normalized = normalizeTimeInput(event.target.value)
+                        updateField(day.key, 'end_time', normalized)
+                        saveDate(day.key, {
+                          ...entriesRef.current,
+                          [day.key]: { ...entriesRef.current[day.key], end_time: normalized },
+                        })
+                      }}
+                    />
+
+                    <div className="space-y-1">
+                      <textarea
+                        className="w-full min-h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                        placeholder="הערה"
+                        value={row.notes}
+                        onChange={(event) => updateField(day.key, 'notes', event.target.value)}
+                        onBlur={() => saveDate(day.key)}
+                      />
+                      {row.has_change_note ? (
                         <textarea
-                          className="w-full min-h-16 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                          value={dayEntry.notes}
-                          onChange={(event) => updateEntryField(day.key, 'notes', event.target.value)}
+                          className="w-full min-h-8 rounded-md border border-input bg-transparent px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                          placeholder="דחייה / החלפה / החלפת מדריך"
+                          value={row.change_note}
+                          onChange={(event) => updateField(day.key, 'change_note', event.target.value)}
+                          onBlur={() => saveDate(day.key)}
                         />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          Postponed / switched activity / switched instructor note
-                        </label>
-                        <textarea
-                          className="w-full min-h-16 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                          value={dayEntry.change_note}
-                          onChange={(event) => updateEntryField(day.key, 'change_note', event.target.value)}
-                        />
-                      </div>
+                      ) : null}
+                      <button
+                        className="text-xs text-muted-foreground underline underline-offset-2"
+                        onClick={() => {
+                          updateField(day.key, 'has_change_note', !row.has_change_note)
+                          if (row.has_change_note) updateField(day.key, 'change_note', '')
+                        }}
+                        type="button"
+                      >
+                        {row.has_change_note ? 'הסתרת הערת שינוי' : 'הוספת הערת דחייה/החלפה'}
+                      </button>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button size="sm" onClick={() => saveDay(day.key)} disabled={busy}>
-                        {savingDate === day.key ? 'Saving...' : 'Save'}
-                      </Button>
+
+                    <div className="flex md:flex-col gap-1">
                       {hasHours ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => duplicateSameWeekday(day.key)}
-                            disabled={busy}
-                          >
-                            Duplicate to same weekday
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => clearDay(day.key)}
-                            disabled={busy}
-                          >
-                            Clear
-                          </Button>
-                        </>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="h-8 text-xs"
+                          onClick={() => duplicateSameWeekday(day.key)}
+                          disabled={busy}
+                        >
+                          שכפול יום זהה
+                        </Button>
+                      ) : null}
+                      {hasHours ? (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="h-8 text-xs"
+                          onClick={() => clearDay(day.key)}
+                          disabled={busy}
+                        >
+                          ניקוי
+                        </Button>
                       ) : null}
                     </div>
                   </div>
                 )
-              })
-            )}
-          </div>
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
