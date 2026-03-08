@@ -32,7 +32,7 @@ export async function POST(request) {
   try {
     const supabase = getSupabaseClient()
     const body = await request.json()
-    const { first_name, last_name, birth_date, parent_name, parent_phone, shirt_size, gender, boat } = body
+    const { first_name, last_name, birth_date, join_date, parent_name, parent_phone, shirt_size, gender, boat } = body
 
     if (!first_name || !last_name) {
       return Response.json(
@@ -41,19 +41,29 @@ export async function POST(request) {
       )
     }
 
-    const { data, error } = await supabase
-      .from('sailors')
-      .insert([{
-        first_name,
-        last_name,
-        birth_date: birth_date || null,
-        parent_name: parent_name || '',
-        parent_phone: parent_phone || '',
-        shirt_size: shirt_size || '',
-        gender: gender || '',
-        boat: boat || '',
-      }])
-      .select()
+    const sailorPayload = {
+      first_name,
+      last_name,
+      birth_date: birth_date || null,
+      join_date: join_date || null,
+      parent_name: parent_name || '',
+      parent_phone: parent_phone || '',
+      shirt_size: shirt_size || '',
+      gender: gender || '',
+      boat: boat || '',
+    }
+    let data = null
+    let error = null
+    const createRes = await supabase.from('sailors').insert([sailorPayload]).select()
+    data = createRes.data
+    error = createRes.error
+    if (error && `${error.message || ''}`.toLowerCase().includes('join_date')) {
+      const fallbackPayload = { ...sailorPayload }
+      delete fallbackPayload.join_date
+      const fallbackRes = await supabase.from('sailors').insert([fallbackPayload]).select()
+      data = fallbackRes.data
+      error = fallbackRes.error
+    }
 
     if (error) throw error
     return Response.json(data[0], { status: 201 })

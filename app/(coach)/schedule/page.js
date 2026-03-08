@@ -62,6 +62,8 @@ export default function SchedulePage() {
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [sailorModalOpen, setSailorModalOpen] = useState(false)
   const [substituteModalOpen, setSubstituteModalOpen] = useState(false)
+  const [groupSailors, setGroupSailors] = useState([])
+  const [availableSailors, setAvailableSailors] = useState([])
   const [addGroupDialogOpen, setAddGroupDialogOpen] = useState(false)
   const [selectedGroupDay, setSelectedGroupDay] = useState(null)
   const [newGroupName, setNewGroupName] = useState('')
@@ -118,15 +120,18 @@ export default function SchedulePage() {
   const mergedSessions = useMemo(() => {
     const realSessions = Array.isArray(sessions) ? sessions : []
     const allGroups = Array.isArray(groups) ? groups : []
-    const now = new Date()
+    const today = new Date()
+    const selectedDateObj = new Date(`${selectedMonthDate}T12:00:00`)
     const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
     const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
-    const weekStart = new Date(now)
-    weekStart.setDate(now.getDate() - now.getDay())
+    const weekStart = new Date(currentDate)
+    weekStart.setDate(currentDate.getDate() - currentDate.getDay())
     const weekEnd = new Date(weekStart)
     weekEnd.setDate(weekStart.getDate() + 6)
-    const rangeStart = monthStart < weekStart ? monthStart : weekStart
-    const rangeEnd = monthEnd > weekEnd ? monthEnd : weekEnd
+    const anchors = [monthStart, weekStart, today, selectedDateObj]
+    const anchorsEnd = [monthEnd, weekEnd, today, selectedDateObj]
+    const rangeStart = new Date(Math.min(...anchors.map((d) => d.getTime())))
+    const rangeEnd = new Date(Math.max(...anchorsEnd.map((d) => d.getTime())))
 
     const existingKeys = new Set(
       realSessions
@@ -163,7 +168,7 @@ export default function SchedulePage() {
     }
 
     return [...realSessions, ...virtualSessions]
-  }, [sessions, groups, currentDate])
+  }, [sessions, groups, currentDate, selectedMonthDate])
 
   const filteredSessions = useMemo(() => {
     return mergedSessions.filter(s => {
@@ -219,8 +224,7 @@ export default function SchedulePage() {
             type="button"
             disabled={!canManageSession}
             onClick={() => {
-              setSelectedSession(session)
-              setSailorModalOpen(true)
+              handleOpenSailorModal(session)
             }}
           >
             הוספה / הסרה חניכים
@@ -304,10 +308,50 @@ export default function SchedulePage() {
   }
 
   const handleEditSailors = (sessionId) => {
-    const session = sessions.find(s => s.id === sessionId)
-    setSelectedSession(session)
+    const session = mergedSessions.find(s => s.id === sessionId)
     setDetailModalOpen(false)
+    if (session) handleOpenSailorModal(session)
+  }
+
+  const handleOpenSailorModal = async (session) => {
+    setSelectedSession(session)
     setSailorModalOpen(true)
+    if (!session?.group_id) {
+      setGroupSailors([])
+      setAvailableSailors([])
+      return
+    }
+    try {
+      const [groupSailorsRes, sailorsRes] = await Promise.all([
+        fetch(`/api/groups/${session.group_id}/sailors`),
+        fetch('/api/sailors'),
+      ])
+      const [groupSailorsData, sailorsData] = await Promise.all([groupSailorsRes.json(), sailorsRes.json()])
+      const current = Array.isArray(groupSailorsData) ? groupSailorsData : []
+      const all = Array.isArray(sailorsData) ? sailorsData : []
+      setGroupSailors(current)
+      setAvailableSailors(all.filter((s) => !current.some((c) => c.id === s.id)))
+    } catch (error) {
+      console.error('Error loading sailors for group:', error)
+      setGroupSailors([])
+      setAvailableSailors([])
+    }
+  }
+
+  const handleAddSailorToGroup = async (groupId, sailorId, newSailor) => {
+    const res = await fetch(`/api/groups/${groupId}/sailors`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sailor_id: sailorId, new_sailor: newSailor }),
+    })
+    if (!res.ok) throw new Error('Failed to add sailor')
+    await handleOpenSailorModal(selectedSession)
+  }
+
+  const handleRemoveSailorFromGroup = async (groupId, sailorId) => {
+    const res = await fetch(`/api/groups/${groupId}/sailors?sailor_id=${sailorId}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to remove sailor')
+    await handleOpenSailorModal(selectedSession)
   }
 
   const handleDecline = async (sessionId) => {
@@ -619,7 +663,11 @@ export default function SchedulePage() {
       />
 
       <SailorManagementModal
-        session={selectedSession}
+        groupId={selectedSession?.group_id}
+        sailors={groupSailors}
+        availableSailors={availableSailors}
+        onAddSailor={handleAddSailorToGroup}
+        onRemoveSailor={handleRemoveSailorFromGroup}
         isOpen={sailorModalOpen}
         onClose={() => setSailorModalOpen(false)}
       />

@@ -6,14 +6,34 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Users, User } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Users, User, Pencil, Plus } from 'lucide-react'
 
 export default function SailorsPage() {
   const { coach } = useAuth()
   const [sailors, setSailors] = useState([])
-  const [groups, setGroups] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingSailor, setEditingSailor] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({
+    first_name: '',
+    last_name: '',
+    gender: '',
+    boat: '',
+    birth_date: '',
+    join_date: '',
+    shirt_size: '',
+    parent_name: '',
+    parent_phone: '',
+  })
+
+  const shirtSizes = ['6', '8', '10', '12', '14', 'XS', 'S', 'M', 'L', 'XL', 'XXL']
+  const boatOptions = ['Optimist', 'RS Feva', 'RS Toura']
 
   useEffect(() => {
     const loadData = async () => {
@@ -21,16 +41,9 @@ export default function SailorsPage() {
       setLoading(true)
       setError(null)
       try {
-        const [sailorRes, groupRes] = await Promise.all([
-          fetch('/api/sailors'),
-          fetch(`/api/groups?coach_id=${coach.id}`)
-        ])
-        const [sailorData, groupData] = await Promise.all([
-          sailorRes.json(),
-          groupRes.json()
-        ])
+        const sailorRes = await fetch('/api/sailors')
+        const sailorData = await sailorRes.json()
         setSailors(sailorData)
-        setGroups(groupData)
       } catch (err) {
         console.error('Error loading data:', err)
         setError('שגיאה בטעינת הנתונים. נסה לרענן את הדף.')
@@ -41,13 +54,77 @@ export default function SailorsPage() {
     loadData()
   }, [coach])
 
+  const openCreate = () => {
+    setEditingSailor(null)
+    setForm({
+      first_name: '',
+      last_name: '',
+      gender: '',
+      boat: '',
+      birth_date: '',
+      join_date: '',
+      shirt_size: '',
+      parent_name: '',
+      parent_phone: '',
+    })
+    setDialogOpen(true)
+  }
+
+  const openEdit = (sailor) => {
+    setEditingSailor(sailor)
+    setForm({
+      first_name: sailor.first_name || '',
+      last_name: sailor.last_name || '',
+      gender: sailor.gender || '',
+      boat: sailor.boat || '',
+      birth_date: sailor.birth_date || '',
+      join_date: sailor.join_date || '',
+      shirt_size: sailor.shirt_size || '',
+      parent_name: sailor.parent_name || '',
+      parent_phone: sailor.parent_phone || '',
+    })
+    setDialogOpen(true)
+  }
+
+  const handleSave = async () => {
+    if (!form.first_name || !form.last_name) return
+    setSaving(true)
+    try {
+      const url = editingSailor ? `/api/sailors/${editingSailor.id}` : '/api/sailors'
+      const method = editingSailor ? 'PATCH' : 'POST'
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error('Failed saving sailor')
+      const saved = await res.json()
+      if (editingSailor) {
+        setSailors((prev) => prev.map((s) => (s.id === saved.id ? saved : s)))
+      } else {
+        setSailors((prev) => [saved, ...prev])
+      }
+      setDialogOpen(false)
+    } catch (err) {
+      console.error('Save sailor error:', err)
+      setError('שגיאה בשמירת חניך')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-xl font-extrabold flex items-center gap-2"><Users size={24} /> חניכים</h1>
         <p className="text-muted-foreground text-sm">
-          {sailors.length} חניכים בסה"כ
+          {sailors.length} חניכים בסה&quot;כ
         </p>
+        <div className="mt-3">
+          <Button onClick={openCreate}>
+            <Plus size={16} /> הוסף חניך חדש
+          </Button>
+        </div>
       </div>
 
       {error ? (
@@ -97,11 +174,55 @@ export default function SailorsPage() {
                     </div>
                   ) : null}
                 </div>
+                <Button size="sm" variant="outline" onClick={() => openEdit(sailor)}>
+                  <Pencil size={14} /> ערוך
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent dir="rtl">
+          <DialogHeader>
+            <DialogTitle>{editingSailor ? 'עריכת חניך' : 'חניך חדש'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>שם פרטי</Label>
+            <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
+            <Label>שם משפחה</Label>
+            <Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
+            <Label>מין</Label>
+            <select className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm" value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}>
+              <option value="">בחר</option>
+              <option value="male">זכר</option>
+              <option value="female">נקבה</option>
+            </select>
+            <Label>סירה</Label>
+            <select className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm" value={form.boat} onChange={(e) => setForm({ ...form, boat: e.target.value })}>
+              <option value="">בחר</option>
+              {boatOptions.map((boat) => <option key={boat} value={boat}>{boat}</option>)}
+            </select>
+            <Label>תאריך לידה</Label>
+            <Input type="date" value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} />
+            <Label>תאריך הצטרפות</Label>
+            <Input type="date" value={form.join_date} onChange={(e) => setForm({ ...form, join_date: e.target.value })} />
+            <Label>מידת חולצה</Label>
+            <select className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm" value={form.shirt_size} onChange={(e) => setForm({ ...form, shirt_size: e.target.value })}>
+              <option value="">בחר</option>
+              {shirtSizes.map((size) => <option key={size} value={size}>{size}</option>)}
+            </select>
+            <Label>שם הורה</Label>
+            <Input value={form.parent_name} onChange={(e) => setForm({ ...form, parent_name: e.target.value })} />
+            <Label>טלפון הורה</Label>
+            <Input value={form.parent_phone} onChange={(e) => setForm({ ...form, parent_phone: e.target.value })} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={saving}>ביטול</Button>
+            <Button onClick={handleSave} disabled={saving || !form.first_name || !form.last_name}>{saving ? 'שומר...' : 'שמור'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
