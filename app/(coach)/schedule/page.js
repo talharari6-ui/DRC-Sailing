@@ -208,19 +208,23 @@ export default function SchedulePage() {
   }, [filteredSessions])
 
   const dayViewSessions = useMemo(() => getSessionsForDate(selectedDayDate), [getSessionsForDate, selectedDayDate])
+  const safeSelectedMonthDate = useMemo(() => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(selectedMonthDate || ''))) return selectedMonthDate
+    return toDateStr(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1))
+  }, [selectedMonthDate, currentDate])
   const selectedMonthDateSessions = useMemo(
-    () => getSessionsForDate(selectedMonthDate),
-    [getSessionsForDate, selectedMonthDate]
+    () => getSessionsForDate(safeSelectedMonthDate),
+    [getSessionsForDate, safeSelectedMonthDate]
   )
 
-  const monthSelectedDateObj = useMemo(() => new Date(`${selectedMonthDate}T12:00:00`), [selectedMonthDate])
+  const monthSelectedDateObj = useMemo(() => new Date(`${safeSelectedMonthDate}T12:00:00`), [safeSelectedMonthDate])
   const monthSelectedDay = useMemo(() => ({
-    date: selectedMonthDate,
+    date: safeSelectedMonthDate,
     dayName: HEBREW_DAY_NAMES[monthSelectedDateObj.getDay()],
     dayNum: monthSelectedDateObj.getDate(),
     monthNum: String(monthSelectedDateObj.getMonth() + 1).padStart(2, '0'),
     dateObj: monthSelectedDateObj,
-  }), [monthSelectedDateObj, selectedMonthDate])
+  }), [monthSelectedDateObj, safeSelectedMonthDate])
   const daySelectedDateObj = useMemo(() => new Date(`${selectedDayDate}T12:00:00`), [selectedDayDate])
   const daySelectedMeta = useMemo(() => ({
     date: selectedDayDate,
@@ -705,6 +709,14 @@ export default function SchedulePage() {
 
       {viewMode === 'month' ? (
         <div className="space-y-3">
+          <Calendar
+            year={currentDate.getFullYear()}
+            month={currentDate.getMonth()}
+            onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+            onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+            onDateClick={handleDateClick}
+            getDayContent={getDayContent}
+          />
           {loading ? (
             <div className="text-center p-2 text-muted-foreground text-xs">טוען פעילויות...</div>
           ) : null}
@@ -751,14 +763,6 @@ export default function SchedulePage() {
               )}
             </CardContent>
           </Card>
-          <Calendar
-            year={currentDate.getFullYear()}
-            month={currentDate.getMonth()}
-            onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-            onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-            onDateClick={handleDateClick}
-            getDayContent={getDayContent}
-          />
         </div>
       ) : null}
 
