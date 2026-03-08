@@ -10,7 +10,7 @@ import {
 export function Modal({ isOpen, onClose, title, children }) {
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="bottom" className="bg-background rounded-t-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+      <SheetContent side="bottom" className="bg-background rounded-t-2xl max-h-[80vh] overflow-y-auto p-4 sm:p-6 pb-24">
         <SheetHeader>
           <SheetTitle className="text-lg sm:text-xl font-extrabold">{title}</SheetTitle>
         </SheetHeader>

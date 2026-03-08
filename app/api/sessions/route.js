@@ -5,6 +5,7 @@ export async function GET(request) {
     const supabase = getSupabaseClient()
     const searchParams = request.nextUrl.searchParams
     const groupId = searchParams.get('group_id')
+    const coachId = searchParams.get('coach_id')
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
 
@@ -15,14 +16,15 @@ export async function GET(request) {
       selectFields = `
         *,
         groups(name, color),
-        coaches(name, email),
-        group_sailors(sailor_id, sailors(id, name, level))
+        coaches(name),
+        attendance(sailor_id, present, absence_reason)
       `
     }
 
     let query = supabase.from('sessions').select(selectFields)
 
     if (groupId) query = query.eq('group_id', groupId)
+    if (coachId) query = query.eq('coach_id', coachId)
     if (dateFrom) query = query.gte('date', dateFrom)
     if (dateTo) query = query.lte('date', dateTo)
 

@@ -1,4 +1,4 @@
-import { supabase } from '@/src/lib/supabase'
+import { getSupabaseClient } from '@/src/lib/supabase'
 
 export async function GET(request, { params }) {
   try {
@@ -23,7 +23,8 @@ export async function POST(request, { params }) {
     const supabase = getSupabaseClient()
     const { id: sessionId } = params
     const body = await request.json()
-    const { sailor_id, present, absence_reason } = body
+    const { sailor_id, present, absence_reason, reason } = body
+    const resolvedAbsenceReason = absence_reason ?? reason ?? null
 
     if (!sailor_id) {
       return Response.json(
@@ -48,7 +49,7 @@ export async function POST(request, { params }) {
         .from('attendance')
         .update({
           present,
-          absence_reason: absence_reason || null,
+          absence_reason: resolvedAbsenceReason,
         })
         .eq('session_id', sessionId)
         .eq('sailor_id', sailor_id)
@@ -64,7 +65,7 @@ export async function POST(request, { params }) {
           session_id: sessionId,
           sailor_id,
           present,
-          absence_reason: absence_reason || null,
+          absence_reason: resolvedAbsenceReason,
         }])
         .select()
 

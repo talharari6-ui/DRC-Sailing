@@ -1,8 +1,7 @@
 import Modal from './Modal'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Check, X, Pencil, RefreshCw, XOctagon } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 
 export default function SessionDetailModal({
   session,
@@ -10,24 +9,26 @@ export default function SessionDetailModal({
   onClose,
   coachId,
   onAttendanceUpdate,
-  onSubstituteRequest,
-  onDecline,
-  onEditSailors
 }) {
   const [marking, setMarking] = useState(false)
   const [attendance, setAttendance] = useState({})
 
+  useEffect(() => {
+    const nextAttendance = {}
+    for (const record of session?.attendance || []) {
+      if (!record?.sailor_id) continue
+      nextAttendance[record.sailor_id] = {
+        present: record.present,
+        reason: record.absence_reason || null,
+      }
+    }
+    setAttendance(nextAttendance)
+  }, [session])
+
   if (!session) return null
 
-  const isOwnSession = session.coach_id === coachId
-  const isSubstitute = session.substitute_coach_id === coachId
-  const canMarkAttendance = isOwnSession || isSubstitute
+  const isAssignedInstructor = session.coach_id === coachId || session.substitute_coach_id === coachId
 
-  const formatTime = (time) => {
-    if (!time) return ''
-    const [hours, mins] = time.split(':')
-    return `${hours}:${mins}`
-  }
 
   const handleMarkAttendance = async (sailorId, present, reason = null) => {
     setMarking(true)
@@ -44,34 +45,15 @@ export default function SessionDetailModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={session.groups?.name || 'קבוצה'}>
-      <div className="px-4 pb-5 sm:px-6 sm:pb-6" dir="rtl">
-        {/* Session Info */}
-        <div className="mb-5">
-          <div className="grid grid-cols-2 gap-4 mb-3">
-            <div>
-              <div className="text-muted-foreground text-xs">תאריך</div>
-              <div className="text-foreground text-sm">{session.date}</div>
-            </div>
-            <div>
-              <div className="text-muted-foreground text-xs">שעה</div>
-              <div className="text-foreground text-sm">
-                {formatTime(session.start_time)} - {formatTime(session.end_time)}
-              </div>
-            </div>
-          </div>
-          <div>
-            <div className="text-muted-foreground text-xs">מדריך</div>
-            <div className="text-foreground text-sm">
-              {session.coaches?.name || 'לא מוגדר'}
-            </div>
-          </div>
-        </div>
-
-        {/* Attendance */}
-        {canMarkAttendance ? (
+      <div className="px-4 pb-24 sm:px-6 sm:pb-24" dir="rtl">
+        {isAssignedInstructor ? (
           <div className="mb-5">
             <div className="text-xs font-semibold mb-2 text-foreground">
               נוכחות חניכים
+            </div>
+            <div className="mb-3 rounded-md bg-secondary px-3 py-2 text-[11px] text-muted-foreground">
+              הנוכחות נשמרת אוטומטית בכל לחיצה.
+              {marking ? ' שומר...' : ' אין צורך בכפתור שמירה.'}
             </div>
             {session.group_sailors && session.group_sailors.length > 0 ? (
               <div className="flex flex-col gap-2.5">
@@ -81,27 +63,27 @@ export default function SessionDetailModal({
                   return (
                     <div
                       key={sailor.id}
-                      className="flex justify-between items-center p-2 bg-secondary rounded-md text-sm"
+                      className="flex items-center justify-between gap-3 p-2 bg-secondary rounded-md text-sm"
                     >
-                      <span>{sailor.name}</span>
-                      <div className="flex gap-1">
+                      <span className="flex-1 text-right">{`${sailor.first_name || ''} ${sailor.last_name || sailor.name || ''}`.trim()}</span>
+                      <div className="flex gap-1 shrink-0">
                         <Button
                           size="sm"
                           variant={attendance[sailor.id]?.present === true ? 'default' : 'outline'}
                           onClick={() => handleMarkAttendance(sailor.id, true)}
                           disabled={marking}
-                          className={attendance[sailor.id]?.present === true ? 'bg-drc-green hover:bg-drc-green/80 h-8 px-3' : 'h-8 px-3'}
+                          className={attendance[sailor.id]?.present === true ? 'bg-drc-green hover:bg-drc-green/80 h-7 w-7 p-0' : 'h-7 w-7 p-0'}
                         >
-                          <Check size={16} />
+                          <Check size={14} />
                         </Button>
                         <Button
                           size="sm"
                           variant={attendance[sailor.id]?.present === false ? 'destructive' : 'outline'}
                           onClick={() => handleMarkAttendance(sailor.id, false, 'היעדרות')}
                           disabled={marking}
-                          className="h-8 px-3"
+                          className="h-7 w-7 p-0"
                         >
-                          <X size={16} />
+                          <X size={14} />
                         </Button>
                       </div>
                     </div>
@@ -114,35 +96,8 @@ export default function SessionDetailModal({
               </div>
             )}
           </div>
-        ) : null}
+        ) : <div className="text-muted-foreground text-xs">אין הרשאה לנוכחות</div>}
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3 mt-6">
-          {isOwnSession ? (
-            <>
-              <Button onClick={() => onEditSailors(session.id)}>
-                <Pencil size={16} /> ערוך חניכים
-              </Button>
-              <Button variant="secondary" onClick={() => onSubstituteRequest(session.id)}>
-                <RefreshCw size={16} /> בקשה להחלפה
-              </Button>
-              <Button variant="destructive" onClick={() => onDecline(session.id)}>
-                <XOctagon size={16} /> דחייה
-              </Button>
-            </>
-          ) : null}
-
-          {isSubstitute ? (
-            <>
-              <Button onClick={() => onEditSailors(session.id)}>
-                <Pencil size={16} /> ערוך חניכים
-              </Button>
-              <Button variant="destructive" onClick={() => onDecline(session.id)}>
-                <XOctagon size={16} /> דחייה
-              </Button>
-            </>
-          ) : null}
-        </div>
       </div>
     </Modal>
   )

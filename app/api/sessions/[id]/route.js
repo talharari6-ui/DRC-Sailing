@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
       .select(`
         *,
         groups(name, color),
-        coaches(name, email),
+        coaches(name),
         attendance(sailor_id, present, absence_reason)
       `)
       .eq('id', sessionId)

@@ -8,16 +8,15 @@ export async function GET(request, { params }) {
     // Get sailors in this group via group_sailors junction table
     const { data, error } = await supabase
       .from('group_sailors')
-      .select('sailor_id, sailors(id, name, age, level)')
+      .select('sailor_id, sailors(id, first_name, last_name, gender, boat, birth_date, join_date, shirt_size, parent_name, parent_phone)')
       .eq('group_id', groupId)
-      .order('sailors(name)')
 
     if (error) throw error
 
     // Flatten the response
     const sailors = data.map(row => ({
       id: row.sailor_id,
-      ...row.sailors[0]
+      ...(Array.isArray(row.sailors) ? row.sailors[0] : row.sailors)
     }))
 
     return Response.json(sailors)
@@ -37,14 +36,30 @@ export async function POST(request, { params }) {
 
     // If new sailor, create it first
     if (new_sailor && !sailor_id) {
-      const { data: newSailor, error: createError } = await supabase
-        .from('sailors')
-        .insert([{
-          name: new_sailor.name,
-          age: new_sailor.age,
-          level: new_sailor.level || 'beginner'
-        }])
-        .select()
+      const sailorPayload = {
+        first_name: new_sailor.first_name || '',
+        last_name: new_sailor.last_name || '',
+        birth_date: new_sailor.birth_date || null,
+        parent_name: new_sailor.parent_name || '',
+        parent_phone: new_sailor.parent_phone || '',
+        shirt_size: new_sailor.shirt_size || '',
+        gender: new_sailor.gender || '',
+        boat: new_sailor.boat || '',
+        join_date: new_sailor.join_date || null,
+      }
+
+      let newSailor = null
+      let createError = null
+      const createRes = await supabase.from('sailors').insert([sailorPayload]).select()
+      newSailor = createRes.data
+      createError = createRes.error
+      if (createError && `${createError.message || ''}`.toLowerCase().includes('join_date')) {
+        const fallbackPayload = { ...sailorPayload }
+        delete fallbackPayload.join_date
+        const fallbackRes = await supabase.from('sailors').insert([fallbackPayload]).select()
+        newSailor = fallbackRes.data
+        createError = fallbackRes.error
+      }
 
       if (createError) throw createError
       sailorToAddId = newSailor[0].id

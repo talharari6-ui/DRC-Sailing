@@ -1,16 +1,28 @@
-import { supabase } from '@/src/lib/supabase'
+import { getSupabaseClient } from '@/src/lib/supabase'
 
 export async function PATCH(request, { params }) {
   try {
     const supabase = getSupabaseClient()
     const { id } = params
     const body = await request.json()
+    let updates = { ...body }
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('sailors')
-      .update(body)
+      .update(updates)
       .eq('id', id)
       .select()
+
+    if (error && `${error.message || ''}`.toLowerCase().includes('join_date')) {
+      delete updates.join_date
+      const fallback = await supabase
+        .from('sailors')
+        .update(updates)
+        .eq('id', id)
+        .select()
+      data = fallback.data
+      error = fallback.error
+    }
 
     if (error) throw error
     return Response.json(data[0])
