@@ -364,45 +364,57 @@ export default function HoursPage() {
                     className="rounded-md border p-2 space-y-2"
                   >
                     <div className="grid grid-cols-[96px_1fr_1fr_auto] gap-2 items-center">
-                      <div className="text-sm font-semibold">
-                        {day.weekdayName}, {day.dayNumber}
+                      <div>
+                        <div className="text-sm font-semibold">
+                          {day.weekdayName}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {day.dayNumber}.{viewMonth + 1}
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">התחלה</div>
+                        <Input
+                          className="h-8 text-sm"
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="10 / 1030"
+                          value={row.start_time}
+                          onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
+                          onBlur={(event) => {
+                            const normalized = normalizeTimeInput(event.target.value)
+                            updateField(day.key, 'start_time', normalized)
+                            saveDate(day.key, {
+                              ...entriesRef.current,
+                              [day.key]: { ...entriesRef.current[day.key], start_time: normalized },
+                            })
+                          }}
+                        />
                       </div>
 
-                      <Input
-                        className="h-8 text-sm"
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="10 / 1030"
-                        value={row.start_time}
-                        onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
-                        onBlur={(event) => {
-                          const normalized = normalizeTimeInput(event.target.value)
-                          updateField(day.key, 'start_time', normalized)
-                          saveDate(day.key, {
-                            ...entriesRef.current,
-                            [day.key]: { ...entriesRef.current[day.key], start_time: normalized },
-                          })
-                        }}
-                      />
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">סיום</div>
+                        <Input
+                          className="h-8 text-sm"
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="10 / 1030"
+                          value={row.end_time}
+                          onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
+                          onBlur={(event) => {
+                            const normalized = normalizeTimeInput(event.target.value)
+                            updateField(day.key, 'end_time', normalized)
+                            saveDate(day.key, {
+                              ...entriesRef.current,
+                              [day.key]: { ...entriesRef.current[day.key], end_time: normalized },
+                            })
+                          }}
+                        />
+                      </div>
 
-                      <Input
-                        className="h-8 text-sm"
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="10 / 1030"
-                        value={row.end_time}
-                        onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
-                        onBlur={(event) => {
-                          const normalized = normalizeTimeInput(event.target.value)
-                          updateField(day.key, 'end_time', normalized)
-                          saveDate(day.key, {
-                            ...entriesRef.current,
-                            [day.key]: { ...entriesRef.current[day.key], end_time: normalized },
-                          })
-                        }}
-                      />
-
-                      <div className="flex gap-1">
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">פעולות</div>
+                        <div className="flex gap-1">
                         {hasHours ? (
                           <Button
                             size="sm"
@@ -425,6 +437,7 @@ export default function HoursPage() {
                             ניקוי
                           </Button>
                         ) : null}
+                        </div>
                       </div>
                     </div>
 
