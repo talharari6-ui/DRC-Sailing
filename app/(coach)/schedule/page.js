@@ -709,6 +709,12 @@ export default function SchedulePage() {
 
       {viewMode === 'month' ? (
         <div className="space-y-3">
+          <Card>
+            <CardContent className="p-3">
+              <div className="text-sm font-bold">תצוגת חודש פעילה</div>
+              <div className="text-xs text-muted-foreground">כאן מוצג לוח החודש והפעילויות לפי יום.</div>
+            </CardContent>
+          </Card>
           <Calendar
             year={currentDate.getFullYear()}
             month={currentDate.getMonth()}
