@@ -4,21 +4,22 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/src/hooks/useAuth'
 import { cn } from '@/lib/utils'
+import { Calendar, Users, Clock, BarChart3, User, Crown, GraduationCap, Ban, RefreshCw } from 'lucide-react'
 
 const COACH_ROUTES = [
-  { href: '/schedule', icon: '📅', label: 'לוח' },
-  { href: '/sailors', icon: '👥', label: 'חניכים' },
-  { href: '/hours', icon: '⏰', label: 'שעות' },
-  { href: '/history', icon: '📊', label: 'היסטוריה' },
-  { href: '/profile', icon: '👤', label: 'פרופיל' },
+  { href: '/schedule', icon: Calendar, label: 'לוח' },
+  { href: '/sailors', icon: Users, label: 'חניכים' },
+  { href: '/hours', icon: Clock, label: 'שעות' },
+  { href: '/history', icon: BarChart3, label: 'היסטוריה' },
+  { href: '/profile', icon: User, label: 'פרופיל' },
 ]
 
 const ADMIN_ROUTES = [
-  { href: '/admin/dashboard', icon: '👑', label: 'ניהול' },
-  { href: '/admin/coaches', icon: '👨‍🏫', label: 'מדריכים' },
-  { href: '/admin/sailors', icon: '👥', label: 'חניכים' },
-  { href: '/admin/absences', icon: '🚫', label: 'חיסורים' },
-  { href: '/admin/substitutions', icon: '🔄', label: 'החלפות' },
+  { href: '/admin/dashboard', icon: Crown, label: 'ניהול' },
+  { href: '/admin/coaches', icon: GraduationCap, label: 'מדריכים' },
+  { href: '/admin/sailors', icon: Users, label: 'חניכים' },
+  { href: '/admin/absences', icon: Ban, label: 'חיסורים' },
+  { href: '/admin/substitutions', icon: RefreshCw, label: 'החלפות' },
 ]
 
 export function BottomNav() {
@@ -40,7 +41,7 @@ export function BottomNav() {
               isActive ? 'text-drc-blue-light' : 'text-muted-foreground'
             )}
           >
-            <span className="text-xl leading-none">{route.icon}</span>
+            <route.icon size={20} />
             {route.label}
           </Link>
         )

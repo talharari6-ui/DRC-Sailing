@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { User, GraduationCap, ShieldCheck, Construction } from 'lucide-react'
 
 export default function ProfilePage() {
   const { coach } = useAuth()
@@ -12,7 +13,7 @@ export default function ProfilePage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-extrabold">👤 פרופיל</h1>
+        <h1 className="text-xl font-extrabold flex items-center gap-2"><User size={24} /> פרופיל</h1>
       </div>
 
       <Card className="mb-4">
@@ -20,7 +21,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4 mb-5">
             <Avatar className="w-16 h-16">
               <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-3xl">
-                👨‍🏫
+                <GraduationCap size={32} />
               </AvatarFallback>
             </Avatar>
             <div>
@@ -28,7 +29,7 @@ export default function ProfilePage() {
                 {coach?.name || 'משתמש'}
               </div>
               <Badge variant="outline" className="mt-1">
-                {coach?.is_admin ? '🔐 מנהל' : 'מדריך'}
+                {coach?.is_admin ? <span className="flex items-center gap-1"><ShieldCheck size={14} /> מנהל</span> : 'מדריך'}
               </Badge>
             </div>
           </div>
@@ -49,7 +50,7 @@ export default function ProfilePage() {
 
       <Card>
         <CardContent className="py-8 text-center">
-          <div className="text-4xl mb-3">🏗️</div>
+          <Construction size={48} className="mx-auto mb-3 text-muted-foreground" />
           <p className="text-muted-foreground text-sm">עמוד הפרופיל בעדכון...</p>
         </CardContent>
       </Card>

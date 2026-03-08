@@ -7,6 +7,7 @@ import { Calendar } from '@/src/components/Calendar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { GraduationCap, Users, ClipboardList, Calendar as CalendarIcon, Crown, Zap, Ban, RefreshCw } from 'lucide-react'
 
 export default function AdminDashboard() {
   const { coach } = useAuth()
@@ -61,17 +62,17 @@ export default function AdminDashboard() {
   }).format(new Date(year, month, 1))
 
   const statsData = [
-    { icon: '👨‍🏫', value: coaches.length, label: 'מדריכים' },
-    { icon: '👥', value: sailors.length, label: 'חניכים' },
-    { icon: '📋', value: groups.length, label: 'קבוצות' },
-    { icon: '📅', value: sessions.length, label: 'פעילויות' },
+    { icon: GraduationCap, value: coaches.length, label: 'מדריכים' },
+    { icon: Users, value: sailors.length, label: 'חניכים' },
+    { icon: ClipboardList, value: groups.length, label: 'קבוצות' },
+    { icon: CalendarIcon, value: sessions.length, label: 'פעילויות' },
   ]
 
   return (
     <div>
       <div className="mb-6">
         <h2 className="text-xl font-extrabold flex items-center gap-2">
-          <span>👑</span> לוח בקרה
+          <Crown size={24} /> לוח בקרה
         </h2>
         <p className="text-muted-foreground text-sm">{monthName}</p>
       </div>
@@ -87,7 +88,7 @@ export default function AdminDashboard() {
         {statsData.map((stat, i) => (
           <Card key={i}>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl mb-1">{stat.icon}</div>
+              <stat.icon size={28} className="mx-auto mb-1" />
               <div className="text-2xl font-extrabold mb-1">{stat.value}</div>
               <div className="text-xs text-muted-foreground">{stat.label}</div>
             </CardContent>
@@ -127,18 +128,18 @@ export default function AdminDashboard() {
 
       {/* Quick Links */}
       <div className="mt-6">
-        <h3 className="text-base font-extrabold mb-3">⚡ קישורים מהירים</h3>
+        <h3 className="text-base font-extrabold mb-3 flex items-center gap-2"><Zap size={20} /> קישורים מהירים</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { href: '/admin/coaches', icon: '👨‍🏫', label: 'מדריכים' },
-            { href: '/admin/sailors', icon: '👥', label: 'חניכים' },
-            { href: '/admin/absences', icon: '🚫', label: 'חיסורים' },
-            { href: '/admin/substitutions', icon: '🔄', label: 'החלפות' },
+            { href: '/admin/coaches', icon: GraduationCap, label: 'מדריכים' },
+            { href: '/admin/sailors', icon: Users, label: 'חניכים' },
+            { href: '/admin/absences', icon: Ban, label: 'חיסורים' },
+            { href: '/admin/substitutions', icon: RefreshCw, label: 'החלפות' },
           ].map((link) => (
             <Link key={link.href} href={link.href}>
               <Card className="hover:opacity-70 transition-opacity cursor-pointer">
                 <CardContent className="p-4 flex items-center gap-2">
-                  <span className="text-lg">{link.icon}</span>
+                  <link.icon size={20} />
                   <span className="text-sm font-bold">{link.label}</span>
                 </CardContent>
               </Card>

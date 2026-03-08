@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Clock } from 'lucide-react'
 
 export default function HoursPage() {
   const { coach } = useAuth()
@@ -46,7 +47,7 @@ export default function HoursPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-extrabold">⏰ שעות עבודה</h1>
+        <h1 className="text-xl font-extrabold flex items-center gap-2"><Clock size={24} /> שעות עבודה</h1>
         <p className="text-muted-foreground text-sm">
           חודש נוכחי: {totalHours.toFixed(1)} שעות
         </p>
@@ -75,7 +76,7 @@ export default function HoursPage() {
       ) : hours.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
-            <div className="text-4xl mb-3">⏰</div>
+            <Clock size={48} className="mx-auto mb-3 text-muted-foreground" />
             <p className="text-muted-foreground text-sm">אין שעות עבודה מתועדות</p>
           </CardContent>
         </Card>
