@@ -16,20 +16,20 @@ import { Calendar as CalendarIcon, Plus, ClipboardList } from 'lucide-react'
 const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailModal'), { ssr: false })
 const SailorManagementModal = dynamic(() => import('@/src/components/SailorManagementModal'), { ssr: false })
 const SubstituteCoachModal = dynamic(() => import('@/src/components/SubstituteCoachModal'), { ssr: false })
+const HEBREW_DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
 export default function SchedulePage() {
   const authResult = useAuth()
   const coach = authResult?.coach
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(false)
-  const [viewMode, setViewMode] = useState('month')
+  const [viewMode, setViewMode] = useState('week')
   const [filterMode, setFilterMode] = useState('all')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedSession, setSelectedSession] = useState(null)
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [sailorModalOpen, setSailorModalOpen] = useState(false)
   const [substituteModalOpen, setSubstituteModalOpen] = useState(false)
-  const [showEmptyWeekDays, setShowEmptyWeekDays] = useState(true)
   const [addGroupDialogOpen, setAddGroupDialogOpen] = useState(false)
   const [selectedGroupDay, setSelectedGroupDay] = useState(null)
   const [newGroupName, setNewGroupName] = useState('')
@@ -40,7 +40,6 @@ export default function SchedulePage() {
   const [newGroupStartDate, setNewGroupStartDate] = useState('')
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [groupFormError, setGroupFormError] = useState('')
-  const hebrewDayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -175,10 +174,27 @@ export default function SchedulePage() {
     return days
   }, [currentDate])
 
-  const weekDaysToRender = useMemo(() => {
-    if (showEmptyWeekDays) return weekDays
-    return weekDays.filter((day) => getSessionsForDate(day.date).length > 0)
-  }, [weekDays, showEmptyWeekDays, getSessionsForDate])
+  const daySessionsByDate = useMemo(() => {
+    const grouped = filteredSessions.reduce((acc, session) => {
+      if (!acc[session.date]) acc[session.date] = []
+      acc[session.date].push(session)
+      return acc
+    }, {})
+
+    return Object.entries(grouped)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, sessionsForDate]) => {
+        const dateObj = new Date(`${date}T12:00:00`)
+        return {
+          date,
+          dateObj,
+          dayName: HEBREW_DAY_NAMES[dateObj.getDay()],
+          dayNum: dateObj.getDate(),
+          monthNum: String(dateObj.getMonth() + 1).padStart(2, '0'),
+          sessions: sessionsForDate,
+        }
+      })
+  }, [filteredSessions])
 
   const openAddGroupDialog = (day = null) => {
     setSelectedGroupDay(day)
@@ -253,20 +269,6 @@ export default function SchedulePage() {
 
       <ViewModeToggle currentMode={viewMode} onModeChange={setViewMode} />
       <FilterToggle currentFilter={filterMode} onFilterChange={setFilterMode} />
-      <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
-        {viewMode === 'week' ? (
-          <Button
-            variant={showEmptyWeekDays ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setShowEmptyWeekDays(prev => !prev)}
-          >
-            {showEmptyWeekDays ? 'הסתר ימים ללא פעילות' : 'הצג ימים ללא פעילות'}
-          </Button>
-        ) : null}
-        <Button size="sm" onClick={() => openAddGroupDialog()}>
-          <Plus size={16} className="inline" /> הוסף קבוצה חדשה
-        </Button>
-      </div>
 
       {loading ? (
         <div className="text-center p-5 text-muted-foreground">טוען...</div>
@@ -287,21 +289,26 @@ export default function SchedulePage() {
         <div className="mt-6">
           <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><CalendarIcon size={20} /> השבוע</h2>
           <div className="flex flex-col gap-3">
-            {weekDaysToRender.map((day) => {
+            {weekDays.map((day) => {
               const daySessions = getSessionsForDate(day.date)
               return (
                 <Card key={day.date}>
                   <CardContent className="p-4">
+                    <div className={`mb-3 ${daySessions.length > 0 ? '' : 'mb-2'}`}>
+                      <div className="flex items-center gap-3" dir="ltr">
+                        <Button size="sm" onClick={() => openAddGroupDialog(day)}>
+                          <Plus size={16} className="inline" /> הוסף קבוצה
+                        </Button>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
+                    </div>
                     <div className={`flex justify-between items-center ${daySessions.length > 0 ? 'mb-3' : ''}`}>
                       <div>
                         <div className="text-sm font-bold">{day.dayName}</div>
                         <div className="text-xs text-muted-foreground">
-                          {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')}
+                          {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')} ({day.date})
                         </div>
                       </div>
-                      <Button size="sm" onClick={() => openAddGroupDialog(day)}>
-                        <Plus size={16} className="inline" /> הוסף קבוצה
-                      </Button>
                     </div>
 
                     {daySessions.length > 0 ? (
@@ -342,41 +349,64 @@ export default function SchedulePage() {
           </div>
         </div>
       ) : null}
-      {!loading && viewMode === 'week' && weekDaysToRender.length === 0 ? (
-        <div className="text-muted-foreground text-center p-4">אין פעילויות בשבוע הזה</div>
-      ) : null}
 
       {!loading && viewMode === 'day' ? (
         <div className="mt-6">
           <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><ClipboardList size={20} /> אירועים</h2>
-          {filteredSessions.length === 0 ? (
+          {daySessionsByDate.length === 0 ? (
             <div className="text-muted-foreground text-center p-5">אין אירועים</div>
           ) : (
             <div className="space-y-3">
-              {filteredSessions.map(session => (
-                <Card
-                  key={session.id}
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => {
-                    setSelectedSession(session)
-                    setDetailModalOpen(true)
-                  }}
-                >
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div
-                      className="w-1 h-14 rounded-sm shrink-0"
-                      style={{ background: session.groups?.color || '#3b82f6' }}
-                    />
-                    <div className="flex-1">
-                      <div className="text-sm font-bold mb-1">
-                        {session.groups?.name || 'קבוצה'}
+              {daySessionsByDate.map((dayBlock) => (
+                <Card key={dayBlock.date}>
+                  <CardContent className="p-4">
+                    <div className="mb-3">
+                      <div className="flex items-center gap-3" dir="ltr">
+                        <Button size="sm" onClick={() => openAddGroupDialog({
+                          date: dayBlock.date,
+                          dayName: dayBlock.dayName,
+                          dayNum: dayBlock.dayNum,
+                          dateObj: dayBlock.dateObj,
+                        })}>
+                          <Plus size={16} className="inline" /> הוסף קבוצה
+                        </Button>
+                        <div className="h-px flex-1 bg-border" />
                       </div>
-                      <div className="text-xs text-muted-foreground mb-1">
-                        {session.date} • {session.start_time || 'אין שעה'}
-                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="text-sm font-bold">{dayBlock.dayName}</div>
                       <div className="text-xs text-muted-foreground">
-                        מדריך: {session.coaches?.name || 'לא מוגדר'}
+                        {dayBlock.dayNum}.{dayBlock.monthNum} ({dayBlock.date})
                       </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {dayBlock.sessions.map(session => (
+                        <div
+                          key={session.id}
+                          className="cursor-pointer hover:opacity-80 transition-opacity bg-secondary border border-border rounded-lg p-3 flex items-center gap-3"
+                          onClick={() => {
+                            setSelectedSession(session)
+                            setDetailModalOpen(true)
+                          }}
+                        >
+                          <div
+                            className="w-1 h-14 rounded-sm shrink-0"
+                            style={{ background: session.groups?.color || '#3b82f6' }}
+                          />
+                          <div className="flex-1">
+                            <div className="text-sm font-bold mb-1">
+                              {session.groups?.name || 'קבוצה'}
+                            </div>
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {session.start_time || 'אין שעה'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              מדריך: {session.coaches?.name || 'לא מוגדר'}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -443,7 +473,7 @@ export default function SchedulePage() {
             <div className="space-y-2">
               <Label>ימי פעילות הקבוצה</Label>
               <div className="flex flex-wrap gap-2">
-                {hebrewDayNames.map((dayLabel, dayIndex) => (
+                {HEBREW_DAY_NAMES.map((dayLabel, dayIndex) => (
                   <Button
                     key={dayIndex}
                     type="button"
