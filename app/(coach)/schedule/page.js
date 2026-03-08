@@ -6,6 +6,7 @@ import { useAuth } from '@/src/hooks/useAuth'
 import ViewModeToggle from '@/src/components/ViewModeToggle'
 import FilterToggle from '@/src/components/FilterToggle'
 import { Calendar } from '@/src/components/Calendar'
+import { GROUP_COLORS } from '@/src/lib/constants'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,29 @@ const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailM
 const SailorManagementModal = dynamic(() => import('@/src/components/SailorManagementModal'), { ssr: false })
 const SubstituteCoachModal = dynamic(() => import('@/src/components/SubstituteCoachModal'), { ssr: false })
 const HEBREW_DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+
+const normalizeTimeInput = (value) => {
+  const digits = String(value || '').replace(/\D/g, '')
+  if (!digits) return ''
+
+  let hours = 0
+  let minutes = 0
+
+  if (digits.length <= 2) {
+    hours = Number(digits)
+  } else if (digits.length === 3) {
+    hours = Number(digits.slice(0, 1))
+    minutes = Number(digits.slice(1))
+  } else {
+    const fourDigits = digits.slice(0, 4)
+    hours = Number(fourDigits.slice(0, 2))
+    minutes = Number(fourDigits.slice(2))
+  }
+
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return ''
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return ''
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
 
 export default function SchedulePage() {
   const authResult = useAuth()
@@ -227,13 +251,22 @@ export default function SchedulePage() {
     setCreatingGroup(true)
     setGroupFormError('')
     try {
+      const normalizedStart = normalizeTimeInput(newGroupStartTime)
+      const normalizedEnd = normalizeTimeInput(newGroupEndTime)
+
+      if ((newGroupStartTime && !normalizedStart) || (newGroupEndTime && !normalizedEnd)) {
+        setGroupFormError('פורמט שעות לא תקין. לדוגמה: 10, 1030, 1300')
+        setCreatingGroup(false)
+        return
+      }
+
       const payload = {
         name: trimmedName,
         coach_id: coach.id,
         color: newGroupColor,
         days_of_week: newGroupDays,
-        start_time: newGroupStartTime,
-        end_time: newGroupEndTime,
+        start_time: normalizedStart,
+        end_time: normalizedEnd,
         start_date: newGroupStartDate || null,
       }
 
@@ -244,6 +277,18 @@ export default function SchedulePage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error || 'Failed to create group')
+      const immediateDate = payload.start_date || selectedGroupDay?.date || null
+      if (immediateDate) {
+        const syntheticSession = {
+          id: `new-group-${data.id}-${Date.now()}`,
+          date: immediateDate,
+          start_time: payload.start_time || '',
+          coach_id: coach.id,
+          groups: { name: data.name, color: data.color || payload.color || '#3b82f6' },
+          coaches: { name: coach?.name || 'לא מוגדר' },
+        }
+        setSessions((prev) => [syntheticSession, ...prev])
+      }
 
       setAddGroupDialogOpen(false)
     } catch (error) {
@@ -459,7 +504,7 @@ export default function SchedulePage() {
             />
             <div className="space-y-2">
               <Label htmlFor="group-color">צבע קבוצה</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-2">
                 <Input
                   id="group-color"
                   type="color"
@@ -468,6 +513,18 @@ export default function SchedulePage() {
                   className="h-10 w-16 p-1"
                 />
                 <span className="text-xs text-muted-foreground">{newGroupColor}</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {GROUP_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    className={`h-6 w-6 rounded-full border-2 ${newGroupColor === color ? 'border-foreground' : 'border-transparent'}`}
+                    style={{ backgroundColor: color }}
+                    onClick={() => setNewGroupColor(color)}
+                    aria-label={`בחר צבע ${color}`}
+                  />
+                ))}
               </div>
             </div>
             <div className="space-y-2">
@@ -490,14 +547,18 @@ export default function SchedulePage() {
               <Label>שעות פעילות</Label>
               <div className="grid grid-cols-2 gap-2">
                 <Input
-                  type="time"
+                  type="text"
                   value={newGroupStartTime}
                   onChange={(e) => setNewGroupStartTime(e.target.value)}
+                  onBlur={(e) => setNewGroupStartTime(normalizeTimeInput(e.target.value))}
+                  placeholder="שעת התחלה (למשל 10 או 1030)"
                 />
                 <Input
-                  type="time"
+                  type="text"
                   value={newGroupEndTime}
                   onChange={(e) => setNewGroupEndTime(e.target.value)}
+                  onBlur={(e) => setNewGroupEndTime(normalizeTimeInput(e.target.value))}
+                  placeholder="שעת סיום (למשל 13 או 1300)"
                 />
               </div>
             </div>
