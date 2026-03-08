@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { GraduationCap } from 'lucide-react'
 
 export default function AdminCoaches() {
   const [coaches, setCoaches] = useState([])
@@ -41,7 +42,7 @@ export default function AdminCoaches() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-extrabold">👨‍🏫 ניהול מדריכים</h1>
+        <h1 className="text-xl font-extrabold flex items-center gap-2"><GraduationCap size={24} /> ניהול מדריכים</h1>
         <p className="text-muted-foreground text-sm">{coaches.length} מדריכים</p>
       </div>
 
@@ -68,7 +69,7 @@ export default function AdminCoaches() {
       ) : coaches.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
-            <div className="text-4xl mb-3">👨‍🏫</div>
+            <GraduationCap size={48} className="mx-auto mb-3 text-muted-foreground" />
             <p className="text-muted-foreground text-sm">אין מדריכים</p>
           </CardContent>
         </Card>
@@ -81,7 +82,7 @@ export default function AdminCoaches() {
                 <CardContent className="p-4 flex items-center gap-3">
                   <Avatar>
                     <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-lg">
-                      👨‍🏫
+                      <GraduationCap size={20} />
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">

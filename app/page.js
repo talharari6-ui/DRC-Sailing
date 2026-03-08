@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Sailboat } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -41,7 +42,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="text-5xl mb-3">⛵</div>
+          <Sailboat size={48} className="mx-auto mb-3 text-drc-blue-light" />
           <h1 className="text-2xl font-extrabold text-drc-blue-light mb-2">
             חוג שייט
           </h1>

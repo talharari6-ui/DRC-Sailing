@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Users, User } from 'lucide-react'
 
 export default function AdminSailors() {
   const [sailors, setSailors] = useState([])
@@ -41,7 +42,7 @@ export default function AdminSailors() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-extrabold">👥 ניהול חניכים</h1>
+        <h1 className="text-xl font-extrabold flex items-center gap-2"><Users size={24} /> ניהול חניכים</h1>
         <p className="text-muted-foreground text-sm">{sailors.length} חניכים בסה"כ</p>
       </div>
 
@@ -68,7 +69,7 @@ export default function AdminSailors() {
       ) : sailors.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
-            <div className="text-4xl mb-3">👥</div>
+            <Users size={48} className="mx-auto mb-3 text-muted-foreground" />
             <p className="text-muted-foreground text-sm">אין חניכים</p>
           </CardContent>
         </Card>
@@ -81,7 +82,7 @@ export default function AdminSailors() {
                 <CardContent className="p-4 flex items-center gap-3">
                   <Avatar>
                     <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-lg">
-                      {sailor.gender === 'female' ? '👧' : '👦'}
+                      <User size={20} className={sailor.gender === 'female' ? 'text-pink-400' : 'text-blue-400'} />
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
@@ -118,7 +119,7 @@ export default function AdminSailors() {
                 {sailors.map((sailor) => (
                   <TableRow key={sailor.id}>
                     <TableCell className="font-medium">
-                      {sailor.gender === 'female' ? '👧' : '👦'}{' '}
+                      <User size={20} className={sailor.gender === 'female' ? 'text-pink-400' : 'text-blue-400'} />{' '}
                       {sailor.first_name} {sailor.last_name}
                     </TableCell>
                     <TableCell className="text-muted-foreground">

@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { BarChart3, XCircle } from 'lucide-react'
 
 export default function HistoryPage() {
   const { coach } = useAuth()
@@ -37,7 +38,7 @@ export default function HistoryPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-extrabold">📊 היסטוריה</h1>
+        <h1 className="text-xl font-extrabold flex items-center gap-2"><BarChart3 size={24} /> היסטוריה</h1>
         <p className="text-muted-foreground text-sm">
           {sessions.length} פעילויות
         </p>
@@ -68,7 +69,7 @@ export default function HistoryPage() {
       ) : sessions.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
-            <div className="text-4xl mb-3">📊</div>
+            <BarChart3 size={48} className="mx-auto mb-3 text-muted-foreground" />
             <p className="text-muted-foreground text-sm">אין היסטוריה פעילויות</p>
           </CardContent>
         </Card>
@@ -86,7 +87,7 @@ export default function HistoryPage() {
                   <div className="flex justify-between items-center">
                     <div>
                       <div className={`text-sm font-bold mb-0.5 ${session.cancelled ? 'line-through' : ''}`}>
-                        {session.cancelled ? '❌ ' : ''}יום {DAY_NAMES[dow]}
+                        {session.cancelled ? <><XCircle size={14} className="inline me-1" /></> : null}יום {DAY_NAMES[dow]}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {date.toLocaleDateString('he-IL')}

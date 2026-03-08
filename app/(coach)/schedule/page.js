@@ -9,6 +9,7 @@ import { Calendar } from '@/src/components/Calendar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Calendar as CalendarIcon, Plus, ClipboardList } from 'lucide-react'
 
 const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailModal'), { ssr: false })
 const SailorManagementModal = dynamic(() => import('@/src/components/SailorManagementModal'), { ssr: false })
@@ -167,7 +168,7 @@ export default function SchedulePage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-extrabold mb-1">📅 לוח שנתי</h1>
+        <h1 className="text-xl font-extrabold mb-1 flex items-center gap-2"><CalendarIcon size={24} /> לוח שנתי</h1>
         <p className="text-muted-foreground text-sm">
           ברוכים הבאים, {coach?.name}!
         </p>
@@ -193,7 +194,7 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'week' ? (
         <div className="mt-6">
-          <h2 className="text-base font-extrabold mb-3">📅 השבוע</h2>
+          <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><CalendarIcon size={20} /> השבוע</h2>
           <div className="flex flex-col gap-3">
             {weekDays.map((day) => {
               const daySessions = getSessionsForDate(day.date)
@@ -208,7 +209,7 @@ export default function SchedulePage() {
                         </div>
                       </div>
                       <Button size="sm" onClick={() => console.log('Add group for', day.date)}>
-                        ➕ הוסף קבוצה
+                        <Plus size={16} className="inline" /> הוסף קבוצה
                       </Button>
                     </div>
 
@@ -253,7 +254,7 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'day' ? (
         <div className="mt-6">
-          <h2 className="text-base font-extrabold mb-3">📋 אירועים</h2>
+          <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><ClipboardList size={20} /> אירועים</h2>
           {filteredSessions.length === 0 ? (
             <div className="text-muted-foreground text-center p-5">אין אירועים</div>
           ) : (

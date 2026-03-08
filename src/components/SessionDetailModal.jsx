@@ -2,6 +2,7 @@ import Modal from './Modal'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Check, X, Pencil, RefreshCw, XOctagon } from 'lucide-react'
 
 export default function SessionDetailModal({
   session,
@@ -91,7 +92,7 @@ export default function SessionDetailModal({
                           disabled={marking}
                           className={attendance[sailor.id]?.present === true ? 'bg-drc-green hover:bg-drc-green/80 h-8 px-3' : 'h-8 px-3'}
                         >
-                          ✓
+                          <Check size={16} />
                         </Button>
                         <Button
                           size="sm"
@@ -100,7 +101,7 @@ export default function SessionDetailModal({
                           disabled={marking}
                           className="h-8 px-3"
                         >
-                          ✗
+                          <X size={16} />
                         </Button>
                       </div>
                     </div>
@@ -120,13 +121,13 @@ export default function SessionDetailModal({
           {isOwnSession ? (
             <>
               <Button onClick={() => onEditSailors(session.id)}>
-                ✏️ ערוך חניכים
+                <Pencil size={16} /> ערוך חניכים
               </Button>
               <Button variant="secondary" onClick={() => onSubstituteRequest(session.id)}>
-                🔄 בקשה להחלפה
+                <RefreshCw size={16} /> בקשה להחלפה
               </Button>
               <Button variant="destructive" onClick={() => onDecline(session.id)}>
-                ⛔ דחייה
+                <XOctagon size={16} /> דחייה
               </Button>
             </>
           ) : null}
@@ -134,10 +135,10 @@ export default function SessionDetailModal({
           {isSubstitute ? (
             <>
               <Button onClick={() => onEditSailors(session.id)}>
-                ✏️ ערוך חניכים
+                <Pencil size={16} /> ערוך חניכים
               </Button>
               <Button variant="destructive" onClick={() => onDecline(session.id)}>
-                ⛔ דחייה
+                <XOctagon size={16} /> דחייה
               </Button>
             </>
           ) : null}

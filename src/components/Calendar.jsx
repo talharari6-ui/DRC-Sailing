@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 export function Calendar({
   year,
@@ -31,7 +32,7 @@ export function Calendar({
           onClick={onPrevMonth}
           className="shrink-0 text-base"
         >
-          →
+          <ChevronRight size={18} />
         </Button>
         <div className="flex-1 text-center font-extrabold text-base">
           {monthName}
@@ -42,7 +43,7 @@ export function Calendar({
           onClick={onNextMonth}
           className="shrink-0 text-base"
         >
-          ←
+          <ChevronLeft size={18} />
         </Button>
       </div>
 
