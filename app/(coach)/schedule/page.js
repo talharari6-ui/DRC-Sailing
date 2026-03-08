@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Calendar as CalendarIcon, Plus, ClipboardList } from 'lucide-react'
@@ -208,23 +209,6 @@ export default function SchedulePage() {
   }, [filteredSessions])
 
   const dayViewSessions = useMemo(() => getSessionsForDate(selectedDayDate), [getSessionsForDate, selectedDayDate])
-  const safeSelectedMonthDate = useMemo(() => {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(String(selectedMonthDate || ''))) return selectedMonthDate
-    return toDateStr(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1))
-  }, [selectedMonthDate, currentDate])
-  const selectedMonthDateSessions = useMemo(
-    () => getSessionsForDate(safeSelectedMonthDate),
-    [getSessionsForDate, safeSelectedMonthDate]
-  )
-
-  const monthSelectedDateObj = useMemo(() => new Date(`${safeSelectedMonthDate}T12:00:00`), [safeSelectedMonthDate])
-  const monthSelectedDay = useMemo(() => ({
-    date: safeSelectedMonthDate,
-    dayName: HEBREW_DAY_NAMES[monthSelectedDateObj.getDay()],
-    dayNum: monthSelectedDateObj.getDate(),
-    monthNum: String(monthSelectedDateObj.getMonth() + 1).padStart(2, '0'),
-    dateObj: monthSelectedDateObj,
-  }), [monthSelectedDateObj, safeSelectedMonthDate])
   const daySelectedDateObj = useMemo(() => new Date(`${selectedDayDate}T12:00:00`), [selectedDayDate])
   const daySelectedMeta = useMemo(() => ({
     date: selectedDayDate,
@@ -709,66 +693,22 @@ export default function SchedulePage() {
 
       {viewMode === 'month' ? (
         <div className="space-y-3">
-          <Card>
-            <CardContent className="p-3">
-              <div className="text-sm font-bold">תצוגת חודש פעילה</div>
-              <div className="text-xs text-muted-foreground">כאן מוצג לוח החודש והפעילויות לפי יום.</div>
-            </CardContent>
-          </Card>
-          <Calendar
-            year={currentDate.getFullYear()}
-            month={currentDate.getMonth()}
-            onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-            onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-            onDateClick={handleDateClick}
-            getDayContent={getDayContent}
-          />
           {loading ? (
-            <div className="text-center p-2 text-muted-foreground text-xs">טוען פעילויות...</div>
-          ) : null}
-          <Card>
-            <CardContent className="p-4">
-              <div className="mb-3">
-                <div className="flex items-center gap-3" dir="ltr">
-                  <Button size="sm" onClick={() => openAddGroupDialog(monthSelectedDay)}>
-                    <Plus size={16} className="inline" /> הוסף קבוצה
-                  </Button>
-                  <div className="h-px flex-1 bg-border" />
-                </div>
-              </div>
-              <div className="mb-3">
-                <div className="text-sm font-bold">{monthSelectedDay.dayName}</div>
-                <div className="text-xs text-muted-foreground">
-                  {monthSelectedDay.dayNum}.{monthSelectedDay.monthNum} ({monthSelectedDay.date})
-                </div>
-              </div>
-              {selectedMonthDateSessions.length === 0 ? (
-                <div className="text-muted-foreground text-xs py-2">אין פעילויות ביום זה</div>
-              ) : (
-                <div className="space-y-3">
-                  {sortedByStartTime(selectedMonthDateSessions).map((session) => (
-                    <div
-                      key={session.id}
-                      className="bg-secondary border border-border rounded-lg p-3 flex gap-3 items-center"
-                    >
-                      <div
-                        className="w-[3px] h-12 rounded-sm shrink-0"
-                        style={{ background: session.groups?.color || '#3b82f6' }}
-                      />
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold mb-0.5">{session.groups?.name || 'קבוצה'}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
-                        </div>
-                        {renderSessionActions(session)}
-                      </div>
-                      {renderAttendanceIndicator(session)}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            <Card>
+              <CardContent className="p-4">
+                <Skeleton className="h-64 w-full rounded-lg" />
+              </CardContent>
+            </Card>
+          ) : (
+            <Calendar
+              year={currentDate.getFullYear()}
+              month={currentDate.getMonth()}
+              onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+              onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+              onDateClick={handleDateClick}
+              getDayContent={getDayContent}
+            />
+          )}
         </div>
       ) : null}
 
