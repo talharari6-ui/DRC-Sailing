@@ -357,117 +357,138 @@ export default function HoursPage() {
                 }
                 const hasHours = Boolean(row.start_time && row.end_time)
                 const busy = workingDate === day.key
+                const dailyHours = getHoursBetween(
+                  normalizeTimeInput(row.start_time),
+                  normalizeTimeInput(row.end_time)
+                )
 
                 return (
                   <div
                     key={day.key}
                     className="rounded-md border p-2 space-y-2"
                   >
-                    <div className="grid grid-cols-[86px_minmax(96px,1fr)_minmax(96px,1fr)] md:grid-cols-[96px_1fr_1fr_auto] gap-2 items-center">
-                      <div>
-                        <div className="text-sm font-semibold">
-                          {day.weekdayName}
+                    <div className="overflow-x-auto">
+                      <div className="flex items-end gap-2 min-w-[920px] whitespace-nowrap">
+                        <div className="w-[86px] shrink-0">
+                          <div className="text-sm font-semibold">{day.weekdayName}</div>
+                          <div className="text-xs text-muted-foreground">{day.dayNumber}.{viewMonth + 1}</div>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {day.dayNumber}.{viewMonth + 1}
+                        <div className="space-y-1 w-[96px] shrink-0">
+                          <div className="text-xs text-muted-foreground">התחלה</div>
+                          <Input
+                            className="h-8 text-sm"
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="10 / 1030"
+                            value={row.start_time}
+                            onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
+                            onBlur={(event) => {
+                              const normalized = normalizeTimeInput(event.target.value)
+                              updateField(day.key, 'start_time', normalized)
+                              saveDate(day.key, {
+                                ...entriesRef.current,
+                                [day.key]: { ...entriesRef.current[day.key], start_time: normalized },
+                              })
+                            }}
+                          />
+                        </div>
+                        <div className="space-y-1 w-[96px] shrink-0">
+                          <div className="text-xs text-muted-foreground">סיום</div>
+                          <Input
+                            className="h-8 text-sm"
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="10 / 1030"
+                            value={row.end_time}
+                            onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
+                            onBlur={(event) => {
+                              const normalized = normalizeTimeInput(event.target.value)
+                              updateField(day.key, 'end_time', normalized)
+                              saveDate(day.key, {
+                                ...entriesRef.current,
+                                [day.key]: { ...entriesRef.current[day.key], end_time: normalized },
+                              })
+                            }}
+                          />
+                        </div>
+                        <div className="space-y-1 w-[70px] shrink-0">
+                          <div className="text-xs text-muted-foreground">סה״כ</div>
+                          <div className="h-8 rounded-md border border-input px-2 flex items-center text-sm">{dailyHours.toFixed(1)}</div>
+                        </div>
+                        <div className="space-y-1 min-w-[260px] flex-1">
+                          <div className="text-xs text-muted-foreground">הערה</div>
+                          <textarea
+                            className="w-full h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
+                            placeholder="הערה"
+                            value={row.notes}
+                            onChange={(event) => updateField(day.key, 'notes', event.target.value)}
+                            onBlur={() => saveDate(day.key)}
+                          />
+                        </div>
+                        <div className="space-y-1 w-[180px] shrink-0">
+                          <div className="text-xs text-muted-foreground">{row.has_change_note ? 'הערת שינוי' : 'אפשרות שינוי'}</div>
+                          {row.has_change_note ? (
+                            <Input
+                              className="h-8 text-sm"
+                              type="text"
+                              placeholder="דחייה / החלפה / מדריך"
+                              value={row.change_note}
+                              onChange={(event) => updateField(day.key, 'change_note', event.target.value)}
+                              onBlur={() => saveDate(day.key)}
+                            />
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 text-xs w-full"
+                              onClick={() => updateField(day.key, 'has_change_note', true)}
+                            >
+                              הוספת הערת שינוי
+                            </Button>
+                          )}
+                        </div>
+                        <div className="space-y-1 w-[170px] shrink-0">
+                          <div className="text-xs text-muted-foreground">פעולות</div>
+                          <div className="flex gap-1">
+                            {hasHours ? (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="h-8 text-xs"
+                                onClick={() => duplicateSameWeekday(day.key)}
+                                disabled={busy}
+                              >
+                                שכפול
+                              </Button>
+                            ) : null}
+                            {hasHours ? (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="h-8 text-xs"
+                                onClick={() => clearDay(day.key)}
+                                disabled={busy}
+                              >
+                                ניקוי
+                              </Button>
+                            ) : null}
+                            {row.has_change_note ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-xs"
+                                onClick={() => {
+                                  updateField(day.key, 'has_change_note', false)
+                                  updateField(day.key, 'change_note', '')
+                                  saveDate(day.key)
+                                }}
+                              >
+                                הסתרת שינוי
+                              </Button>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
-                      <div className="space-y-1 min-w-[96px]">
-                        <div className="text-xs text-muted-foreground">התחלה</div>
-                        <Input
-                          className="h-8 text-sm"
-                          type="text"
-                          inputMode="numeric"
-                          placeholder="10 / 1030"
-                          value={row.start_time}
-                          onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
-                          onBlur={(event) => {
-                            const normalized = normalizeTimeInput(event.target.value)
-                            updateField(day.key, 'start_time', normalized)
-                            saveDate(day.key, {
-                              ...entriesRef.current,
-                              [day.key]: { ...entriesRef.current[day.key], start_time: normalized },
-                            })
-                          }}
-                        />
-                      </div>
-
-                      <div className="space-y-1 min-w-[96px]">
-                        <div className="text-xs text-muted-foreground">סיום</div>
-                        <Input
-                          className="h-8 text-sm"
-                          type="text"
-                          inputMode="numeric"
-                          placeholder="10 / 1030"
-                          value={row.end_time}
-                          onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
-                          onBlur={(event) => {
-                            const normalized = normalizeTimeInput(event.target.value)
-                            updateField(day.key, 'end_time', normalized)
-                            saveDate(day.key, {
-                              ...entriesRef.current,
-                              [day.key]: { ...entriesRef.current[day.key], end_time: normalized },
-                            })
-                          }}
-                        />
-                      </div>
-
-                      <div className="space-y-1 col-span-3 md:col-span-1">
-                        <div className="text-xs text-muted-foreground">פעולות</div>
-                        <div className="flex flex-wrap gap-1">
-                        {hasHours ? (
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="h-8 text-xs"
-                            onClick={() => duplicateSameWeekday(day.key)}
-                            disabled={busy}
-                          >
-                            שכפול
-                          </Button>
-                        ) : null}
-                        {hasHours ? (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="h-8 text-xs"
-                            onClick={() => clearDay(day.key)}
-                            disabled={busy}
-                          >
-                            ניקוי
-                          </Button>
-                        ) : null}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <textarea
-                        className="w-full min-h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                        placeholder="הערה"
-                        value={row.notes}
-                        onChange={(event) => updateField(day.key, 'notes', event.target.value)}
-                        onBlur={() => saveDate(day.key)}
-                      />
-                      {row.has_change_note ? (
-                        <textarea
-                          className="w-full min-h-8 rounded-md border border-input bg-transparent px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                          placeholder="דחייה / החלפה / החלפת מדריך"
-                          value={row.change_note}
-                          onChange={(event) => updateField(day.key, 'change_note', event.target.value)}
-                          onBlur={() => saveDate(day.key)}
-                        />
-                      ) : null}
-                      <button
-                        className="text-xs text-muted-foreground underline underline-offset-2"
-                        onClick={() => {
-                          updateField(day.key, 'has_change_note', !row.has_change_note)
-                          if (row.has_change_note) updateField(day.key, 'change_note', '')
-                        }}
-                        type="button"
-                      >
-                        {row.has_change_note ? 'הסתרת הערת שינוי' : 'הוספת הערת דחייה/החלפה'}
-                      </button>
                     </div>
                   </div>
                 )
