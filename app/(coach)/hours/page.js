@@ -363,7 +363,7 @@ export default function HoursPage() {
                     key={day.key}
                     className="rounded-md border p-2 space-y-2"
                   >
-                    <div className="grid grid-cols-[96px_1fr_1fr_auto] gap-2 items-center">
+                    <div className="grid grid-cols-[86px_minmax(96px,1fr)_minmax(96px,1fr)] md:grid-cols-[96px_1fr_1fr_auto] gap-2 items-center">
                       <div>
                         <div className="text-sm font-semibold">
                           {day.weekdayName}
@@ -372,7 +372,7 @@ export default function HoursPage() {
                           {day.dayNumber}.{viewMonth + 1}
                         </div>
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 min-w-[96px]">
                         <div className="text-xs text-muted-foreground">התחלה</div>
                         <Input
                           className="h-8 text-sm"
@@ -392,7 +392,7 @@ export default function HoursPage() {
                         />
                       </div>
 
-                      <div className="space-y-1">
+                      <div className="space-y-1 min-w-[96px]">
                         <div className="text-xs text-muted-foreground">סיום</div>
                         <Input
                           className="h-8 text-sm"
@@ -412,9 +412,9 @@ export default function HoursPage() {
                         />
                       </div>
 
-                      <div className="space-y-1">
+                      <div className="space-y-1 col-span-3 md:col-span-1">
                         <div className="text-xs text-muted-foreground">פעולות</div>
-                        <div className="flex gap-1">
+                        <div className="flex flex-wrap gap-1">
                         {hasHours ? (
                           <Button
                             size="sm"
