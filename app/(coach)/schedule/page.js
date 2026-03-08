@@ -249,11 +249,47 @@ export default function SchedulePage() {
           {attendedCount}
         </div>
         <div className="mt-1 text-[10px] text-muted-foreground">
-          {markedCount > 0 ? 'נוכחים' : 'אין סימון'}
+          {markedCount > 0 ? 'attendance' : 'attendance'}
         </div>
       </div>
     )
   }
+  const ensureRealSessionForAttendance = useCallback(async (session) => {
+    if (!session?.id || !String(session.id).startsWith('virtual-')) {
+      return session?.id
+    }
+    const res = await fetch('/api/sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        group_id: session.group_id,
+        date: session.date,
+        coach_id: session.coach_id || coach?.id,
+      }),
+    })
+    const created = await res.json()
+    if (!res.ok || !created?.id) {
+      throw new Error(created?.error || 'Failed creating real session for attendance')
+    }
+    const createdSession = {
+      ...session,
+      ...created,
+      attendance: [],
+      is_virtual: false,
+    }
+    setSessions((prev) => {
+      const withoutVirtual = prev.filter((s) => s.id !== session.id)
+      return [createdSession, ...withoutVirtual]
+    })
+    setSelectedSession((prev) => {
+      if (!prev || prev.id !== session.id) return prev
+      return {
+        ...prev,
+        ...createdSession,
+      }
+    })
+    return created.id
+  }, [coach?.id])
 
   const renderSessionActions = (session) => {
     const isAssignedInstructor = session.coach_id === coach?.id || session.substitute_coach_id === coach?.id
@@ -355,7 +391,16 @@ export default function SchedulePage() {
 
   const handleAttendanceUpdate = async (sessionId, sailorId, present, reason) => {
     try {
-      const res = await fetch(`/api/sessions/${sessionId}/attendance`, {
+      let targetSessionId = sessionId
+      const isVirtual = String(sessionId || '').startsWith('virtual-')
+      if (isVirtual) {
+        const sourceSession = selectedSession?.id === sessionId
+          ? selectedSession
+          : mergedSessions.find((s) => s.id === sessionId)
+        if (!sourceSession) throw new Error('Session not found for attendance update')
+        targetSessionId = await ensureRealSessionForAttendance(sourceSession)
+      }
+      const res = await fetch(`/api/sessions/${targetSessionId}/attendance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sailor_id: sailorId, present, absence_reason: reason })
@@ -363,7 +408,7 @@ export default function SchedulePage() {
       if (!res.ok) throw new Error('Failed to update attendance')
       const savedAttendance = await res.json()
       setSessions((prev) => prev.map((session) => {
-        if (session.id !== sessionId) return session
+        if (session.id !== targetSessionId) return session
         const existingAttendance = Array.isArray(session.attendance) ? session.attendance : []
         const nextAttendance = existingAttendance.some((record) => record?.sailor_id === sailorId)
           ? existingAttendance.map((record) => (
@@ -378,7 +423,7 @@ export default function SchedulePage() {
         }
       }))
       setSelectedSession((prev) => {
-        if (!prev || prev.id !== sessionId) return prev
+        if (!prev || prev.id !== targetSessionId) return prev
         const existingAttendance = Array.isArray(prev.attendance) ? prev.attendance : []
         const nextAttendance = existingAttendance.some((record) => record?.sailor_id === sailorId)
           ? existingAttendance.map((record) => (
@@ -658,8 +703,11 @@ export default function SchedulePage() {
         <div className="text-center p-5 text-muted-foreground">טוען...</div>
       ) : null}
 
-      {!loading && viewMode === 'month' ? (
+      {viewMode === 'month' ? (
         <div className="space-y-3">
+          {loading ? (
+            <div className="text-center p-2 text-muted-foreground text-xs">טוען פעילויות...</div>
+          ) : null}
           <Card>
             <CardContent className="p-4">
               <div className="mb-3">
