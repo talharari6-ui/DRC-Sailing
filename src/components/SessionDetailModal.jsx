@@ -1,5 +1,5 @@
 import Modal from './Modal'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Check, X } from 'lucide-react'
 
@@ -12,6 +12,18 @@ export default function SessionDetailModal({
 }) {
   const [marking, setMarking] = useState(false)
   const [attendance, setAttendance] = useState({})
+
+  useEffect(() => {
+    const nextAttendance = {}
+    for (const record of session?.attendance || []) {
+      if (!record?.sailor_id) continue
+      nextAttendance[record.sailor_id] = {
+        present: record.present,
+        reason: record.absence_reason || null,
+      }
+    }
+    setAttendance(nextAttendance)
+  }, [session])
 
   if (!session) return null
 
@@ -39,6 +51,10 @@ export default function SessionDetailModal({
             <div className="text-xs font-semibold mb-2 text-foreground">
               נוכחות חניכים
             </div>
+            <div className="mb-3 rounded-md bg-secondary px-3 py-2 text-[11px] text-muted-foreground">
+              הנוכחות נשמרת אוטומטית בכל לחיצה.
+              {marking ? ' שומר...' : ' אין צורך בכפתור שמירה.'}
+            </div>
             {session.group_sailors && session.group_sailors.length > 0 ? (
               <div className="flex flex-col gap-2.5">
                 {session.group_sailors.map((gs) => {
@@ -47,9 +63,10 @@ export default function SessionDetailModal({
                   return (
                     <div
                       key={sailor.id}
-                      className="flex justify-between items-center p-2 bg-secondary rounded-md text-sm"
+                      className="flex items-center justify-between gap-3 p-2 bg-secondary rounded-md text-sm"
                     >
-                      <div className="flex gap-1 order-first">
+                      <span className="flex-1 text-right">{`${sailor.first_name || ''} ${sailor.last_name || sailor.name || ''}`.trim()}</span>
+                      <div className="flex gap-1 shrink-0">
                         <Button
                           size="sm"
                           variant={attendance[sailor.id]?.present === true ? 'default' : 'outline'}
@@ -69,7 +86,6 @@ export default function SessionDetailModal({
                           <X size={14} />
                         </Button>
                       </div>
-                      <span>{`${sailor.first_name || ''} ${sailor.last_name || sailor.name || ''}`.trim()}</span>
                     </div>
                   )
                 })}

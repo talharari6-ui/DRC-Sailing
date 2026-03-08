@@ -18,6 +18,7 @@ import { Calendar as CalendarIcon, Plus, ClipboardList } from 'lucide-react'
 const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailModal'), { ssr: false })
 const SailorManagementModal = dynamic(() => import('@/src/components/SailorManagementModal'), { ssr: false })
 const HEBREW_DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+const REQUEST_STATUS_STORAGE_KEY = 'coach-board-request-status'
 
 const normalizeTimeInput = (value) => {
   const digits = String(value || '').replace(/\D/g, '')
@@ -72,14 +73,24 @@ export default function SchedulePage() {
   const [newGroupStartDate, setNewGroupStartDate] = useState('')
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [groupFormError, setGroupFormError] = useState('')
-  const [selectedMonthDate, setSelectedMonthDate] = useState(() => new Date().toISOString().split('T')[0])
+  const [selectedMonthDate, setSelectedMonthDate] = useState(() => toDateStr(new Date()))
   const [selectedDayDate, setSelectedDayDate] = useState(() => toDateStr(new Date()))
   const [managerRequestNotice, setManagerRequestNotice] = useState('')
   const [collapsedWeekDates, setCollapsedWeekDates] = useState({})
-  const [requestStatusBySession, setRequestStatusBySession] = useState({})
+  const [requestStatusBySession, setRequestStatusBySession] = useState(() => {
+    if (typeof window === 'undefined') return {}
+    try {
+      return JSON.parse(window.localStorage.getItem(REQUEST_STATUS_STORAGE_KEY) || '{}') || {}
+    } catch (error) {
+      console.error('Error reading saved request statuses:', error)
+      return {}
+    }
+  })
+  const [boardDataError, setBoardDataError] = useState('')
 
   const loadBoardData = useCallback(async () => {
     setLoading(true)
+    setBoardDataError('')
     try {
       const [sessionsRes, groupsRes] = await Promise.all([
         fetch('/api/sessions?include_details=true'),
@@ -91,6 +102,7 @@ export default function SchedulePage() {
       if (!sessionsRes.ok) {
         console.error('Sessions API error:', sessionsRes.status, sessionsData)
         setSessions([])
+        setBoardDataError('שגיאה בטעינת הפעילויות. הלוח מוצג חלקית.')
       } else if (Array.isArray(sessionsData)) {
         setSessions(sessionsData)
       } else {
@@ -100,6 +112,7 @@ export default function SchedulePage() {
       if (!groupsRes.ok) {
         console.error('Groups API error:', groupsRes.status, groupsData)
         setGroups([])
+        setBoardDataError((prev) => prev || 'שגיאה בטעינת הקבוצות. הלוח מוצג חלקית.')
       } else if (Array.isArray(groupsData)) {
         setGroups(groupsData)
       } else {
@@ -109,6 +122,7 @@ export default function SchedulePage() {
       console.error('Error loading board data:', error)
       setSessions([])
       setGroups([])
+      setBoardDataError('שגיאה בטעינת הלוח. נסה לרענן את הדף.')
     } finally {
       setLoading(false)
     }
@@ -117,6 +131,15 @@ export default function SchedulePage() {
   useEffect(() => {
     loadBoardData()
   }, [loadBoardData])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem(REQUEST_STATUS_STORAGE_KEY, JSON.stringify(requestStatusBySession))
+    } catch (error) {
+      console.error('Error saving request statuses:', error)
+    }
+  }, [requestStatusBySession])
 
   const mergedSessions = useMemo(() => {
     const realSessions = Array.isArray(sessions) ? sessions : []
@@ -208,6 +231,28 @@ export default function SchedulePage() {
   }), [selectedDayDate, daySelectedDateObj])
   const sortedByStartTime = (items) => {
     return [...items].sort((a, b) => (a.start_time || '99:99').localeCompare(b.start_time || '99:99'))
+  }
+  const getAttendanceSummary = (session) => {
+    const records = Array.isArray(session?.attendance) ? session.attendance : []
+    const attendedCount = records.filter((record) => record?.present === true).length
+    const markedCount = records.filter((record) => typeof record?.present === 'boolean').length
+    return {
+      attendedCount,
+      markedCount,
+    }
+  }
+  const renderAttendanceIndicator = (session) => {
+    const { attendedCount, markedCount } = getAttendanceSummary(session)
+    return (
+      <div className="shrink-0 min-w-[52px] text-left">
+        <div className="rounded-md border border-border bg-background/60 px-2 py-1 text-[11px] font-semibold text-foreground">
+          {attendedCount}
+        </div>
+        <div className="mt-1 text-[10px] text-muted-foreground">
+          {markedCount > 0 ? 'נוכחים' : 'אין סימון'}
+        </div>
+      </div>
+    )
   }
 
   const renderSessionActions = (session) => {
@@ -313,9 +358,40 @@ export default function SchedulePage() {
       const res = await fetch(`/api/sessions/${sessionId}/attendance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sailor_id: sailorId, present, reason })
+        body: JSON.stringify({ sailor_id: sailorId, present, absence_reason: reason })
       })
       if (!res.ok) throw new Error('Failed to update attendance')
+      const savedAttendance = await res.json()
+      setSessions((prev) => prev.map((session) => {
+        if (session.id !== sessionId) return session
+        const existingAttendance = Array.isArray(session.attendance) ? session.attendance : []
+        const nextAttendance = existingAttendance.some((record) => record?.sailor_id === sailorId)
+          ? existingAttendance.map((record) => (
+            record?.sailor_id === sailorId
+              ? { ...record, present, absence_reason: reason || null }
+              : record
+          ))
+          : [...existingAttendance, savedAttendance]
+        return {
+          ...session,
+          attendance: nextAttendance,
+        }
+      }))
+      setSelectedSession((prev) => {
+        if (!prev || prev.id !== sessionId) return prev
+        const existingAttendance = Array.isArray(prev.attendance) ? prev.attendance : []
+        const nextAttendance = existingAttendance.some((record) => record?.sailor_id === sailorId)
+          ? existingAttendance.map((record) => (
+            record?.sailor_id === sailorId
+              ? { ...record, present, absence_reason: reason || null }
+              : record
+          ))
+          : [...existingAttendance, savedAttendance]
+        return {
+          ...prev,
+          attendance: nextAttendance,
+        }
+      })
     } catch (error) {
       console.error('Error updating attendance:', error)
     }
@@ -324,13 +400,25 @@ export default function SchedulePage() {
     let enriched = session
     if (session?.group_id) {
       try {
-        const groupSailorsRes = await fetch(`/api/groups/${session.group_id}/sailors`)
+        const requests = [
+          fetch(`/api/groups/${session.group_id}/sailors`),
+        ]
+        if (!String(session.id || '').startsWith('virtual-')) {
+          requests.push(fetch(`/api/sessions/${session.id}`))
+        }
+        const responses = await Promise.all(requests)
+        const groupSailorsRes = responses[0]
         const groupSailorsData = await groupSailorsRes.json()
         const mapped = (Array.isArray(groupSailorsData) ? groupSailorsData : []).map((sailor) => ({
           sailor_id: sailor.id,
           sailors: sailor,
         }))
-        enriched = { ...session, group_sailors: mapped }
+        let attendance = Array.isArray(session.attendance) ? session.attendance : []
+        if (responses[1]?.ok) {
+          const sessionData = await responses[1].json()
+          attendance = Array.isArray(sessionData?.attendance) ? sessionData.attendance : attendance
+        }
+        enriched = { ...session, group_sailors: mapped, attendance }
       } catch (error) {
         console.error('Error loading attendance sailors:', error)
       }
@@ -382,6 +470,16 @@ export default function SchedulePage() {
         })),
       }
     }))
+    setSelectedSession((prev) => {
+      if (!prev || prev.group_id !== groupId) return prev
+      return {
+        ...prev,
+        group_sailors: (Array.isArray(refreshedGroup) ? refreshedGroup : []).map((sailor) => ({
+          sailor_id: sailor.id,
+          sailors: sailor,
+        })),
+      }
+    })
   }
 
   const handleRemoveSailorFromGroup = async (groupId, sailorId) => {
@@ -399,6 +497,16 @@ export default function SchedulePage() {
         })),
       }
     }))
+    setSelectedSession((prev) => {
+      if (!prev || prev.group_id !== groupId) return prev
+      return {
+        ...prev,
+        group_sailors: (Array.isArray(refreshedGroup) ? refreshedGroup : []).map((sailor) => ({
+          sailor_id: sailor.id,
+          sailors: sailor,
+        })),
+      }
+    })
   }
 
 
@@ -540,6 +648,11 @@ export default function SchedulePage() {
           <AlertDescription>{managerRequestNotice}</AlertDescription>
         </Alert>
       ) : null}
+      {boardDataError ? (
+        <Alert className="mb-4">
+          <AlertDescription>{boardDataError}</AlertDescription>
+        </Alert>
+      ) : null}
 
       {loading ? (
         <div className="text-center p-5 text-muted-foreground">טוען...</div>
@@ -583,6 +696,7 @@ export default function SchedulePage() {
                         </div>
                         {renderSessionActions(session)}
                       </div>
+                      {renderAttendanceIndicator(session)}
                     </div>
                   ))}
                 </div>
@@ -654,6 +768,7 @@ export default function SchedulePage() {
                               </div>
                               {renderSessionActions(session)}
                             </div>
+                            {renderAttendanceIndicator(session)}
                           </div>
                         ))}
                       </div>
@@ -732,6 +847,7 @@ export default function SchedulePage() {
                         </div>
                         {renderSessionActions(session)}
                       </div>
+                      {renderAttendanceIndicator(session)}
                     </div>
                   ))}
                 </div>

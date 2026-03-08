@@ -1,5 +1,5 @@
 import Modal from './Modal'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -41,6 +41,13 @@ export default function SailorManagementModal({
       return fullName.includes(query)
     })
   }, [availableSailors, searchTerm])
+
+  useEffect(() => {
+    if (!isOpen) return
+    if (newSailorMode === 'new') {
+      setNewSailorDialogOpen(true)
+    }
+  }, [isOpen, newSailorMode])
 
   const handleSelectExisting = async (sailorId) => {
     if (!sailorId || loading) return
@@ -117,7 +124,6 @@ export default function SailorManagementModal({
             onValueChange={(v) => {
               if (!v) return
               setNewSailorMode(v)
-              if (v === 'new') setNewSailorDialogOpen(true)
             }}
             className="w-full"
           >
@@ -157,13 +163,21 @@ export default function SailorManagementModal({
             <div className="text-[11px] text-muted-foreground">לחיצה על שם חניך מוסיפה אותו מיד לקבוצה</div>
           </div>
         ) : (
-          <div className="mb-4">
-            <Button className="w-full" onClick={() => setNewSailorDialogOpen(true)}>פתח טופס חניך חדש</Button>
+          <div className="mb-4 text-[11px] text-muted-foreground">
+            טופס חניך חדש נפתח מיד.
           </div>
         )}
 
-        <Dialog open={newSailorDialogOpen} onOpenChange={setNewSailorDialogOpen}>
-          <DialogContent dir="rtl" className="max-h-[80vh] overflow-y-auto pb-28">
+        <Dialog
+          open={newSailorDialogOpen}
+          onOpenChange={(open) => {
+            setNewSailorDialogOpen(open)
+            if (!open && newSailorMode === 'new') {
+              setNewSailorMode('existing')
+            }
+          }}
+        >
+          <DialogContent dir="rtl" className="max-h-[80vh] overflow-y-auto pb-36">
             <DialogHeader>
               <DialogTitle>חניך חדש</DialogTitle>
             </DialogHeader>
@@ -197,7 +211,7 @@ export default function SailorManagementModal({
               <Label>טלפון הורה</Label>
               <Input value={newSailorData.parent_phone} onChange={(e) => setNewSailorData({ ...newSailorData, parent_phone: e.target.value })} />
             </div>
-            <DialogFooter>
+            <DialogFooter className="sticky bottom-0 bg-background pt-3 pb-6">
               <Button variant="outline" onClick={() => setNewSailorDialogOpen(false)} disabled={loading}>ביטול</Button>
               <Button onClick={handleAddNew} disabled={!newSailorData.first_name || !newSailorData.last_name || loading}>הוסף</Button>
             </DialogFooter>
