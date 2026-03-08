@@ -28,7 +28,7 @@ export async function POST(request) {
   try {
     const supabase = getSupabaseClient()
     const body = await request.json()
-    const { coach_id, date, start_time, end_time, notes, change_note } = body
+    const { coach_id, date, start_time, end_time, notes } = body
 
     if (!coach_id || !date || !start_time || !end_time) {
       return Response.json(
@@ -45,7 +45,6 @@ export async function POST(request) {
         start_time,
         end_time,
         notes: notes || '',
-        change_note: change_note || '',
       }])
       .select()
 
@@ -68,7 +67,6 @@ export async function PUT(request) {
         start_time: item.start_time,
         end_time: item.end_time,
         notes: item.notes || '',
-        change_note: item.change_note || '',
       }
 
       const { data: updated, error: updateError } = await supabase
@@ -103,10 +101,9 @@ export async function PUT(request) {
         if (row) results.push(row)
       }
       return Response.json(results)
-      return Response.json(data || [])
     }
 
-    const { coach_id, date, start_time, end_time, notes, change_note } = body
+    const { coach_id, date, start_time, end_time, notes } = body
     if (!coach_id || !date || !start_time || !end_time) {
       return Response.json(
         { error: 'מדריך, תאריך, שעת התחלה וסיום נדרשים' },
@@ -120,7 +117,6 @@ export async function PUT(request) {
       start_time,
       end_time,
       notes,
-      change_note,
     })
 
     return Response.json(result)

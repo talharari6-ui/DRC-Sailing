@@ -157,7 +157,19 @@ export default function HoursPage() {
     if (!coach?.id) return
     const dataStore = sourceEntries || entriesRef.current
     const entry = dataStore[date]
-    if (!entry?.start_time || !entry?.end_time) return
+    const normalizedStart = normalizeTimeInput(entry?.start_time)
+    const normalizedEnd = normalizeTimeInput(entry?.end_time)
+    if (!normalizedStart || !normalizedEnd) return
+    if (normalizedStart !== entry?.start_time || normalizedEnd !== entry?.end_time) {
+      setEntries((prev) => ({
+        ...prev,
+        [date]: {
+          ...(prev[date] || {}),
+          start_time: normalizedStart,
+          end_time: normalizedEnd,
+        },
+      }))
+    }
     setWorkingDate(date)
     try {
       const response = await fetch('/api/hours', {
@@ -166,8 +178,8 @@ export default function HoursPage() {
         body: JSON.stringify({
           coach_id: coach.id,
           date,
-          start_time: entry.start_time,
-          end_time: entry.end_time,
+          start_time: normalizedStart,
+          end_time: normalizedEnd,
           notes: entry.notes || '',
           change_note: entry.has_change_note ? entry.change_note || '' : '',
         }),
@@ -190,12 +202,14 @@ export default function HoursPage() {
     const batch = dirtyDates
       .map((date) => {
         const item = current[date]
-        if (!item?.start_time || !item?.end_time) return null
+        const normalizedStart = normalizeTimeInput(item?.start_time)
+        const normalizedEnd = normalizeTimeInput(item?.end_time)
+        if (!normalizedStart || !normalizedEnd) return null
         return {
           coach_id: coach.id,
           date,
-          start_time: item.start_time,
-          end_time: item.end_time,
+          start_time: normalizedStart,
+          end_time: normalizedEnd,
           notes: item.notes || '',
           change_note: item.has_change_note ? item.change_note || '' : '',
         }
@@ -347,45 +361,72 @@ export default function HoursPage() {
                 return (
                   <div
                     key={day.key}
-                    className="grid grid-cols-1 md:grid-cols-[110px_100px_100px_1fr_auto] gap-2 rounded-md border p-2 items-start"
+                    className="rounded-md border p-2 space-y-2"
                   >
-                    <div className="text-sm font-semibold pt-1">
-                      {day.weekdayName}, {day.dayNumber}
+                    <div className="grid grid-cols-[96px_1fr_1fr_auto] gap-2 items-center">
+                      <div className="text-sm font-semibold">
+                        {day.weekdayName}, {day.dayNumber}
+                      </div>
+
+                      <Input
+                        className="h-8 text-sm"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="10 / 1030"
+                        value={row.start_time}
+                        onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
+                        onBlur={(event) => {
+                          const normalized = normalizeTimeInput(event.target.value)
+                          updateField(day.key, 'start_time', normalized)
+                          saveDate(day.key, {
+                            ...entriesRef.current,
+                            [day.key]: { ...entriesRef.current[day.key], start_time: normalized },
+                          })
+                        }}
+                      />
+
+                      <Input
+                        className="h-8 text-sm"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="10 / 1030"
+                        value={row.end_time}
+                        onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
+                        onBlur={(event) => {
+                          const normalized = normalizeTimeInput(event.target.value)
+                          updateField(day.key, 'end_time', normalized)
+                          saveDate(day.key, {
+                            ...entriesRef.current,
+                            [day.key]: { ...entriesRef.current[day.key], end_time: normalized },
+                          })
+                        }}
+                      />
+
+                      <div className="flex gap-1">
+                        {hasHours ? (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="h-8 text-xs"
+                            onClick={() => duplicateSameWeekday(day.key)}
+                            disabled={busy}
+                          >
+                            שכפול
+                          </Button>
+                        ) : null}
+                        {hasHours ? (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-8 text-xs"
+                            onClick={() => clearDay(day.key)}
+                            disabled={busy}
+                          >
+                            ניקוי
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
-
-                    <Input
-                      className="h-8 text-sm"
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="10 / 1030"
-                      value={row.start_time}
-                      onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
-                      onBlur={(event) => {
-                        const normalized = normalizeTimeInput(event.target.value)
-                        updateField(day.key, 'start_time', normalized)
-                        saveDate(day.key, {
-                          ...entriesRef.current,
-                          [day.key]: { ...entriesRef.current[day.key], start_time: normalized },
-                        })
-                      }}
-                    />
-
-                    <Input
-                      className="h-8 text-sm"
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="10 / 1030"
-                      value={row.end_time}
-                      onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
-                      onBlur={(event) => {
-                        const normalized = normalizeTimeInput(event.target.value)
-                        updateField(day.key, 'end_time', normalized)
-                        saveDate(day.key, {
-                          ...entriesRef.current,
-                          [day.key]: { ...entriesRef.current[day.key], end_time: normalized },
-                        })
-                      }}
-                    />
 
                     <div className="space-y-1">
                       <textarea
@@ -414,31 +455,6 @@ export default function HoursPage() {
                       >
                         {row.has_change_note ? 'הסתרת הערת שינוי' : 'הוספת הערת דחייה/החלפה'}
                       </button>
-                    </div>
-
-                    <div className="flex md:flex-col gap-1">
-                      {hasHours ? (
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="h-8 text-xs"
-                          onClick={() => duplicateSameWeekday(day.key)}
-                          disabled={busy}
-                        >
-                          שכפול יום זהה
-                        </Button>
-                      ) : null}
-                      {hasHours ? (
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          className="h-8 text-xs"
-                          onClick={() => clearDay(day.key)}
-                          disabled={busy}
-                        >
-                          ניקוי
-                        </Button>
-                      ) : null}
                     </div>
                   </div>
                 )
