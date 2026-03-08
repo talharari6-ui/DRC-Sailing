@@ -114,7 +114,7 @@ export default function SailorsPage() {
   }
 
   return (
-    <div>
+    <div className="pb-24">
       <div className="mb-6">
         <h1 className="text-xl font-extrabold flex items-center gap-2"><Users size={24} /> חניכים</h1>
         <p className="text-muted-foreground text-sm">

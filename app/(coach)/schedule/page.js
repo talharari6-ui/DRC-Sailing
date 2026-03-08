@@ -76,6 +76,7 @@ export default function SchedulePage() {
   const [groupFormError, setGroupFormError] = useState('')
   const [selectedMonthDate, setSelectedMonthDate] = useState(() => new Date().toISOString().split('T')[0])
   const [managerRequestNotice, setManagerRequestNotice] = useState('')
+  const [collapseWeekDays, setCollapseWeekDays] = useState(false)
 
   const loadBoardData = useCallback(async () => {
     setLoading(true)
@@ -183,7 +184,7 @@ export default function SchedulePage() {
     return filteredSessions.filter(s => s.date === dateStr)
   }, [filteredSessions])
 
-  const todayDateStr = useMemo(() => new Date().toISOString().split('T')[0], [])
+  const todayDateStr = useMemo(() => toDateStr(new Date()), [])
   const todaySessions = useMemo(() => getSessionsForDate(todayDateStr), [getSessionsForDate, todayDateStr])
   const selectedMonthDateSessions = useMemo(
     () => getSessionsForDate(selectedMonthDate),
@@ -200,17 +201,15 @@ export default function SchedulePage() {
   }), [monthSelectedDateObj, selectedMonthDate])
 
   const renderSessionActions = (session) => {
-    const canManageSession = session.coach_id === coach?.id
+    const isAssignedInstructor = session.coach_id === coach?.id || session.substitute_coach_id === coach?.id
+    if (!isAssignedInstructor) return null
     return (
       <div className="mt-2 space-y-2">
-        <div className="text-xs text-muted-foreground mb-1">
-          {canManageSession ? 'פעולות זמינות:' : 'רק מדריך הקבוצה יכול לבצע פעולות'}
-        </div>
+        <div className="text-xs text-muted-foreground mb-1">פעולות זמינות:</div>
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
             type="button"
-            disabled={!canManageSession}
             onClick={() => {
               setSelectedSession(session)
               setDetailModalOpen(true)
@@ -222,7 +221,6 @@ export default function SchedulePage() {
             size="sm"
             variant="outline"
             type="button"
-            disabled={!canManageSession}
             onClick={() => {
               handleOpenSailorModal(session)
             }}
@@ -233,7 +231,6 @@ export default function SchedulePage() {
             size="sm"
             variant="secondary"
             type="button"
-            disabled={!canManageSession}
             onClick={() => handlePostponeRequest(session)}
           >
             דחיית פעילות
@@ -242,7 +239,6 @@ export default function SchedulePage() {
             size="sm"
             variant="secondary"
             type="button"
-            disabled={!canManageSession}
             onClick={() => handleSwitchRequest(session)}
           >
             פתיחה להחלפת מדריך
@@ -346,12 +342,34 @@ export default function SchedulePage() {
     })
     if (!res.ok) throw new Error('Failed to add sailor')
     await handleOpenSailorModal(selectedSession)
+    const refreshedGroup = await fetch(`/api/groups/${groupId}/sailors`).then(r => r.json()).catch(() => [])
+    setSessions((prev) => prev.map((s) => {
+      if (s.group_id !== groupId) return s
+      return {
+        ...s,
+        group_sailors: (Array.isArray(refreshedGroup) ? refreshedGroup : []).map((sailor) => ({
+          sailor_id: sailor.id,
+          sailors: sailor,
+        })),
+      }
+    }))
   }
 
   const handleRemoveSailorFromGroup = async (groupId, sailorId) => {
     const res = await fetch(`/api/groups/${groupId}/sailors?sailor_id=${sailorId}`, { method: 'DELETE' })
     if (!res.ok) throw new Error('Failed to remove sailor')
     await handleOpenSailorModal(selectedSession)
+    const refreshedGroup = await fetch(`/api/groups/${groupId}/sailors`).then(r => r.json()).catch(() => [])
+    setSessions((prev) => prev.map((s) => {
+      if (s.group_id !== groupId) return s
+      return {
+        ...s,
+        group_sailors: (Array.isArray(refreshedGroup) ? refreshedGroup : []).map((sailor) => ({
+          sailor_id: sailor.id,
+          sailors: sailor,
+        })),
+      }
+    }))
   }
 
   const handleDecline = async (sessionId) => {
@@ -360,12 +378,12 @@ export default function SchedulePage() {
   }
 
   const handlePostponeRequest = (session) => {
-    if (session.coach_id !== coach?.id) return
+    if (session.coach_id !== coach?.id && session.substitute_coach_id !== coach?.id) return
     setManagerRequestNotice(`בקשת דחייה נשלחה לאישור מנהל עבור ${session.groups?.name || 'קבוצה'}`)
   }
 
   const handleSwitchRequest = (session) => {
-    if (session.coach_id !== coach?.id) return
+    if (session.coach_id !== coach?.id && session.substitute_coach_id !== coach?.id) return
     setManagerRequestNotice(`בקשת החלפה נשלחה לאישור מנהל עבור ${session.groups?.name || 'קבוצה'}`)
   }
 
@@ -467,7 +485,7 @@ export default function SchedulePage() {
   }
 
   return (
-    <div>
+    <div className="pb-24">
       <div className="mb-6">
         <h1 className="text-xl font-extrabold mb-1 flex items-center gap-2"><CalendarIcon size={24} /> לוח שנתי</h1>
         <p className="text-muted-foreground text-sm">
@@ -544,7 +562,17 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'week' ? (
         <div className="mt-6">
-          <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><CalendarIcon size={20} /> השבוע</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-extrabold flex items-center gap-2"><CalendarIcon size={20} /> השבוע</h2>
+            <button
+              type="button"
+              className="h-5 w-10 rounded-full bg-secondary border border-border flex items-center justify-center text-xs"
+              onClick={() => setCollapseWeekDays((prev) => !prev)}
+              aria-label="מזער ימים בשבוע"
+            >
+              {collapseWeekDays ? '▾' : '▴'}
+            </button>
+          </div>
           <div className="flex flex-col gap-3">
             {weekDays.map((day) => {
               const daySessions = getSessionsForDate(day.date)
@@ -568,7 +596,7 @@ export default function SchedulePage() {
                       </div>
                     </div>
 
-                    {daySessions.length > 0 ? (
+                    {collapseWeekDays ? null : daySessions.length > 0 ? (
                       <div className="flex flex-col gap-2.5">
                         {daySessions.map(session => (
                           <div
@@ -616,8 +644,8 @@ export default function SchedulePage() {
                   <div className="flex items-center gap-3" dir="ltr">
                     <Button size="sm" onClick={() => openAddGroupDialog({
                       date: todayDateStr,
-                      dayName: HEBREW_DAY_NAMES[new Date().getDay()],
-                      dayNum: new Date().getDate(),
+                      dayName: HEBREW_DAY_NAMES[new Date(`${todayDateStr}T12:00:00`).getDay()],
+                      dayNum: new Date(`${todayDateStr}T12:00:00`).getDate(),
                       dateObj: new Date(),
                     })}>
                       <Plus size={16} className="inline" /> הוסף קבוצה

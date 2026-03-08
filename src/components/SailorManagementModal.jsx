@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 
 export default function SailorManagementModal({
   groupId,
@@ -14,8 +16,8 @@ export default function SailorManagementModal({
   availableSailors
 }) {
   const [newSailorMode, setNewSailorMode] = useState('existing')
-  const [selectedSailorId, setSelectedSailorId] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [newSailorDialogOpen, setNewSailorDialogOpen] = useState(false)
   const [newSailorData, setNewSailorData] = useState({
     first_name: '',
     last_name: '',
@@ -40,12 +42,11 @@ export default function SailorManagementModal({
     })
   }, [availableSailors, searchTerm])
 
-  const handleAddExisting = async () => {
-    if (!selectedSailorId) return
+  const handleSelectExisting = async (sailorId) => {
+    if (!sailorId || loading) return
     setLoading(true)
     try {
-      await onAddSailor(groupId, selectedSailorId)
-      setSelectedSailorId('')
+      await onAddSailor(groupId, sailorId)
       setSearchTerm('')
     } finally {
       setLoading(false)
@@ -69,6 +70,7 @@ export default function SailorManagementModal({
         parent_phone: '',
       })
       setNewSailorMode('existing')
+      setNewSailorDialogOpen(false)
     } finally {
       setLoading(false)
     }
@@ -76,8 +78,7 @@ export default function SailorManagementModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="ערוך חניכים">
-      <div className="px-4 pb-5 sm:px-6 sm:pb-6" dir="rtl">
-        {/* Current Sailors */}
+      <div className="px-4 pb-24 sm:px-6 sm:pb-24" dir="rtl">
         <div className="mb-5">
           <div className="text-xs font-semibold mb-2 text-foreground">
             חניכים בקבוצה
@@ -109,12 +110,15 @@ export default function SailorManagementModal({
           )}
         </div>
 
-        {/* Add Sailor Mode Toggle */}
         <div className="mb-4">
           <ToggleGroup
             type="single"
             value={newSailorMode}
-            onValueChange={(v) => v && setNewSailorMode(v)}
+            onValueChange={(v) => {
+              if (!v) return
+              setNewSailorMode(v)
+              if (v === 'new') setNewSailorDialogOpen(true)
+            }}
             className="w-full"
           >
             <ToggleGroupItem value="existing" className="flex-1 text-xs data-[state=on]:bg-drc-blue-light data-[state=on]:text-white">
@@ -126,7 +130,6 @@ export default function SailorManagementModal({
           </ToggleGroup>
         </div>
 
-        {/* Add Existing Sailor */}
         {newSailorMode === 'existing' ? (
           <div className="mb-4">
             <Input
@@ -143,101 +146,63 @@ export default function SailorManagementModal({
                   <button
                     key={sailor.id}
                     type="button"
-                    onClick={() => setSelectedSailorId(sailor.id)}
-                    className={`w-full text-right p-2 text-sm border-b border-border last:border-b-0 ${selectedSailorId === sailor.id ? 'bg-secondary' : ''}`}
+                    onClick={() => handleSelectExisting(sailor.id)}
+                    className="w-full text-right p-2 text-sm border-b border-border last:border-b-0 hover:bg-secondary"
                   >
                     {`${sailor.first_name || ''} ${sailor.last_name || ''}`.trim()}
                   </button>
                 ))
               )}
             </div>
-            <Button
-              onClick={handleAddExisting}
-              disabled={!selectedSailorId || loading}
-              className="w-full"
-            >
-              הוסף
-            </Button>
+            <div className="text-[11px] text-muted-foreground">לחיצה על שם חניך מוסיפה אותו מיד לקבוצה</div>
           </div>
-        ) : null}
+        ) : (
+          <div className="mb-4">
+            <Button className="w-full" onClick={() => setNewSailorDialogOpen(true)}>פתח טופס חניך חדש</Button>
+          </div>
+        )}
 
-        {/* Add New Sailor */}
-        {newSailorMode === 'new' ? (
-          <div className="mb-4 space-y-2">
-            <Input
-              type="text"
-              placeholder="שם פרטי"
-              value={newSailorData.first_name}
-              onChange={(e) => setNewSailorData({ ...newSailorData, first_name: e.target.value })}
-            />
-            <Input
-              type="text"
-              placeholder="שם משפחה"
-              value={newSailorData.last_name}
-              onChange={(e) => setNewSailorData({ ...newSailorData, last_name: e.target.value })}
-            />
-            <select
-              value={newSailorData.gender}
-              onChange={(e) => setNewSailorData({ ...newSailorData, gender: e.target.value })}
-              className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm"
-            >
-              <option value="">מין</option>
-              <option value="male">זכר</option>
-              <option value="female">נקבה</option>
-            </select>
-            <select
-              value={newSailorData.boat}
-              onChange={(e) => setNewSailorData({ ...newSailorData, boat: e.target.value })}
-              className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm"
-            >
-              <option value="">סירה</option>
-              {boatOptions.map((boat) => (
-                <option key={boat} value={boat}>{boat}</option>
-              ))}
-            </select>
-            <Input
-              type="date"
-              placeholder="תאריך לידה"
-              value={newSailorData.birth_date}
-              onChange={(e) => setNewSailorData({ ...newSailorData, birth_date: e.target.value })}
-            />
-            <Input
-              type="date"
-              placeholder="תאריך הצטרפות"
-              value={newSailorData.join_date}
-              onChange={(e) => setNewSailorData({ ...newSailorData, join_date: e.target.value })}
-            />
-            <select
-              value={newSailorData.shirt_size}
-              onChange={(e) => setNewSailorData({ ...newSailorData, shirt_size: e.target.value })}
-              className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm"
-            >
-              <option value="">מידת חולצה</option>
-              {shirtSizes.map((size) => (
-                <option key={size} value={size}>{size}</option>
-              ))}
-            </select>
-            <Input
-              type="text"
-              placeholder="שם הורה"
-              value={newSailorData.parent_name}
-              onChange={(e) => setNewSailorData({ ...newSailorData, parent_name: e.target.value })}
-            />
-            <Input
-              type="tel"
-              placeholder="טלפון הורה"
-              value={newSailorData.parent_phone}
-              onChange={(e) => setNewSailorData({ ...newSailorData, parent_phone: e.target.value })}
-            />
-            <Button
-              onClick={handleAddNew}
-              disabled={!newSailorData.first_name || !newSailorData.last_name || loading}
-              className="w-full"
-            >
-              הוסף
-            </Button>
-          </div>
-        ) : null}
+        <Dialog open={newSailorDialogOpen} onOpenChange={setNewSailorDialogOpen}>
+          <DialogContent dir="rtl">
+            <DialogHeader>
+              <DialogTitle>חניך חדש</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label>שם פרטי</Label>
+              <Input value={newSailorData.first_name} onChange={(e) => setNewSailorData({ ...newSailorData, first_name: e.target.value })} />
+              <Label>שם משפחה</Label>
+              <Input value={newSailorData.last_name} onChange={(e) => setNewSailorData({ ...newSailorData, last_name: e.target.value })} />
+              <Label>מין</Label>
+              <select value={newSailorData.gender} onChange={(e) => setNewSailorData({ ...newSailorData, gender: e.target.value })} className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm">
+                <option value="">בחר</option>
+                <option value="male">זכר</option>
+                <option value="female">נקבה</option>
+              </select>
+              <Label>סירה</Label>
+              <select value={newSailorData.boat} onChange={(e) => setNewSailorData({ ...newSailorData, boat: e.target.value })} className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm">
+                <option value="">בחר</option>
+                {boatOptions.map((boat) => <option key={boat} value={boat}>{boat}</option>)}
+              </select>
+              <Label>תאריך לידה</Label>
+              <Input type="date" value={newSailorData.birth_date} onChange={(e) => setNewSailorData({ ...newSailorData, birth_date: e.target.value })} />
+              <Label>תאריך הצטרפות</Label>
+              <Input type="date" value={newSailorData.join_date} onChange={(e) => setNewSailorData({ ...newSailorData, join_date: e.target.value })} />
+              <Label>מידת חולצה</Label>
+              <select value={newSailorData.shirt_size} onChange={(e) => setNewSailorData({ ...newSailorData, shirt_size: e.target.value })} className="w-full p-2.5 rounded-md border border-border bg-secondary text-foreground text-sm">
+                <option value="">בחר</option>
+                {shirtSizes.map((size) => <option key={size} value={size}>{size}</option>)}
+              </select>
+              <Label>שם הורה</Label>
+              <Input value={newSailorData.parent_name} onChange={(e) => setNewSailorData({ ...newSailorData, parent_name: e.target.value })} />
+              <Label>טלפון הורה</Label>
+              <Input value={newSailorData.parent_phone} onChange={(e) => setNewSailorData({ ...newSailorData, parent_phone: e.target.value })} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setNewSailorDialogOpen(false)} disabled={loading}>ביטול</Button>
+              <Button onClick={handleAddNew} disabled={!newSailorData.first_name || !newSailorData.last_name || loading}>הוסף</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </Modal>
   )
