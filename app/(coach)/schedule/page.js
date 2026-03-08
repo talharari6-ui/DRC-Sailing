@@ -17,7 +17,6 @@ import { Calendar as CalendarIcon, Plus, ClipboardList } from 'lucide-react'
 
 const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailModal'), { ssr: false })
 const SailorManagementModal = dynamic(() => import('@/src/components/SailorManagementModal'), { ssr: false })
-const SubstituteCoachModal = dynamic(() => import('@/src/components/SubstituteCoachModal'), { ssr: false })
 const HEBREW_DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
 const normalizeTimeInput = (value) => {
@@ -61,7 +60,6 @@ export default function SchedulePage() {
   const [selectedSession, setSelectedSession] = useState(null)
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [sailorModalOpen, setSailorModalOpen] = useState(false)
-  const [substituteModalOpen, setSubstituteModalOpen] = useState(false)
   const [groupSailors, setGroupSailors] = useState([])
   const [availableSailors, setAvailableSailors] = useState([])
   const [addGroupDialogOpen, setAddGroupDialogOpen] = useState(false)
@@ -76,7 +74,7 @@ export default function SchedulePage() {
   const [groupFormError, setGroupFormError] = useState('')
   const [selectedMonthDate, setSelectedMonthDate] = useState(() => new Date().toISOString().split('T')[0])
   const [managerRequestNotice, setManagerRequestNotice] = useState('')
-  const [collapseWeekDays, setCollapseWeekDays] = useState(false)
+  const [collapsedWeekDates, setCollapsedWeekDates] = useState({})
 
   const loadBoardData = useCallback(async () => {
     setLoading(true)
@@ -250,6 +248,12 @@ export default function SchedulePage() {
       </div>
     )
   }
+  const toggleDayCollapse = (dateStr) => {
+    setCollapsedWeekDates((prev) => ({
+      ...prev,
+      [dateStr]: !prev[dateStr],
+    }))
+  }
 
   const getDayContent = (dateStr) => {
     const daySessions = getSessionsForDate(dateStr)
@@ -295,20 +299,6 @@ export default function SchedulePage() {
       console.error('Error updating attendance:', error)
     }
   }
-
-  const handleSubstituteRequest = (sessionId) => {
-    const session = sessions.find(s => s.id === sessionId)
-    setSelectedSession(session)
-    setDetailModalOpen(false)
-    setSubstituteModalOpen(true)
-  }
-
-  const handleEditSailors = (sessionId) => {
-    const session = mergedSessions.find(s => s.id === sessionId)
-    setDetailModalOpen(false)
-    if (session) handleOpenSailorModal(session)
-  }
-
   const handleOpenSailorModal = async (session) => {
     setSelectedSession(session)
     setSailorModalOpen(true)
@@ -372,10 +362,6 @@ export default function SchedulePage() {
     }))
   }
 
-  const handleDecline = async (sessionId) => {
-    console.log('Session declined:', sessionId)
-    setDetailModalOpen(false)
-  }
 
   const handlePostponeRequest = (session) => {
     if (session.coach_id !== coach?.id && session.substitute_coach_id !== coach?.id) return
@@ -562,20 +548,11 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'week' ? (
         <div className="mt-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-extrabold flex items-center gap-2"><CalendarIcon size={20} /> השבוע</h2>
-            <button
-              type="button"
-              className="h-5 w-10 rounded-full bg-secondary border border-border flex items-center justify-center text-xs"
-              onClick={() => setCollapseWeekDays((prev) => !prev)}
-              aria-label="מזער ימים בשבוע"
-            >
-              {collapseWeekDays ? '▾' : '▴'}
-            </button>
-          </div>
+          <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><CalendarIcon size={20} /> השבוע</h2>
           <div className="flex flex-col gap-3">
             {weekDays.map((day) => {
               const daySessions = getSessionsForDate(day.date)
+              const isCollapsed = !!collapsedWeekDates[day.date]
               return (
                 <Card key={day.date}>
                   <CardContent className="p-4">
@@ -594,9 +571,16 @@ export default function SchedulePage() {
                           {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')} ({day.date})
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        className="h-5 w-10 rounded-full bg-secondary border border-border flex items-center justify-center text-xs"
+                        onClick={() => toggleDayCollapse(day.date)}
+                        aria-label="מזער יום"
+                      >
+                        {isCollapsed ? '▾' : '▴'}
+                      </button>
                     </div>
-
-                    {collapseWeekDays ? null : daySessions.length > 0 ? (
+                    {isCollapsed ? null : daySessions.length > 0 ? (
                       <div className="flex flex-col gap-2.5">
                         {daySessions.map(session => (
                           <div
@@ -635,24 +619,24 @@ export default function SchedulePage() {
       {!loading && viewMode === 'day' ? (
         <div className="mt-6">
           <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><ClipboardList size={20} /> היום</h2>
-          {todaySessions.length === 0 ? (
-            <div className="text-muted-foreground text-center p-5">אין פעילויות להיום</div>
-          ) : (
-            <Card>
-              <CardContent className="p-4">
-                <div className="mb-3">
-                  <div className="flex items-center gap-3" dir="ltr">
-                    <Button size="sm" onClick={() => openAddGroupDialog({
-                      date: todayDateStr,
-                      dayName: HEBREW_DAY_NAMES[new Date(`${todayDateStr}T12:00:00`).getDay()],
-                      dayNum: new Date(`${todayDateStr}T12:00:00`).getDate(),
-                      dateObj: new Date(),
-                    })}>
-                      <Plus size={16} className="inline" /> הוסף קבוצה
-                    </Button>
-                    <div className="h-px flex-1 bg-border" />
-                  </div>
+          <Card>
+            <CardContent className="p-4">
+              <div className="mb-3">
+                <div className="flex items-center gap-3" dir="ltr">
+                  <Button size="sm" onClick={() => openAddGroupDialog({
+                    date: todayDateStr,
+                    dayName: HEBREW_DAY_NAMES[new Date(`${todayDateStr}T12:00:00`).getDay()],
+                    dayNum: new Date(`${todayDateStr}T12:00:00`).getDate(),
+                    dateObj: new Date(),
+                  })}>
+                    <Plus size={16} className="inline" /> הוסף קבוצה
+                  </Button>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
+              </div>
+              {todaySessions.length === 0 ? (
+                <div className="text-muted-foreground text-center p-5">אין פעילויות להיום</div>
+              ) : (
                 <div className="space-y-3">
                   {todaySessions.map((session) => (
                     <div
@@ -673,9 +657,9 @@ export default function SchedulePage() {
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
+            </CardContent>
+          </Card>
         </div>
       ) : null}
 
@@ -685,9 +669,6 @@ export default function SchedulePage() {
         onClose={() => setDetailModalOpen(false)}
         coachId={coach?.id}
         onAttendanceUpdate={handleAttendanceUpdate}
-        onSubstituteRequest={handleSubstituteRequest}
-        onDecline={handleDecline}
-        onEditSailors={handleEditSailors}
       />
 
       <SailorManagementModal
@@ -700,14 +681,9 @@ export default function SchedulePage() {
         onClose={() => setSailorModalOpen(false)}
       />
 
-      <SubstituteCoachModal
-        session={selectedSession}
-        isOpen={substituteModalOpen}
-        onClose={() => setSubstituteModalOpen(false)}
-      />
 
       <Dialog open={addGroupDialogOpen} onOpenChange={setAddGroupDialogOpen}>
-        <DialogContent dir="rtl">
+        <DialogContent dir="rtl" className="max-h-[80vh] overflow-y-auto pb-24">
           <DialogHeader>
             <DialogTitle>קבוצה חדשה</DialogTitle>
             <DialogDescription>

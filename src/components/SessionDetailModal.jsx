@@ -1,7 +1,7 @@
 import Modal from './Modal'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Check, X, Pencil, RefreshCw, XOctagon } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 
 export default function SessionDetailModal({
   session,
@@ -9,9 +9,6 @@ export default function SessionDetailModal({
   onClose,
   coachId,
   onAttendanceUpdate,
-  onSubstituteRequest,
-  onDecline,
-  onEditSailors
 }) {
   const [marking, setMarking] = useState(false)
   const [attendance, setAttendance] = useState({})
@@ -85,22 +82,6 @@ export default function SessionDetailModal({
           </div>
         ) : <div className="text-muted-foreground text-xs">אין הרשאה לנוכחות</div>}
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3 mt-6">
-          {isAssignedInstructor ? (
-            <>
-              <Button onClick={() => onEditSailors(session.id)}>
-                <Pencil size={16} /> ערוך חניכים
-              </Button>
-              <Button variant="secondary" onClick={() => onSubstituteRequest(session.id)}>
-                <RefreshCw size={16} /> בקשה להחלפה
-              </Button>
-              <Button variant="destructive" onClick={() => onDecline(session.id)}>
-                <XOctagon size={16} /> דחייה
-              </Button>
-            </>
-          ) : null}
-        </div>
       </div>
     </Modal>
   )

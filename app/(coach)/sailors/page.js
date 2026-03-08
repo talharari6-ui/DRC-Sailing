@@ -183,7 +183,7 @@ export default function SailorsPage() {
         </div>
       )}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent dir="rtl">
+        <DialogContent dir="rtl" className="max-h-[80vh] overflow-y-auto pb-24">
           <DialogHeader>
             <DialogTitle>{editingSailor ? 'עריכת חניך' : 'חניך חדש'}</DialogTitle>
           </DialogHeader>
