@@ -163,7 +163,7 @@ export default function SailorManagementModal({
         )}
 
         <Dialog open={newSailorDialogOpen} onOpenChange={setNewSailorDialogOpen}>
-          <DialogContent dir="rtl">
+          <DialogContent dir="rtl" className="max-h-[80vh] overflow-y-auto pb-28">
             <DialogHeader>
               <DialogTitle>חניך חדש</DialogTitle>
             </DialogHeader>

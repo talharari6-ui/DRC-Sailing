@@ -73,8 +73,10 @@ export default function SchedulePage() {
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [groupFormError, setGroupFormError] = useState('')
   const [selectedMonthDate, setSelectedMonthDate] = useState(() => new Date().toISOString().split('T')[0])
+  const [selectedDayDate, setSelectedDayDate] = useState(() => toDateStr(new Date()))
   const [managerRequestNotice, setManagerRequestNotice] = useState('')
   const [collapsedWeekDates, setCollapsedWeekDates] = useState({})
+  const [requestStatusBySession, setRequestStatusBySession] = useState({})
 
   const loadBoardData = useCallback(async () => {
     setLoading(true)
@@ -182,8 +184,7 @@ export default function SchedulePage() {
     return filteredSessions.filter(s => s.date === dateStr)
   }, [filteredSessions])
 
-  const todayDateStr = useMemo(() => toDateStr(new Date()), [])
-  const todaySessions = useMemo(() => getSessionsForDate(todayDateStr), [getSessionsForDate, todayDateStr])
+  const dayViewSessions = useMemo(() => getSessionsForDate(selectedDayDate), [getSessionsForDate, selectedDayDate])
   const selectedMonthDateSessions = useMemo(
     () => getSessionsForDate(selectedMonthDate),
     [getSessionsForDate, selectedMonthDate]
@@ -197,6 +198,17 @@ export default function SchedulePage() {
     monthNum: String(monthSelectedDateObj.getMonth() + 1).padStart(2, '0'),
     dateObj: monthSelectedDateObj,
   }), [monthSelectedDateObj, selectedMonthDate])
+  const daySelectedDateObj = useMemo(() => new Date(`${selectedDayDate}T12:00:00`), [selectedDayDate])
+  const daySelectedMeta = useMemo(() => ({
+    date: selectedDayDate,
+    dayName: HEBREW_DAY_NAMES[daySelectedDateObj.getDay()],
+    dayNum: daySelectedDateObj.getDate(),
+    monthNum: String(daySelectedDateObj.getMonth() + 1).padStart(2, '0'),
+    dateObj: daySelectedDateObj,
+  }), [selectedDayDate, daySelectedDateObj])
+  const sortedByStartTime = (items) => {
+    return [...items].sort((a, b) => (a.start_time || '99:99').localeCompare(b.start_time || '99:99'))
+  }
 
   const renderSessionActions = (session) => {
     const isAssignedInstructor = session.coach_id === coach?.id || session.substitute_coach_id === coach?.id
@@ -209,8 +221,7 @@ export default function SchedulePage() {
             size="sm"
             type="button"
             onClick={() => {
-              setSelectedSession(session)
-              setDetailModalOpen(true)
+              handleOpenAttendanceModal(session)
             }}
           >
             מילוי נוכחות
@@ -229,19 +240,33 @@ export default function SchedulePage() {
             size="sm"
             variant="secondary"
             type="button"
-            onClick={() => handlePostponeRequest(session)}
+            onClick={() => {
+              const current = requestStatusBySession[session.id] || {}
+              if (current.delay) return cancelPostponeRequest(session)
+              handlePostponeRequest(session)
+            }}
           >
-            דחיית פעילות
+            {(requestStatusBySession[session.id] || {}).delay ? 'בטל דחייה' : 'דחיית פעילות'}
           </Button>
           <Button
             size="sm"
             variant="secondary"
             type="button"
-            onClick={() => handleSwitchRequest(session)}
+            onClick={() => {
+              const current = requestStatusBySession[session.id] || {}
+              if (current.switch) return cancelSwitchRequest(session)
+              handleSwitchRequest(session)
+            }}
           >
-            פתיחה להחלפת מדריך
+            {(requestStatusBySession[session.id] || {}).switch ? 'בטל החלפה' : 'פתיחה להחלפת מדריך'}
           </Button>
         </div>
+        {(requestStatusBySession[session.id] || {}).delay ? (
+          <div className="text-[11px] text-amber-400">סטטוס דחייה: ממתין לאישור מנהל</div>
+        ) : null}
+        {(requestStatusBySession[session.id] || {}).switch ? (
+          <div className="text-[11px] text-cyan-400">סטטוס החלפה: ממתין לאישור מנהל</div>
+        ) : null}
         <div className="text-[11px] text-muted-foreground">
           דחייה/החלפה מחייבות אישור מנהל בטרמינל המנהל
         </div>
@@ -256,27 +281,23 @@ export default function SchedulePage() {
   }
 
   const getDayContent = (dateStr) => {
-    const daySessions = getSessionsForDate(dateStr)
+    const daySessions = sortedByStartTime(getSessionsForDate(dateStr))
     if (daySessions.length === 0) return null
 
     return (
       <div className="text-xs flex flex-col gap-0.5">
-        {daySessions.slice(0, 2).map(s => (
+        {daySessions.slice(0, 3).map(s => (
           <div
             key={s.id}
-            onClick={() => {
-              setSelectedSession(s)
-              setDetailModalOpen(true)
-            }}
             className="text-white px-1 py-0.5 rounded-sm cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap"
             style={{ background: s.groups?.color || '#3b82f6' }}
           >
-            {s.groups?.name?.substring(0, 5)}
+            {(s.start_time ? `${s.start_time} ` : '') + (s.groups?.name || 'קבוצה')}
           </div>
         ))}
-        {daySessions.length > 2 ? (
+        {daySessions.length > 3 ? (
           <div className="text-xs text-muted-foreground">
-            +{daySessions.length - 2}
+            +{daySessions.length - 3}
           </div>
         ) : null}
       </div>
@@ -298,6 +319,24 @@ export default function SchedulePage() {
     } catch (error) {
       console.error('Error updating attendance:', error)
     }
+  }
+  const handleOpenAttendanceModal = async (session) => {
+    let enriched = session
+    if (session?.group_id) {
+      try {
+        const groupSailorsRes = await fetch(`/api/groups/${session.group_id}/sailors`)
+        const groupSailorsData = await groupSailorsRes.json()
+        const mapped = (Array.isArray(groupSailorsData) ? groupSailorsData : []).map((sailor) => ({
+          sailor_id: sailor.id,
+          sailors: sailor,
+        }))
+        enriched = { ...session, group_sailors: mapped }
+      } catch (error) {
+        console.error('Error loading attendance sailors:', error)
+      }
+    }
+    setSelectedSession(enriched)
+    setDetailModalOpen(true)
   }
   const handleOpenSailorModal = async (session) => {
     setSelectedSession(session)
@@ -366,11 +405,21 @@ export default function SchedulePage() {
   const handlePostponeRequest = (session) => {
     if (session.coach_id !== coach?.id && session.substitute_coach_id !== coach?.id) return
     setManagerRequestNotice(`בקשת דחייה נשלחה לאישור מנהל עבור ${session.groups?.name || 'קבוצה'}`)
+    setRequestStatusBySession((prev) => ({ ...prev, [session.id]: { ...(prev[session.id] || {}), delay: true } }))
   }
 
   const handleSwitchRequest = (session) => {
     if (session.coach_id !== coach?.id && session.substitute_coach_id !== coach?.id) return
     setManagerRequestNotice(`בקשת החלפה נשלחה לאישור מנהל עבור ${session.groups?.name || 'קבוצה'}`)
+    setRequestStatusBySession((prev) => ({ ...prev, [session.id]: { ...(prev[session.id] || {}), switch: true } }))
+  }
+  const cancelPostponeRequest = (session) => {
+    setManagerRequestNotice(`בקשת דחייה בוטלה עבור ${session.groups?.name || 'קבוצה'}`)
+    setRequestStatusBySession((prev) => ({ ...prev, [session.id]: { ...(prev[session.id] || {}), delay: false } }))
+  }
+  const cancelSwitchRequest = (session) => {
+    setManagerRequestNotice(`בקשת החלפה בוטלה עבור ${session.groups?.name || 'קבוצה'}`)
+    setRequestStatusBySession((prev) => ({ ...prev, [session.id]: { ...(prev[session.id] || {}), switch: false } }))
   }
 
   const weekDays = useMemo(() => {
@@ -481,6 +530,11 @@ export default function SchedulePage() {
 
       <ViewModeToggle currentMode={viewMode} onModeChange={setViewMode} />
       <FilterToggle currentFilter={filterMode} onFilterChange={setFilterMode} />
+      <div className="flex items-center justify-center gap-3 text-muted-foreground text-xs mb-3">
+        <span>⬇</span>
+        <span>⬇</span>
+        <span>⬇</span>
+      </div>
       {managerRequestNotice ? (
         <Alert className="mb-4">
           <AlertDescription>{managerRequestNotice}</AlertDescription>
@@ -513,7 +567,7 @@ export default function SchedulePage() {
                 <div className="text-muted-foreground text-xs py-2">אין פעילויות ביום זה</div>
               ) : (
                 <div className="space-y-3">
-                  {selectedMonthDateSessions.map((session) => (
+                  {sortedByStartTime(selectedMonthDateSessions).map((session) => (
                     <div
                       key={session.id}
                       className="bg-secondary border border-border rounded-lg p-3 flex gap-3 items-center"
@@ -618,27 +672,51 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'day' ? (
         <div className="mt-6">
-          <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><ClipboardList size={20} /> היום</h2>
+          <div className="flex items-center justify-between mb-3">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const d = new Date(`${selectedDayDate}T12:00:00`)
+                d.setDate(d.getDate() - 1)
+                setSelectedDayDate(toDateStr(d))
+              }}
+            >
+              ←
+            </Button>
+            <h2 className="text-base font-extrabold flex items-center gap-2"><ClipboardList size={20} /> יום {daySelectedMeta.dayName} ({daySelectedMeta.date})</h2>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const d = new Date(`${selectedDayDate}T12:00:00`)
+                d.setDate(d.getDate() + 1)
+                setSelectedDayDate(toDateStr(d))
+              }}
+            >
+              →
+            </Button>
+          </div>
           <Card>
             <CardContent className="p-4">
               <div className="mb-3">
                 <div className="flex items-center gap-3" dir="ltr">
                   <Button size="sm" onClick={() => openAddGroupDialog({
-                    date: todayDateStr,
-                    dayName: HEBREW_DAY_NAMES[new Date(`${todayDateStr}T12:00:00`).getDay()],
-                    dayNum: new Date(`${todayDateStr}T12:00:00`).getDate(),
-                    dateObj: new Date(),
+                    date: selectedDayDate,
+                    dayName: daySelectedMeta.dayName,
+                    dayNum: daySelectedMeta.dayNum,
+                    dateObj: daySelectedMeta.dateObj,
                   })}>
                     <Plus size={16} className="inline" /> הוסף קבוצה
                   </Button>
                   <div className="h-px flex-1 bg-border" />
                 </div>
               </div>
-              {todaySessions.length === 0 ? (
-                <div className="text-muted-foreground text-center p-5">אין פעילויות להיום</div>
+              {dayViewSessions.length === 0 ? (
+                <div className="text-muted-foreground text-center p-5">אין פעילויות ליום זה</div>
               ) : (
                 <div className="space-y-3">
-                  {todaySessions.map((session) => (
+                  {sortedByStartTime(dayViewSessions).map((session) => (
                     <div
                       key={session.id}
                       className="bg-secondary border border-border rounded-lg p-3 flex items-center gap-3"
