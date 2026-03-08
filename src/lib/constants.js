@@ -15,7 +15,6 @@ export const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 export const GENDERS = [
   { value: 'male', label: 'זכר' },
   { value: 'female', label: 'נקבה' },
-  { value: 'other', label: 'אחר' },
 ]
 
 // Color palette for groups (original colors from CSS)
