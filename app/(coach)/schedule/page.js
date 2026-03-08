@@ -74,7 +74,6 @@ export default function SchedulePage() {
   const [newGroupStartDate, setNewGroupStartDate] = useState('')
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [groupFormError, setGroupFormError] = useState('')
-  const [selectedMonthDate, setSelectedMonthDate] = useState(() => toDateStr(new Date()))
   const [selectedDayDate, setSelectedDayDate] = useState(() => toDateStr(new Date()))
   const [managerRequestNotice, setManagerRequestNotice] = useState('')
   const [collapsedWeekDates, setCollapsedWeekDates] = useState({})
@@ -146,15 +145,14 @@ export default function SchedulePage() {
     const realSessions = Array.isArray(sessions) ? sessions : []
     const allGroups = Array.isArray(groups) ? groups : []
     const today = new Date()
-    const selectedDateObj = new Date(`${selectedMonthDate}T12:00:00`)
     const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
     const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
     const weekStart = new Date(currentDate)
     weekStart.setDate(currentDate.getDate() - currentDate.getDay())
     const weekEnd = new Date(weekStart)
     weekEnd.setDate(weekStart.getDate() + 6)
-    const anchors = [monthStart, weekStart, today, selectedDateObj]
-    const anchorsEnd = [monthEnd, weekEnd, today, selectedDateObj]
+    const anchors = [monthStart, weekStart, today]
+    const anchorsEnd = [monthEnd, weekEnd, today]
     const rangeStart = new Date(Math.min(...anchors.map((d) => d.getTime())))
     const rangeEnd = new Date(Math.max(...anchorsEnd.map((d) => d.getTime())))
 
@@ -193,7 +191,7 @@ export default function SchedulePage() {
     }
 
     return [...realSessions, ...virtualSessions]
-  }, [sessions, groups, currentDate, selectedMonthDate])
+  }, [sessions, groups, currentDate])
 
   const filteredSessions = useMemo(() => {
     return mergedSessions.filter(s => {
@@ -349,33 +347,6 @@ export default function SchedulePage() {
     }))
   }
 
-  const getDayContent = (dateStr) => {
-    const daySessions = sortedByStartTime(getSessionsForDate(dateStr))
-    if (daySessions.length === 0) return null
-
-    return (
-      <div className="text-xs flex flex-col gap-0.5">
-        {daySessions.slice(0, 3).map(s => (
-          <div
-            key={s.id}
-            className="text-white px-1 py-0.5 rounded-sm cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap"
-            style={{ background: s.groups?.color || '#3b82f6' }}
-          >
-            {(s.start_time ? `${s.start_time} ` : '') + (s.groups?.name || 'קבוצה')}
-          </div>
-        ))}
-        {daySessions.length > 3 ? (
-          <div className="text-xs text-muted-foreground">
-            +{daySessions.length - 3}
-          </div>
-        ) : null}
-      </div>
-    )
-  }
-
-  const handleDateClick = (dateStr) => {
-    setSelectedMonthDate(dateStr)
-  }
 
   const handleAttendanceUpdate = async (sessionId, sailorId, present, reason) => {
     try {
@@ -705,8 +676,6 @@ export default function SchedulePage() {
               month={currentDate.getMonth()}
               onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
               onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-              onDateClick={handleDateClick}
-              getDayContent={getDayContent}
             />
           )}
         </div>
