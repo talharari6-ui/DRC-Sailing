@@ -8,7 +8,9 @@ import FilterToggle from '@/src/components/FilterToggle'
 import { Calendar } from '@/src/components/Calendar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Calendar as CalendarIcon, Plus, ClipboardList } from 'lucide-react'
 
 const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailModal'), { ssr: false })
@@ -27,6 +29,18 @@ export default function SchedulePage() {
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [sailorModalOpen, setSailorModalOpen] = useState(false)
   const [substituteModalOpen, setSubstituteModalOpen] = useState(false)
+  const [showEmptyWeekDays, setShowEmptyWeekDays] = useState(true)
+  const [addGroupDialogOpen, setAddGroupDialogOpen] = useState(false)
+  const [selectedGroupDay, setSelectedGroupDay] = useState(null)
+  const [newGroupName, setNewGroupName] = useState('')
+  const [newGroupColor, setNewGroupColor] = useState('#3b82f6')
+  const [newGroupDays, setNewGroupDays] = useState([])
+  const [newGroupStartTime, setNewGroupStartTime] = useState('')
+  const [newGroupEndTime, setNewGroupEndTime] = useState('')
+  const [newGroupStartDate, setNewGroupStartDate] = useState('')
+  const [creatingGroup, setCreatingGroup] = useState(false)
+  const [groupFormError, setGroupFormError] = useState('')
+  const hebrewDayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -161,6 +175,69 @@ export default function SchedulePage() {
     return days
   }, [currentDate])
 
+  const weekDaysToRender = useMemo(() => {
+    if (showEmptyWeekDays) return weekDays
+    return weekDays.filter((day) => getSessionsForDate(day.date).length > 0)
+  }, [weekDays, showEmptyWeekDays, getSessionsForDate])
+
+  const openAddGroupDialog = (day = null) => {
+    setSelectedGroupDay(day)
+    setNewGroupName('')
+    setNewGroupColor('#3b82f6')
+    setNewGroupDays(day?.dateObj ? [day.dateObj.getDay()] : [])
+    setNewGroupStartTime('')
+    setNewGroupEndTime('')
+    setNewGroupStartDate(day?.date || '')
+    setGroupFormError('')
+    setAddGroupDialogOpen(true)
+  }
+
+  const toggleGroupDay = (dayIndex) => {
+    setNewGroupDays((prev) =>
+      prev.includes(dayIndex)
+        ? prev.filter((d) => d !== dayIndex)
+        : [...prev, dayIndex].sort((a, b) => a - b)
+    )
+  }
+
+  const handleCreateGroup = async () => {
+    if (!coach?.id) return
+    const trimmedName = newGroupName.trim()
+    if (!trimmedName) {
+      setGroupFormError('יש להזין שם קבוצה')
+      return
+    }
+
+    setCreatingGroup(true)
+    setGroupFormError('')
+    try {
+      const payload = {
+        name: trimmedName,
+        coach_id: coach.id,
+        color: newGroupColor,
+        days_of_week: newGroupDays,
+        start_time: newGroupStartTime,
+        end_time: newGroupEndTime,
+        start_date: newGroupStartDate || null,
+      }
+
+      const res = await fetch('/api/groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || 'Failed to create group')
+
+      setAddGroupDialogOpen(false)
+    } catch (error) {
+      console.error('Error creating group:', error)
+      setGroupFormError('שגיאה ביצירת קבוצה חדשה')
+    } finally {
+      setCreatingGroup(false)
+    }
+  }
+
   if (!coach) {
     return <div className="p-5 text-muted-foreground text-center">טוען...</div>
   }
@@ -176,6 +253,20 @@ export default function SchedulePage() {
 
       <ViewModeToggle currentMode={viewMode} onModeChange={setViewMode} />
       <FilterToggle currentFilter={filterMode} onFilterChange={setFilterMode} />
+      <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+        {viewMode === 'week' ? (
+          <Button
+            variant={showEmptyWeekDays ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setShowEmptyWeekDays(prev => !prev)}
+          >
+            {showEmptyWeekDays ? 'הסתר ימים ללא פעילות' : 'הצג ימים ללא פעילות'}
+          </Button>
+        ) : null}
+        <Button size="sm" onClick={() => openAddGroupDialog()}>
+          <Plus size={16} className="inline" /> הוסף קבוצה חדשה
+        </Button>
+      </div>
 
       {loading ? (
         <div className="text-center p-5 text-muted-foreground">טוען...</div>
@@ -196,7 +287,7 @@ export default function SchedulePage() {
         <div className="mt-6">
           <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><CalendarIcon size={20} /> השבוע</h2>
           <div className="flex flex-col gap-3">
-            {weekDays.map((day) => {
+            {weekDaysToRender.map((day) => {
               const daySessions = getSessionsForDate(day.date)
               return (
                 <Card key={day.date}>
@@ -208,7 +299,7 @@ export default function SchedulePage() {
                           {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')}
                         </div>
                       </div>
-                      <Button size="sm" onClick={() => console.log('Add group for', day.date)}>
+                      <Button size="sm" onClick={() => openAddGroupDialog(day)}>
                         <Plus size={16} className="inline" /> הוסף קבוצה
                       </Button>
                     </div>
@@ -250,6 +341,9 @@ export default function SchedulePage() {
             })}
           </div>
         </div>
+      ) : null}
+      {!loading && viewMode === 'week' && weekDaysToRender.length === 0 ? (
+        <div className="text-muted-foreground text-center p-4">אין פעילויות בשבוע הזה</div>
       ) : null}
 
       {!loading && viewMode === 'day' ? (
@@ -314,6 +408,92 @@ export default function SchedulePage() {
         isOpen={substituteModalOpen}
         onClose={() => setSubstituteModalOpen(false)}
       />
+
+      <Dialog open={addGroupDialogOpen} onOpenChange={setAddGroupDialogOpen}>
+        <DialogContent dir="rtl">
+          <DialogHeader>
+            <DialogTitle>קבוצה חדשה</DialogTitle>
+            <DialogDescription>
+              {selectedGroupDay
+                ? `הוספת קבוצה ליום ${selectedGroupDay.dayName} (${selectedGroupDay.dayNum}.${String(selectedGroupDay.dateObj.getMonth() + 1).padStart(2, '0')})`
+                : 'מלא את פרטי הקבוצה החדשה'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="group-name">שם קבוצה</Label>
+            <Input
+              id="group-name"
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+              placeholder="שם קבוצה"
+            />
+            <div className="space-y-2">
+              <Label htmlFor="group-color">צבע קבוצה</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="group-color"
+                  type="color"
+                  value={newGroupColor}
+                  onChange={(e) => setNewGroupColor(e.target.value)}
+                  className="h-10 w-16 p-1"
+                />
+                <span className="text-xs text-muted-foreground">{newGroupColor}</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>ימי פעילות הקבוצה</Label>
+              <div className="flex flex-wrap gap-2">
+                {hebrewDayNames.map((dayLabel, dayIndex) => (
+                  <Button
+                    key={dayIndex}
+                    type="button"
+                    size="sm"
+                    variant={newGroupDays.includes(dayIndex) ? 'default' : 'outline'}
+                    onClick={() => toggleGroupDay(dayIndex)}
+                  >
+                    {dayLabel}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>שעות פעילות</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  type="time"
+                  value={newGroupStartTime}
+                  onChange={(e) => setNewGroupStartTime(e.target.value)}
+                />
+                <Input
+                  type="time"
+                  value={newGroupEndTime}
+                  onChange={(e) => setNewGroupEndTime(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="group-start-date">תאריך התחלה לפעילות</Label>
+              <Input
+                id="group-start-date"
+                type="date"
+                value={newGroupStartDate}
+                onChange={(e) => setNewGroupStartDate(e.target.value)}
+              />
+            </div>
+            {groupFormError ? (
+              <p className="text-xs text-destructive">{groupFormError}</p>
+            ) : null}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddGroupDialogOpen(false)} disabled={creatingGroup}>
+              ביטול
+            </Button>
+            <Button onClick={handleCreateGroup} disabled={creatingGroup}>
+              {creatingGroup ? 'יוצר קבוצה...' : 'צור קבוצה'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
