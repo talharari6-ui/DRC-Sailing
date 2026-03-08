@@ -114,8 +114,6 @@ export default function HoursPage() {
           start_time: row.start_time || '',
           end_time: row.end_time || '',
           notes: row.notes || '',
-          change_note: row.change_note || '',
-          has_change_note: Boolean(row.change_note),
         }
       }
       setEntries(map)
@@ -145,8 +143,6 @@ export default function HoursPage() {
         start_time: prev[date]?.start_time || '',
         end_time: prev[date]?.end_time || '',
         notes: prev[date]?.notes || '',
-        change_note: prev[date]?.change_note || '',
-        has_change_note: prev[date]?.has_change_note || false,
         [field]: value,
       },
     }))
@@ -181,7 +177,6 @@ export default function HoursPage() {
           start_time: normalizedStart,
           end_time: normalizedEnd,
           notes: entry.notes || '',
-          change_note: entry.has_change_note ? entry.change_note || '' : '',
         }),
       })
       if (!response.ok) throw new Error('Failed to save')
@@ -211,7 +206,6 @@ export default function HoursPage() {
           start_time: normalizedStart,
           end_time: normalizedEnd,
           notes: item.notes || '',
-          change_note: item.has_change_note ? item.change_note || '' : '',
         }
       })
       .filter(Boolean)
@@ -339,10 +333,10 @@ export default function HoursPage() {
             <div className="text-sm text-muted-foreground">טוען...</div>
           ) : (
             <div className="space-y-2">
-              <div className="hidden md:grid md:grid-cols-[110px_100px_100px_1fr_auto] gap-2 text-xs text-muted-foreground px-2">
-                <div>יום</div>
+              <div className="hidden md:grid md:grid-cols-[100px_100px_70px_180px_170px] gap-2 text-xs text-muted-foreground px-2">
                 <div>התחלה</div>
                 <div>סיום</div>
+                <div>סה״כ</div>
                 <div>הערה</div>
                 <div>פעולות</div>
               </div>
@@ -352,8 +346,6 @@ export default function HoursPage() {
                   start_time: '',
                   end_time: '',
                   notes: '',
-                  change_note: '',
-                  has_change_note: false,
                 }
                 const hasHours = Boolean(row.start_time && row.end_time)
                 const busy = workingDate === day.key
@@ -367,12 +359,12 @@ export default function HoursPage() {
                     key={day.key}
                     className="rounded-md border p-2 space-y-2"
                   >
+                    <div className="text-xs text-muted-foreground">
+                      <span className="text-sm font-semibold text-foreground">{day.weekdayName}</span>{' '}
+                      {day.dayNumber}.{viewMonth + 1}
+                    </div>
                     <div className="overflow-x-auto">
-                      <div className="flex items-end gap-2 min-w-[920px] whitespace-nowrap">
-                        <div className="w-[86px] shrink-0">
-                          <div className="text-sm font-semibold">{day.weekdayName}</div>
-                          <div className="text-xs text-muted-foreground">{day.dayNumber}.{viewMonth + 1}</div>
-                        </div>
+                      <div className="flex items-end justify-end gap-2 min-w-[700px] whitespace-nowrap">
                         <div className="space-y-1 w-[96px] shrink-0">
                           <div className="text-xs text-muted-foreground">התחלה</div>
                           <Input
@@ -415,37 +407,15 @@ export default function HoursPage() {
                           <div className="text-xs text-muted-foreground">סה״כ</div>
                           <div className="h-8 rounded-md border border-input px-2 flex items-center text-sm">{dailyHours.toFixed(1)}</div>
                         </div>
-                        <div className="space-y-1 min-w-[260px] flex-1">
+                        <div className="space-y-1 w-[180px] shrink-0">
                           <div className="text-xs text-muted-foreground">הערה</div>
                           <textarea
-                            className="w-full h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
+                            className="w-full h-8 rounded-md border border-input bg-transparent px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
                             placeholder="הערה"
                             value={row.notes}
                             onChange={(event) => updateField(day.key, 'notes', event.target.value)}
                             onBlur={() => saveDate(day.key)}
                           />
-                        </div>
-                        <div className="space-y-1 w-[180px] shrink-0">
-                          <div className="text-xs text-muted-foreground">{row.has_change_note ? 'הערת שינוי' : 'אפשרות שינוי'}</div>
-                          {row.has_change_note ? (
-                            <Input
-                              className="h-8 text-sm"
-                              type="text"
-                              placeholder="דחייה / החלפה / מדריך"
-                              value={row.change_note}
-                              onChange={(event) => updateField(day.key, 'change_note', event.target.value)}
-                              onBlur={() => saveDate(day.key)}
-                            />
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 text-xs w-full"
-                              onClick={() => updateField(day.key, 'has_change_note', true)}
-                            >
-                              הוספת הערת שינוי
-                            </Button>
-                          )}
                         </div>
                         <div className="space-y-1 w-[170px] shrink-0">
                           <div className="text-xs text-muted-foreground">פעולות</div>
@@ -470,20 +440,6 @@ export default function HoursPage() {
                                 disabled={busy}
                               >
                                 ניקוי
-                              </Button>
-                            ) : null}
-                            {row.has_change_note ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 text-xs"
-                                onClick={() => {
-                                  updateField(day.key, 'has_change_note', false)
-                                  updateField(day.key, 'change_note', '')
-                                  saveDate(day.key)
-                                }}
-                              >
-                                הסתרת שינוי
                               </Button>
                             ) : null}
                           </div>
