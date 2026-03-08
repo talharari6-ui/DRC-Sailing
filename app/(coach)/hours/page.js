@@ -333,7 +333,8 @@ export default function HoursPage() {
             <div className="text-sm text-muted-foreground">טוען...</div>
           ) : (
             <div className="space-y-2">
-              <div className="hidden md:grid md:grid-cols-[100px_100px_70px_180px_170px] gap-2 text-xs text-muted-foreground px-2">
+              <div className="hidden md:grid md:grid-cols-[58px_72px_72px_48px_1fr_84px] gap-1 text-xs text-muted-foreground px-1">
+                <div>יום</div>
                 <div>התחלה</div>
                 <div>סיום</div>
                 <div>סה״כ</div>
@@ -355,22 +356,18 @@ export default function HoursPage() {
                 )
 
                 return (
-                  <div
-                    key={day.key}
-                    className="rounded-md border p-2 space-y-2"
-                  >
-                    <div className="text-xs text-muted-foreground">
-                      <span className="text-sm font-semibold text-foreground">{day.weekdayName}</span>{' '}
-                      {day.dayNumber}.{viewMonth + 1}
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-[100px_100px_70px_180px_170px] gap-2">
-                      <div className="space-y-1">
-                        <div className="text-xs text-muted-foreground">התחלה</div>
+                  <div key={day.key} className="rounded-md border p-1.5">
+                    <div className="grid grid-cols-[58px_72px_72px_48px_minmax(70px,1fr)_84px] gap-1 items-center">
+                      <div className="text-[11px] text-muted-foreground leading-tight">
+                        <div className="truncate font-semibold text-foreground text-[11px]">{day.weekdayName.slice(0, 3)}</div>
+                        <div>{day.dayNumber}.{viewMonth + 1}</div>
+                      </div>
+                      <div>
                         <Input
-                          className="h-8 text-sm"
+                          className="h-7 text-xs px-1.5"
                           type="text"
                           inputMode="numeric"
-                          placeholder="10 / 1030"
+                          placeholder="10"
                           value={row.start_time}
                           onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
                           onBlur={(event) => {
@@ -383,13 +380,12 @@ export default function HoursPage() {
                           }}
                         />
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-xs text-muted-foreground">סיום</div>
+                      <div>
                         <Input
-                          className="h-8 text-sm"
+                          className="h-7 text-xs px-1.5"
                           type="text"
                           inputMode="numeric"
-                          placeholder="10 / 1030"
+                          placeholder="10"
                           value={row.end_time}
                           onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
                           onBlur={(event) => {
@@ -402,45 +398,44 @@ export default function HoursPage() {
                           }}
                         />
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-xs text-muted-foreground">סה״כ</div>
-                        <div className="h-8 rounded-md border border-input px-2 flex items-center text-sm">
+                      <div>
+                        <div className="h-7 rounded-md border border-input px-1.5 flex items-center justify-center text-[11px]">
                           {dailyHours.toFixed(1)}
                         </div>
                       </div>
-                      <div className="space-y-1 col-span-2 md:col-span-1">
-                        <div className="text-xs text-muted-foreground">הערה</div>
+                      <div>
                         <textarea
-                          className="w-full h-8 rounded-md border border-input bg-transparent px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
+                          className="w-full h-7 rounded-md border border-input bg-transparent px-1.5 py-1 text-[11px] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
                           placeholder="הערה"
                           value={row.notes}
                           onChange={(event) => updateField(day.key, 'notes', event.target.value)}
                           onBlur={() => saveDate(day.key)}
                         />
                       </div>
-                      <div className="space-y-1 col-span-2 md:col-span-1">
-                        <div className="text-xs text-muted-foreground">פעולות</div>
-                        <div className="flex gap-1">
+                      <div>
+                        <div className="flex gap-1 justify-end">
                           {hasHours ? (
                             <Button
                               size="sm"
                               variant="secondary"
-                              className="h-8 text-xs"
+                              className="h-7 text-[10px] px-1.5"
                               onClick={() => duplicateSameWeekday(day.key)}
                               disabled={busy}
+                              title="שכפול"
                             >
-                              שכפול
+                              שכ
                             </Button>
                           ) : null}
                           {hasHours ? (
                             <Button
                               size="sm"
                               variant="destructive"
-                              className="h-8 text-xs"
+                              className="h-7 text-[10px] px-1.5"
                               onClick={() => clearDay(day.key)}
                               disabled={busy}
+                              title="ניקוי"
                             >
-                              ניקוי
+                              נק
                             </Button>
                           ) : null}
                         </div>
