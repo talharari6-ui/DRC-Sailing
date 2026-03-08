@@ -363,86 +363,86 @@ export default function HoursPage() {
                       <span className="text-sm font-semibold text-foreground">{day.weekdayName}</span>{' '}
                       {day.dayNumber}.{viewMonth + 1}
                     </div>
-                    <div className="overflow-x-auto">
-                      <div className="flex items-end justify-end gap-2 min-w-[700px] whitespace-nowrap">
-                        <div className="space-y-1 w-[96px] shrink-0">
-                          <div className="text-xs text-muted-foreground">התחלה</div>
-                          <Input
-                            className="h-8 text-sm"
-                            type="text"
-                            inputMode="numeric"
-                            placeholder="10 / 1030"
-                            value={row.start_time}
-                            onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
-                            onBlur={(event) => {
-                              const normalized = normalizeTimeInput(event.target.value)
-                              updateField(day.key, 'start_time', normalized)
-                              saveDate(day.key, {
-                                ...entriesRef.current,
-                                [day.key]: { ...entriesRef.current[day.key], start_time: normalized },
-                              })
-                            }}
-                          />
+                    <div className="grid grid-cols-2 md:grid-cols-[100px_100px_70px_180px_170px] gap-2">
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">התחלה</div>
+                        <Input
+                          className="h-8 text-sm"
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="10 / 1030"
+                          value={row.start_time}
+                          onChange={(event) => updateField(day.key, 'start_time', event.target.value)}
+                          onBlur={(event) => {
+                            const normalized = normalizeTimeInput(event.target.value)
+                            updateField(day.key, 'start_time', normalized)
+                            saveDate(day.key, {
+                              ...entriesRef.current,
+                              [day.key]: { ...entriesRef.current[day.key], start_time: normalized },
+                            })
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">סיום</div>
+                        <Input
+                          className="h-8 text-sm"
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="10 / 1030"
+                          value={row.end_time}
+                          onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
+                          onBlur={(event) => {
+                            const normalized = normalizeTimeInput(event.target.value)
+                            updateField(day.key, 'end_time', normalized)
+                            saveDate(day.key, {
+                              ...entriesRef.current,
+                              [day.key]: { ...entriesRef.current[day.key], end_time: normalized },
+                            })
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">סה״כ</div>
+                        <div className="h-8 rounded-md border border-input px-2 flex items-center text-sm">
+                          {dailyHours.toFixed(1)}
                         </div>
-                        <div className="space-y-1 w-[96px] shrink-0">
-                          <div className="text-xs text-muted-foreground">סיום</div>
-                          <Input
-                            className="h-8 text-sm"
-                            type="text"
-                            inputMode="numeric"
-                            placeholder="10 / 1030"
-                            value={row.end_time}
-                            onChange={(event) => updateField(day.key, 'end_time', event.target.value)}
-                            onBlur={(event) => {
-                              const normalized = normalizeTimeInput(event.target.value)
-                              updateField(day.key, 'end_time', normalized)
-                              saveDate(day.key, {
-                                ...entriesRef.current,
-                                [day.key]: { ...entriesRef.current[day.key], end_time: normalized },
-                              })
-                            }}
-                          />
-                        </div>
-                        <div className="space-y-1 w-[70px] shrink-0">
-                          <div className="text-xs text-muted-foreground">סה״כ</div>
-                          <div className="h-8 rounded-md border border-input px-2 flex items-center text-sm">{dailyHours.toFixed(1)}</div>
-                        </div>
-                        <div className="space-y-1 w-[180px] shrink-0">
-                          <div className="text-xs text-muted-foreground">הערה</div>
-                          <textarea
-                            className="w-full h-8 rounded-md border border-input bg-transparent px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
-                            placeholder="הערה"
-                            value={row.notes}
-                            onChange={(event) => updateField(day.key, 'notes', event.target.value)}
-                            onBlur={() => saveDate(day.key)}
-                          />
-                        </div>
-                        <div className="space-y-1 w-[170px] shrink-0">
-                          <div className="text-xs text-muted-foreground">פעולות</div>
-                          <div className="flex gap-1">
-                            {hasHours ? (
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                className="h-8 text-xs"
-                                onClick={() => duplicateSameWeekday(day.key)}
-                                disabled={busy}
-                              >
-                                שכפול
-                              </Button>
-                            ) : null}
-                            {hasHours ? (
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                className="h-8 text-xs"
-                                onClick={() => clearDay(day.key)}
-                                disabled={busy}
-                              >
-                                ניקוי
-                              </Button>
-                            ) : null}
-                          </div>
+                      </div>
+                      <div className="space-y-1 col-span-2 md:col-span-1">
+                        <div className="text-xs text-muted-foreground">הערה</div>
+                        <textarea
+                          className="w-full h-8 rounded-md border border-input bg-transparent px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
+                          placeholder="הערה"
+                          value={row.notes}
+                          onChange={(event) => updateField(day.key, 'notes', event.target.value)}
+                          onBlur={() => saveDate(day.key)}
+                        />
+                      </div>
+                      <div className="space-y-1 col-span-2 md:col-span-1">
+                        <div className="text-xs text-muted-foreground">פעולות</div>
+                        <div className="flex gap-1">
+                          {hasHours ? (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="h-8 text-xs"
+                              onClick={() => duplicateSameWeekday(day.key)}
+                              disabled={busy}
+                            >
+                              שכפול
+                            </Button>
+                          ) : null}
+                          {hasHours ? (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="h-8 text-xs"
+                              onClick={() => clearDay(day.key)}
+                              disabled={busy}
+                            >
+                              ניקוי
+                            </Button>
+                          ) : null}
                         </div>
                       </div>
                     </div>
