@@ -15,10 +15,9 @@ export async function GET(request) {
     if (includeDetails) {
       selectFields = `
         *,
-        groups(name, color),
+        groups(id, name, color),
         coaches(name),
-        attendance(sailor_id, present, absence_reason),
-        group_sailors(sailors(id, first_name, last_name, name, avatar_url))
+        attendance(sailor_id, present, absence_reason)
       `
     }
 
