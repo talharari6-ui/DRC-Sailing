@@ -106,34 +106,7 @@ export default function SchedulePage() {
         setSessions([])
         setBoardDataError('שגיאה בטעינת הפעילויות. הלוח מוצג חלקית.')
       } else if (Array.isArray(sessionsData)) {
-        // Fetch group sailors and enrich sessions with group_sailors data
-        if (Array.isArray(groupsData)) {
-          const sailorsByGroup = {}
-          for (const group of groupsData) {
-            try {
-              const sailorsRes = await fetch(`/api/groups/${group.id}/sailors`)
-              if (sailorsRes.ok) {
-                const sailors = await sailorsRes.json()
-                if (Array.isArray(sailors)) {
-                  sailorsByGroup[group.id] = sailors.map((sailor) => ({
-                    sailor_id: sailor.id,
-                    sailors: sailor,
-                  }))
-                }
-              }
-            } catch (error) {
-              console.error(`Error fetching sailors for group ${group.id}:`, error)
-            }
-          }
-          // Enrich sessions with group_sailors data
-          const enrichedSessions = sessionsData.map((session) => ({
-            ...session,
-            group_sailors: sailorsByGroup[session.group_id] || [],
-          }))
-          setSessions(enrichedSessions)
-        } else {
-          setSessions(sessionsData)
-        }
+        setSessions(sessionsData)
       } else {
         setSessions([])
       }
@@ -259,11 +232,11 @@ export default function SchedulePage() {
     }
   }
   const renderAttendanceIndicator = (session) => {
-    const { attendedCount, markedCount, totalSailors } = getAttendanceSummary(session)
+    const { attendedCount, markedCount } = getAttendanceSummary(session)
     return (
       <div className="shrink-0 min-w-[52px] text-left">
         <div className="rounded-md border border-drc-blue-light bg-drc-blue-light/10 px-2 py-1 text-[12px] font-semibold text-drc-blue-light">
-          {markedCount > 0 ? `${attendedCount}/${totalSailors}` : '0'}
+          {markedCount > 0 ? `${attendedCount}/${markedCount}` : '0'}
         </div>
         <div className="mt-1 text-[10px] text-muted-foreground">
           {markedCount > 0 ? 'נוכחים' : 'attendance'}
