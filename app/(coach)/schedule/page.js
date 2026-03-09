@@ -92,8 +92,10 @@ export default function SchedulePage() {
     setLoading(true)
     setBoardDataError('')
     try {
+      // Add timestamp to bust cache and get fresh data
+      const timestamp = Date.now()
       const [sessionsRes, groupsRes] = await Promise.all([
-        fetch('/api/sessions?include_details=true'),
+        fetch(`/api/sessions?include_details=true&t=${timestamp}`),
         fetch('/api/groups'),
       ])
       const sessionsData = await sessionsRes.json()
