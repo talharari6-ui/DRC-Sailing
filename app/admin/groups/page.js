@@ -153,7 +153,7 @@ export default function AdminGroupsPage() {
       let res
       if (editingGroup) {
         res = await fetch(`/api/groups/${editingGroup.id}`, {
-          method: 'PUT',
+          method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
