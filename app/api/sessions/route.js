@@ -17,8 +17,7 @@ export async function GET(request) {
         *,
         groups(id, name, color),
         coaches(name),
-        attendance(sailor_id, present, absence_reason),
-        group_sailors(sailor_id)
+        attendance(sailor_id, present, absence_reason)
       `
     }
 

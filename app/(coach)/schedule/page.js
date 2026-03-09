@@ -106,7 +106,34 @@ export default function SchedulePage() {
         setSessions([])
         setBoardDataError('שגיאה בטעינת הפעילויות. הלוח מוצג חלקית.')
       } else if (Array.isArray(sessionsData)) {
-        setSessions(sessionsData)
+        // Fetch group sailors and enrich sessions with group_sailors data
+        if (Array.isArray(groupsData)) {
+          const sailorsByGroup = {}
+          for (const group of groupsData) {
+            try {
+              const sailorsRes = await fetch(`/api/groups/${group.id}/sailors`)
+              if (sailorsRes.ok) {
+                const sailors = await sailorsRes.json()
+                if (Array.isArray(sailors)) {
+                  sailorsByGroup[group.id] = sailors.map((sailor) => ({
+                    sailor_id: sailor.id,
+                    sailors: sailor,
+                  }))
+                }
+              }
+            } catch (error) {
+              console.error(`Error fetching sailors for group ${group.id}:`, error)
+            }
+          }
+          // Enrich sessions with group_sailors data
+          const enrichedSessions = sessionsData.map((session) => ({
+            ...session,
+            group_sailors: sailorsByGroup[session.group_id] || [],
+          }))
+          setSessions(enrichedSessions)
+        } else {
+          setSessions(sessionsData)
+        }
       } else {
         setSessions([])
       }
