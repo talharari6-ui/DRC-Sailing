@@ -396,6 +396,10 @@ export default function SchedulePage() {
           attendance: nextAttendance,
         }
       })
+      // Reload board data after a short delay to ensure fresh data
+      setTimeout(() => {
+        loadBoardData()
+      }, 300)
     } catch (error) {
       console.error('Error updating attendance:', error)
     }
@@ -664,6 +668,27 @@ export default function SchedulePage() {
 
       {viewMode === 'month' ? (
         <div className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+              className="h-9 w-9 p-0"
+            >
+              ←
+            </Button>
+            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center">
+              {new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric' }).format(currentDate)}
+            </h2>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+              className="h-9 w-9 p-0"
+            >
+              →
+            </Button>
+          </div>
           {loading ? (
             <Card>
               <CardContent className="p-4">
@@ -683,7 +708,33 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'week' ? (
         <div className="mt-6">
-          <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><CalendarIcon size={20} /> השבוע</h2>
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const d = new Date(currentDate)
+                d.setDate(d.getDate() - 7)
+                setCurrentDate(d)
+              }}
+              className="h-9 w-9 p-0"
+            >
+              ←
+            </Button>
+            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center flex items-center justify-center gap-2"><CalendarIcon size={18} className="sm:w-5 sm:h-5" /> השבוע</h2>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const d = new Date(currentDate)
+                d.setDate(d.getDate() + 7)
+                setCurrentDate(d)
+              }}
+              className="h-9 w-9 p-0"
+            >
+              →
+            </Button>
+          </div>
           <div className="flex flex-col gap-3">
             {weekDays.map((day) => {
               const daySessions = getSessionsForDate(day.date)
@@ -730,8 +781,13 @@ export default function SchedulePage() {
                               <div className="text-sm font-semibold mb-0.5">
                                 {session.groups?.name || 'קבוצה'}
                               </div>
+                              <div className="text-xs text-muted-foreground mb-0.5">
+                                {session.start_time && session.end_time
+                                  ? `${session.start_time} - ${session.end_time}`
+                                  : session.start_time || 'אין שעה'}
+                              </div>
                               <div className="text-xs text-muted-foreground">
-                                {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
+                                {session.coaches?.name || 'לא מוגדר'}
                               </div>
                               {renderSessionActions(session)}
                             </div>
@@ -754,7 +810,7 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'day' ? (
         <div className="mt-6">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between gap-2 mb-3">
             <Button
               size="sm"
               variant="outline"
@@ -763,10 +819,11 @@ export default function SchedulePage() {
                 d.setDate(d.getDate() - 1)
                 setSelectedDayDate(toDateStr(d))
               }}
+              className="h-9 w-9 p-0"
             >
               ←
             </Button>
-            <h2 className="text-base font-extrabold flex items-center gap-2"><ClipboardList size={20} /> יום {daySelectedMeta.dayName} ({daySelectedMeta.date})</h2>
+            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center flex items-center justify-center gap-2"><ClipboardList size={18} className="sm:w-5 sm:h-5" /> יום {daySelectedMeta.dayName}</h2>
             <Button
               size="sm"
               variant="outline"
@@ -775,6 +832,7 @@ export default function SchedulePage() {
                 d.setDate(d.getDate() + 1)
                 setSelectedDayDate(toDateStr(d))
               }}
+              className="h-9 w-9 p-0"
             >
               →
             </Button>
@@ -809,8 +867,13 @@ export default function SchedulePage() {
                       />
                       <div className="flex-1">
                         <div className="text-sm font-bold mb-1">{session.groups?.name || 'קבוצה'}</div>
+                        <div className="text-xs text-muted-foreground mb-0.5">
+                          {session.start_time && session.end_time
+                            ? `${session.start_time} - ${session.end_time}`
+                            : session.start_time || 'אין שעה'}
+                        </div>
                         <div className="text-xs text-muted-foreground mb-1">
-                          {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
+                          {session.coaches?.name || 'לא מוגדר'}
                         </div>
                         {renderSessionActions(session)}
                       </div>
