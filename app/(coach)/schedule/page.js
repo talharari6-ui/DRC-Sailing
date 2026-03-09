@@ -282,14 +282,15 @@ export default function SchedulePage() {
     if (!isAssignedInstructor) return null
     return (
       <div className="mt-2 space-y-2">
-        <div className="text-xs text-muted-foreground mb-1">פעולות זמינות:</div>
-        <div className="flex flex-wrap gap-2">
+        <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">פעולות זמינות:</div>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 sm:gap-2">
           <Button
             size="sm"
             type="button"
             onClick={() => {
               handleOpenAttendanceModal(session)
             }}
+            className="text-[11px] sm:text-sm h-8 sm:h-9"
           >
             מילוי נוכחות
           </Button>
@@ -300,8 +301,9 @@ export default function SchedulePage() {
             onClick={() => {
               handleOpenSailorModal(session)
             }}
+            className="text-[11px] sm:text-sm h-8 sm:h-9"
           >
-            הוספה / הסרה חניכים
+            הוספה / הסרה
           </Button>
           <Button
             size="sm"
@@ -312,8 +314,9 @@ export default function SchedulePage() {
               if (current.delay) return cancelPostponeRequest(session)
               handlePostponeRequest(session)
             }}
+            className="text-[11px] sm:text-sm h-8 sm:h-9"
           >
-            {(requestStatusBySession[session.id] || {}).delay ? 'בטל דחייה' : 'דחיית פעילות'}
+            {(requestStatusBySession[session.id] || {}).delay ? 'בטל דחייה' : 'דחיית'}
           </Button>
           <Button
             size="sm"
@@ -324,18 +327,19 @@ export default function SchedulePage() {
               if (current.switch) return cancelSwitchRequest(session)
               handleSwitchRequest(session)
             }}
+            className="text-[11px] sm:text-sm h-8 sm:h-9"
           >
-            {(requestStatusBySession[session.id] || {}).switch ? 'בטל החלפה' : 'פתיחה להחלפת מדריך'}
+            {(requestStatusBySession[session.id] || {}).switch ? 'בטל החלפה' : 'החלפת מדריך'}
           </Button>
         </div>
         {(requestStatusBySession[session.id] || {}).delay ? (
-          <div className="text-[11px] text-amber-400">סטטוס דחייה: ממתין לאישור מנהל</div>
+          <div className="text-[9px] sm:text-[11px] text-amber-400">סטטוס דחייה: ממתין לאישור מנהל</div>
         ) : null}
         {(requestStatusBySession[session.id] || {}).switch ? (
-          <div className="text-[11px] text-cyan-400">סטטוס החלפה: ממתין לאישור מנהל</div>
+          <div className="text-[9px] sm:text-[11px] text-cyan-400">סטטוס החלפה: ממתין לאישור מנהל</div>
         ) : null}
-        <div className="text-[11px] text-muted-foreground">
-          דחייה/החלפה מחייבות אישור מנהל בטרמינל המנהל
+        <div className="text-[9px] sm:text-[11px] text-muted-foreground">
+          דחייה/החלפה מחייבות אישור מנהל
         </div>
       </div>
     )
@@ -633,9 +637,9 @@ export default function SchedulePage() {
 
   return (
     <div className="pb-24">
-      <div className="mb-6">
-        <h1 className="text-xl font-extrabold mb-1 flex items-center gap-2"><CalendarIcon size={24} /> לוח שנתי</h1>
-        <p className="text-muted-foreground text-sm">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-xl font-extrabold mb-1 flex items-center gap-2"><CalendarIcon size={20} className="sm:w-6 sm:h-6" /> לוח שנתי</h1>
+        <p className="text-muted-foreground text-xs sm:text-sm">
           ברוכים הבאים, {coach?.name}!
         </p>
       </div>
@@ -682,33 +686,33 @@ export default function SchedulePage() {
       ) : null}
 
       {!loading && viewMode === 'week' ? (
-        <div className="mt-6">
-          <h2 className="text-base font-extrabold mb-3 flex items-center gap-2"><CalendarIcon size={20} /> השבוע</h2>
+        <div className="mt-4 sm:mt-6">
+          <h2 className="text-sm sm:text-base font-extrabold mb-3 flex items-center gap-2"><CalendarIcon size={18} className="sm:w-5 sm:h-5" /> השבוע</h2>
           <div className="flex flex-col gap-3">
             {weekDays.map((day) => {
               const daySessions = getSessionsForDate(day.date)
               const isCollapsed = !!collapsedWeekDates[day.date]
               return (
                 <Card key={day.date}>
-                  <CardContent className="p-4">
-                    <div className={`mb-3 ${daySessions.length > 0 ? '' : 'mb-2'}`}>
-                      <div className="flex items-center gap-3" dir="ltr">
-                        <Button size="sm" onClick={() => openAddGroupDialog(day)}>
-                          <Plus size={16} className="inline" /> הוסף קבוצה
+                  <CardContent className="p-3 sm:p-4">
+                    <div className={`mb-2 sm:mb-3 ${daySessions.length > 0 ? '' : 'mb-2'}`}>
+                      <div className="flex items-center gap-2 sm:gap-3" dir="ltr">
+                        <Button size="sm" onClick={() => openAddGroupDialog(day)} className="text-xs sm:text-sm h-8 sm:h-9 whitespace-nowrap">
+                          <Plus size={14} className="sm:w-4 sm:h-4" /> הוסף
                         </Button>
                         <div className="h-px flex-1 bg-border" />
                       </div>
                     </div>
-                    <div className={`flex justify-between items-center ${daySessions.length > 0 ? 'mb-3' : ''}`}>
-                      <div>
-                        <div className="text-sm font-bold">{day.dayName}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')} ({day.date})
+                    <div className={`flex justify-between items-center gap-2 ${daySessions.length > 0 ? 'mb-2 sm:mb-3' : ''}`}>
+                      <div className="min-w-0">
+                        <div className="text-xs sm:text-sm font-bold">{day.dayName}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                          {day.dayNum}.{String(day.dateObj.getMonth() + 1).padStart(2, '0')}
                         </div>
                       </div>
                       <button
                         type="button"
-                        className="h-5 w-10 rounded-full bg-secondary border border-border flex items-center justify-center text-xs"
+                        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-secondary border border-border flex items-center justify-center text-xs shrink-0"
                         onClick={() => toggleDayCollapse(day.date)}
                         aria-label="מזער יום"
                       >
@@ -716,21 +720,21 @@ export default function SchedulePage() {
                       </button>
                     </div>
                     {isCollapsed ? null : daySessions.length > 0 ? (
-                      <div className="flex flex-col gap-2.5">
+                      <div className="flex flex-col gap-2">
                         {daySessions.map(session => (
                           <div
                             key={session.id}
-                            className="bg-secondary border border-border rounded-lg p-3 flex gap-3 items-center"
+                            className="bg-secondary border border-border rounded-lg p-2.5 sm:p-3 flex gap-2 sm:gap-3 items-start"
                           >
                             <div
-                              className="w-[3px] h-10 rounded-sm shrink-0"
+                              className="w-[3px] h-12 sm:h-14 rounded-sm shrink-0 mt-0.5"
                               style={{ background: session.groups?.color || '#3b82f6' }}
                             />
-                            <div className="flex-1">
-                              <div className="text-sm font-semibold mb-0.5">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs sm:text-sm font-semibold mb-0.5 truncate">
                                 {session.groups?.name || 'קבוצה'}
                               </div>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
                                 {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
                               </div>
                               {renderSessionActions(session)}
@@ -753,8 +757,8 @@ export default function SchedulePage() {
       ) : null}
 
       {!loading && viewMode === 'day' ? (
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-3">
+        <div className="mt-4 sm:mt-6">
+          <div className="flex items-center justify-between gap-2 mb-3">
             <Button
               size="sm"
               variant="outline"
@@ -763,10 +767,11 @@ export default function SchedulePage() {
                 d.setDate(d.getDate() - 1)
                 setSelectedDayDate(toDateStr(d))
               }}
+              className="h-9 w-9 p-0"
             >
               ←
             </Button>
-            <h2 className="text-base font-extrabold flex items-center gap-2"><ClipboardList size={20} /> יום {daySelectedMeta.dayName} ({daySelectedMeta.date})</h2>
+            <h2 className="text-sm sm:text-base font-extrabold flex items-center gap-1 sm:gap-2 text-center flex-1"><ClipboardList size={18} className="sm:w-5 sm:h-5" /> יום {daySelectedMeta.dayName}</h2>
             <Button
               size="sm"
               variant="outline"
@@ -775,41 +780,42 @@ export default function SchedulePage() {
                 d.setDate(d.getDate() + 1)
                 setSelectedDayDate(toDateStr(d))
               }}
+              className="h-9 w-9 p-0"
             >
               →
             </Button>
           </div>
           <Card>
-            <CardContent className="p-4">
-              <div className="mb-3">
-                <div className="flex items-center gap-3" dir="ltr">
+            <CardContent className="p-3 sm:p-4">
+              <div className="mb-2 sm:mb-3">
+                <div className="flex items-center gap-2 sm:gap-3" dir="ltr">
                   <Button size="sm" onClick={() => openAddGroupDialog({
                     date: selectedDayDate,
                     dayName: daySelectedMeta.dayName,
                     dayNum: daySelectedMeta.dayNum,
                     dateObj: daySelectedMeta.dateObj,
-                  })}>
-                    <Plus size={16} className="inline" /> הוסף קבוצה
+                  })} className="text-xs sm:text-sm h-8 sm:h-9 whitespace-nowrap">
+                    <Plus size={14} className="sm:w-4 sm:h-4" /> הוסף
                   </Button>
                   <div className="h-px flex-1 bg-border" />
                 </div>
               </div>
               {dayViewSessions.length === 0 ? (
-                <div className="text-muted-foreground text-center p-5">אין פעילויות ליום זה</div>
+                <div className="text-muted-foreground text-center p-3 sm:p-5 text-sm">אין פעילויות ליום זה</div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {sortedByStartTime(dayViewSessions).map((session) => (
                     <div
                       key={session.id}
-                      className="bg-secondary border border-border rounded-lg p-3 flex items-center gap-3"
+                      className="bg-secondary border border-border rounded-lg p-2.5 sm:p-3 flex items-start gap-2 sm:gap-3"
                     >
                       <div
-                        className="w-1 h-14 rounded-sm shrink-0"
+                        className="w-1 h-16 sm:h-20 rounded-sm shrink-0"
                         style={{ background: session.groups?.color || '#3b82f6' }}
                       />
-                      <div className="flex-1">
-                        <div className="text-sm font-bold mb-1">{session.groups?.name || 'קבוצה'}</div>
-                        <div className="text-xs text-muted-foreground mb-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs sm:text-sm font-bold mb-1 truncate">{session.groups?.name || 'קבוצה'}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground mb-1 truncate">
                           {session.start_time || 'אין שעה'} • {session.coaches?.name || 'לא מוגדר'}
                         </div>
                         {renderSessionActions(session)}
@@ -844,16 +850,16 @@ export default function SchedulePage() {
 
 
       <Dialog open={addGroupDialogOpen} onOpenChange={setAddGroupDialogOpen}>
-        <DialogContent dir="rtl" className="max-h-[80vh] overflow-y-auto pb-24">
+        <DialogContent dir="rtl" className="max-h-[85vh] overflow-y-auto pb-28 sm:pb-24 text-xs sm:text-sm">
           <DialogHeader>
-            <DialogTitle>קבוצה חדשה</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">קבוצה חדשה</DialogTitle>
+            <DialogDescription className="text-[10px] sm:text-xs">
               {selectedGroupDay
-                ? `הוספת קבוצה ליום ${selectedGroupDay.dayName} (${selectedGroupDay.dayNum}.${String(selectedGroupDay.dateObj.getMonth() + 1).padStart(2, '0')})`
+                ? `הוספת קבוצה ליום ${selectedGroupDay.dayName}`
                 : 'מלא את פרטי הקבוצה החדשה'}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-2 text-xs sm:text-sm">
             <Label htmlFor="group-name">שם קבוצה</Label>
             <Input
               id="group-name"

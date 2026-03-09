@@ -37,12 +37,12 @@ export function BottomNav() {
             key={route.href}
             href={route.href}
             className={cn(
-              'flex-1 py-2.5 px-1 flex flex-col items-center gap-1 text-xs font-semibold no-underline transition-colors',
+              'flex-1 py-2 sm:py-2.5 px-1 flex flex-col items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-semibold no-underline transition-colors min-h-[60px] sm:min-h-[72px] justify-center',
               isActive ? 'text-drc-blue-light' : 'text-muted-foreground'
             )}
           >
-            <route.icon size={20} />
-            {route.label}
+            <route.icon size={18} className="sm:w-5 sm:h-5" />
+            <span className="truncate max-w-full">{route.label}</span>
           </Link>
         )
       })}

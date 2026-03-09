@@ -23,36 +23,36 @@ export function Calendar({
   const dayHeaders = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש']
 
   return (
-    <div className="mb-4">
+    <div className="mb-3 sm:mb-4">
       {/* Month navigation */}
-      <div className="flex items-center gap-2 mb-3 bg-card border border-border rounded-xl p-2.5 px-4">
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 bg-card border border-border rounded-xl p-2 sm:p-2.5 sm:px-4">
         <Button
           variant="outline"
           size="sm"
           onClick={onPrevMonth}
-          className="shrink-0 text-base"
+          className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 p-0"
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={16} className="sm:w-5 sm:h-5" />
         </Button>
-        <div className="flex-1 text-center font-extrabold text-base">
+        <div className="flex-1 text-center font-extrabold text-xs sm:text-base truncate">
           {monthName}
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={onNextMonth}
-          className="shrink-0 text-base"
+          className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 p-0"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={16} className="sm:w-5 sm:h-5" />
         </Button>
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-1">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-0.5 sm:mb-1">
         {dayHeaders.map((day) => (
           <div
             key={day}
-            className="text-center text-xs font-extrabold text-muted-foreground py-1"
+            className="text-center text-[9px] sm:text-xs font-extrabold text-muted-foreground py-1"
           >
             {day}
           </div>
@@ -60,7 +60,7 @@ export function Calendar({
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
         {Array.from({ length: totalCells }).map((_, i) => {
           const day = i - firstDay + 1
           const isValid = day >= 1 && day <= daysInMonth
@@ -76,12 +76,14 @@ export function Calendar({
             <div
               key={i}
               onClick={() => onDateClick && onDateClick(dateStr)}
-              className="min-h-[72px] sm:min-h-20 p-1.5 sm:p-2 rounded-lg cursor-pointer border border-border bg-card transition-opacity hover:opacity-80 flex flex-col"
+              className="min-h-[56px] sm:min-h-20 p-1 sm:p-2 rounded-lg cursor-pointer border border-border bg-card transition-opacity hover:opacity-80 flex flex-col"
             >
-              <div className="text-xs font-semibold text-foreground mb-1">
+              <div className="text-[10px] sm:text-xs font-semibold text-foreground mb-0.5 sm:mb-1">
                 {day}
               </div>
-              {content}
+              <div className="text-[8px] sm:text-[10px] overflow-hidden flex-1">
+                {content}
+              </div>
             </div>
           )
         })}

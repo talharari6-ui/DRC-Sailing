@@ -40,10 +40,10 @@ export default function AdminSailors() {
   }, [])
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-extrabold flex items-center gap-2"><Users size={24} /> ניהול חניכים</h1>
-        <p className="text-muted-foreground text-sm">{sailors.length} חניכים בסה"כ</p>
+    <div className="pb-24">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-xl font-extrabold flex items-center gap-2"><Users size={20} className="sm:w-6 sm:h-6" /> ניהול חניכים</h1>
+        <p className="text-muted-foreground text-xs sm:text-sm">{sailors.length} חניכים בסה"כ</p>
       </div>
 
       {error ? (
@@ -76,27 +76,27 @@ export default function AdminSailors() {
       ) : (
         <>
           {/* Mobile: card list */}
-          <div className="md:hidden space-y-3">
+          <div className="md:hidden space-y-2 sm:space-y-3">
             {sailors.map((sailor) => (
               <Card key={sailor.id}>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <Avatar>
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-lg">
-                      <User size={20} className={sailor.gender === 'female' ? 'text-pink-400' : 'text-blue-400'} />
+                <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-sm">
+                      <User size={16} className={`sm:w-5 sm:h-5 ${sailor.gender === 'female' ? 'text-pink-400' : 'text-blue-400'}`} />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
-                    <div className="text-sm font-bold">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs sm:text-sm font-bold truncate">
                       {sailor.first_name} {sailor.last_name}
                     </div>
                     {sailor.parent_name ? (
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
                         הורה: {sailor.parent_name}
                       </div>
                     ) : null}
                   </div>
                   {sailor.shirt_size ? (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-[10px] sm:text-xs shrink-0">
                       מידה {sailor.shirt_size}
                     </Badge>
                   ) : null}
