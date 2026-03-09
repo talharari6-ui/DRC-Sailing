@@ -304,20 +304,20 @@ export default function HoursPage() {
   }
 
   return (
-    <div className="space-y-3" dir="rtl">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" size="icon-sm" onClick={goToNextMonth} title="חודש הבא">
-          <ChevronRight />
+    <div className="space-y-2 sm:space-y-3 pb-24" dir="rtl">
+      <div className="flex items-center justify-between gap-1">
+        <Button variant="outline" size="icon-sm" onClick={goToNextMonth} title="חודש הבא" className="h-8 w-8">
+          <ChevronRight size={16} />
         </Button>
-        <div className="text-center">
-          <h1 className="text-lg font-extrabold flex items-center justify-center gap-2">
+        <div className="text-center flex-1 min-w-0">
+          <h1 className="text-sm sm:text-lg font-extrabold flex items-center justify-center gap-1 sm:gap-2">
             {monthTitle}
-            <Clock size={18} />
+            <Clock size={14} className="sm:w-4.5 sm:h-4.5" />
           </h1>
-          <p className="text-xs text-muted-foreground">סה״כ לחודש: {monthlyTotal.toFixed(1)} שעות</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">סה״כ לחודש: {monthlyTotal.toFixed(1)} שעות</p>
         </div>
-        <Button variant="outline" size="icon-sm" onClick={goToPreviousMonth} title="חודש קודם">
-          <ChevronLeft />
+        <Button variant="outline" size="icon-sm" onClick={goToPreviousMonth} title="חודש קודם" className="h-8 w-8">
+          <ChevronLeft size={16} />
         </Button>
       </div>
 
@@ -348,14 +348,11 @@ export default function HoursPage() {
                 )
 
                 return (
-                  <div key={day.key} className="rounded-md border p-2 space-y-2">
-                    <div className="grid grid-cols-[64px_1fr_56px] gap-2 items-center">
-                      <div className="text-sm font-bold text-drc-green text-left">
-                        {dailyHours > 0 ? `${dailyHours.toFixed(1)}ש׳` : ''}
-                      </div>
-                      <div className="flex items-center justify-center gap-2">
+                  <div key={day.key} className="rounded-md border p-1.5 sm:p-2 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1 flex items-center justify-center gap-1">
                         <Input
-                          className="h-9 w-[100px] text-base text-center"
+                          className="h-8 sm:h-9 flex-1 text-xs sm:text-sm text-center"
                           type="text"
                           inputMode="numeric"
                           placeholder="כניסה"
@@ -370,9 +367,9 @@ export default function HoursPage() {
                             })
                           }}
                         />
-                        <span className="text-muted-foreground">-</span>
+                        <span className="text-muted-foreground text-xs">-</span>
                         <Input
-                          className="h-9 w-[100px] text-base text-center"
+                          className="h-8 sm:h-9 flex-1 text-xs sm:text-sm text-center"
                           type="text"
                           inputMode="numeric"
                           placeholder="יציאה"
@@ -388,46 +385,47 @@ export default function HoursPage() {
                           }}
                         />
                       </div>
-                      <div className="text-right leading-tight">
-                        <div className="text-3xl font-extrabold">{String(day.dayNumber).padStart(2, '0')}</div>
-                        <div className="text-xs text-muted-foreground">{day.weekdayName}</div>
+                      <div className="text-right min-w-[70px]">
+                        <div className="text-5xl sm:text-6xl font-extrabold text-white leading-none">{String(day.dayNumber).padStart(2, '0')}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{day.weekdayName}</div>
+                        <div className="text-[10px] sm:text-sm font-bold text-drc-green">
+                          {dailyHours > 0 ? `${dailyHours.toFixed(1)}ש׳` : ''}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
-                      <div className="flex gap-1">
-                        {hasHours ? (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="h-8 text-xs px-2"
-                            onClick={() => clearDay(day.key)}
-                            disabled={busy}
-                            title="ניקוי"
-                          >
-                            🗑️
-                          </Button>
-                        ) : null}
-                        {hasHours ? (
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="h-8 text-xs px-2"
-                            onClick={() => duplicateSameWeekday(day.key)}
-                            disabled={busy}
-                            title="שכפול"
-                          >
-                            📋
-                          </Button>
-                        ) : null}
-                      </div>
+                    <div className="flex items-center gap-1 sm:gap-2">
                       <textarea
-                        className="w-full h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
+                        className="flex-1 h-7 sm:h-8 rounded-md border border-input bg-transparent px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs sm:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
                         placeholder="הערה..."
                         value={row.notes}
                         onChange={(event) => updateField(day.key, 'notes', event.target.value)}
                         onBlur={() => saveDate(day.key)}
                       />
+                      {hasHours ? (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="h-7 sm:h-8 w-7 sm:w-8 p-0 text-xs sm:text-sm"
+                          onClick={() => clearDay(day.key)}
+                          disabled={busy}
+                          title="ניקוי"
+                        >
+                          🗑️
+                        </Button>
+                      ) : null}
+                      {hasHours ? (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="h-7 sm:h-8 w-7 sm:w-8 p-0 text-xs sm:text-sm"
+                          onClick={() => duplicateSameWeekday(day.key)}
+                          disabled={busy}
+                          title="שכפול"
+                        >
+                          📋
+                        </Button>
+                      ) : null}
                     </div>
                   </div>
                 )
