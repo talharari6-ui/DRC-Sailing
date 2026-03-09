@@ -222,20 +222,22 @@ export default function SchedulePage() {
     const records = Array.isArray(session?.attendance) ? session.attendance : []
     const attendedCount = records.filter((record) => record?.present === true).length
     const markedCount = records.filter((record) => typeof record?.present === 'boolean').length
+    const totalSailors = Array.isArray(session?.group_sailors) ? session.group_sailors.length : 0
     return {
       attendedCount,
       markedCount,
+      totalSailors,
     }
   }
   const renderAttendanceIndicator = (session) => {
-    const { attendedCount, markedCount } = getAttendanceSummary(session)
+    const { attendedCount, markedCount, totalSailors } = getAttendanceSummary(session)
     return (
       <div className="shrink-0 min-w-[52px] text-left">
-        <div className="rounded-md border border-border bg-background/60 px-2 py-1 text-[11px] font-semibold text-foreground">
-          {attendedCount}
+        <div className="rounded-md border border-drc-blue-light bg-drc-blue-light/10 px-2 py-1 text-[12px] font-semibold text-drc-blue-light">
+          {markedCount > 0 ? `${attendedCount}/${totalSailors}` : '0'}
         </div>
         <div className="mt-1 text-[10px] text-muted-foreground">
-          {markedCount > 0 ? 'attendance' : 'attendance'}
+          {markedCount > 0 ? 'נוכחים' : 'attendance'}
         </div>
       </div>
     )
