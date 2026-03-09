@@ -69,12 +69,12 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <div>
-      <div className="mb-6">
-        <h2 className="text-xl font-extrabold flex items-center gap-2">
-          <Crown size={24} /> לוח בקרה
+    <div className="pb-24">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl font-extrabold flex items-center gap-2">
+          <Crown size={20} className="sm:w-6 sm:h-6" /> לוח בקרה
         </h2>
-        <p className="text-muted-foreground text-sm">{monthName}</p>
+        <p className="text-muted-foreground text-xs sm:text-sm">{monthName}</p>
       </div>
 
       {error ? (
@@ -84,13 +84,13 @@ export default function AdminDashboard() {
       ) : null}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
         {statsData.map((stat, i) => (
           <Card key={i}>
-            <CardContent className="p-4 text-center">
-              <stat.icon size={28} className="mx-auto mb-1" />
-              <div className="text-2xl font-extrabold mb-1">{stat.value}</div>
-              <div className="text-xs text-muted-foreground">{stat.label}</div>
+            <CardContent className="p-2.5 sm:p-4 text-center">
+              <stat.icon size={20} className="sm:w-7 sm:h-7 mx-auto mb-1" />
+              <div className="text-lg sm:text-2xl font-extrabold mb-0.5 sm:mb-1">{stat.value}</div>
+              <div className="text-[10px] sm:text-xs text-muted-foreground">{stat.label}</div>
             </CardContent>
           </Card>
         ))}
@@ -127,9 +127,9 @@ export default function AdminDashboard() {
       )}
 
       {/* Quick Links */}
-      <div className="mt-6">
-        <h3 className="text-base font-extrabold mb-3 flex items-center gap-2"><Zap size={20} /> קישורים מהירים</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="mt-4 sm:mt-6">
+        <h3 className="text-sm sm:text-base font-extrabold mb-2 sm:mb-3 flex items-center gap-2"><Zap size={18} className="sm:w-5 sm:h-5" /> קישורים מהירים</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
           {[
             { href: '/admin/coaches', icon: GraduationCap, label: 'מדריכים' },
             { href: '/admin/sailors', icon: Users, label: 'חניכים' },
@@ -138,9 +138,9 @@ export default function AdminDashboard() {
           ].map((link) => (
             <Link key={link.href} href={link.href}>
               <Card className="hover:opacity-70 transition-opacity cursor-pointer">
-                <CardContent className="p-4 flex items-center gap-2">
-                  <link.icon size={20} />
-                  <span className="text-sm font-bold">{link.label}</span>
+                <CardContent className="p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+                  <link.icon size={16} className="sm:w-5 sm:h-5" />
+                  <span className="text-[10px] sm:text-sm font-bold truncate">{link.label}</span>
                 </CardContent>
               </Card>
             </Link>

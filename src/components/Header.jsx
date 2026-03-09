@@ -14,13 +14,13 @@ export function Header({ title, subtitle = '' }) {
   }
 
   return (
-    <div className="bg-black/50 backdrop-blur-drc border-b border-border px-4 sm:px-6 py-3 pt-[max(12px,env(safe-area-inset-top))] flex items-center gap-3 shrink-0">
-      <div className="flex-1">
-        <div className="text-base font-extrabold text-drc-blue-light">
+    <div className="bg-black/50 backdrop-blur-drc border-b border-border px-3 sm:px-6 py-3 pt-[max(12px,env(safe-area-inset-top))] flex items-center gap-2 sm:gap-3 shrink-0">
+      <div className="flex-1 min-w-0">
+        <div className="text-sm sm:text-base font-extrabold text-drc-blue-light truncate">
           {title}
         </div>
         {subtitle ? (
-          <div className="text-xs text-muted-foreground mt-0.5">
+          <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">
             {subtitle}
           </div>
         ) : null}
@@ -29,7 +29,7 @@ export function Header({ title, subtitle = '' }) {
         variant="ghost"
         size="sm"
         onClick={handleLogout}
-        className="text-muted-foreground text-xs"
+        className="text-muted-foreground text-[10px] sm:text-xs whitespace-nowrap shrink-0"
       >
         התנתקות
       </Button>

@@ -36,10 +36,10 @@ export default function HistoryPage() {
   }, [loadHistory])
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-extrabold flex items-center gap-2"><BarChart3 size={24} /> היסטוריה</h1>
-        <p className="text-muted-foreground text-sm">
+    <div className="pb-24">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-xl font-extrabold flex items-center gap-2"><BarChart3 size={20} className="sm:w-6 sm:h-6" /> היסטוריה</h1>
+        <p className="text-muted-foreground text-xs sm:text-sm">
           {sessions.length} פעילויות
         </p>
       </div>
@@ -74,7 +74,7 @@ export default function HistoryPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {sessions.map((session) => {
             const date = new Date(session.date + 'T12:00:00')
             const dow = date.getDay()
@@ -83,17 +83,17 @@ export default function HistoryPage() {
                 key={session.id}
                 className={session.cancelled ? 'bg-drc-red/10 border-drc-red/30 opacity-70' : ''}
               >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className={`text-sm font-bold mb-0.5 ${session.cancelled ? 'line-through' : ''}`}>
-                        {session.cancelled ? <><XCircle size={14} className="inline me-1" /></> : null}יום {DAY_NAMES[dow]}
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className={`text-xs sm:text-sm font-bold mb-0.5 ${session.cancelled ? 'line-through' : ''} truncate`}>
+                        {session.cancelled ? <><XCircle size={12} className="sm:w-3.5 sm:h-3.5 inline me-1" /></> : null}יום {DAY_NAMES[dow]}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">
                         {date.toLocaleDateString('he-IL')}
                       </div>
                     </div>
-                    <Badge variant={session.cancelled ? 'destructive' : 'outline'} className={session.cancelled ? '' : 'text-drc-green border-drc-green/30'}>
+                    <Badge variant={session.cancelled ? 'destructive' : 'outline'} className={`text-[10px] sm:text-xs ${session.cancelled ? '' : 'text-drc-green border-drc-green/30'} shrink-0`}>
                       {session.cancelled ? 'בוטל' : 'בוצע'}
                     </Badge>
                   </div>

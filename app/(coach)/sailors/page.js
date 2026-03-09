@@ -115,14 +115,14 @@ export default function SailorsPage() {
 
   return (
     <div className="pb-24">
-      <div className="mb-6">
-        <h1 className="text-xl font-extrabold flex items-center gap-2"><Users size={24} /> חניכים</h1>
-        <p className="text-muted-foreground text-sm">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-xl font-extrabold flex items-center gap-2"><Users size={20} className="sm:w-6 sm:h-6" /> חניכים</h1>
+        <p className="text-muted-foreground text-xs sm:text-sm">
           {sailors.length} חניכים בסה&quot;כ
         </p>
-        <div className="mt-3">
-          <Button onClick={openCreate}>
-            <Plus size={16} /> הוסף חניך חדש
+        <div className="mt-2 sm:mt-3">
+          <Button onClick={openCreate} className="text-xs sm:text-sm">
+            <Plus size={14} className="sm:w-4 sm:h-4" /> הוסף חניך
           </Button>
         </div>
       </div>
@@ -155,27 +155,27 @@ export default function SailorsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {sailors.map((sailor) => (
             <Card key={sailor.id}>
-              <CardContent className="p-4 flex items-center gap-3">
-                <Avatar>
-                  <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-lg">
-                    <User size={20} className={sailor.gender === 'female' ? 'text-pink-400' : 'text-blue-400'} />
+              <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+                <Avatar className="h-9 w-9 sm:h-10 sm:w-10">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-sm">
+                    <User size={16} className={`sm:w-5 sm:h-5 ${sailor.gender === 'female' ? 'text-pink-400' : 'text-blue-400'}`} />
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <div className="text-sm font-bold mb-0.5">
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs sm:text-sm font-bold mb-0.5 truncate">
                     {sailor.first_name} {sailor.last_name}
                   </div>
                   {sailor.parent_name ? (
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
                       הורה: {sailor.parent_name}
                     </div>
                   ) : null}
                 </div>
-                <Button size="sm" variant="outline" onClick={() => openEdit(sailor)}>
-                  <Pencil size={14} /> ערוך
+                <Button size="sm" variant="outline" onClick={() => openEdit(sailor)} className="h-8 sm:h-9 text-xs sm:text-sm shrink-0">
+                  <Pencil size={12} className="sm:w-4 sm:h-4" />
                 </Button>
               </CardContent>
             </Card>
@@ -183,11 +183,11 @@ export default function SailorsPage() {
         </div>
       )}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent dir="rtl" className="max-h-[80vh] overflow-y-auto pb-24">
+        <DialogContent dir="rtl" className="max-h-[85vh] overflow-y-auto pb-28 sm:pb-24 text-xs sm:text-sm">
           <DialogHeader>
-            <DialogTitle>{editingSailor ? 'עריכת חניך' : 'חניך חדש'}</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">{editingSailor ? 'עריכת חניך' : 'חניך חדש'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-2 text-xs sm:text-sm">
             <Label>שם פרטי</Label>
             <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
             <Label>שם משפחה</Label>

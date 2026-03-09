@@ -40,10 +40,10 @@ export default function AdminCoaches() {
   }, [])
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-extrabold flex items-center gap-2"><GraduationCap size={24} /> ניהול מדריכים</h1>
-        <p className="text-muted-foreground text-sm">{coaches.length} מדריכים</p>
+    <div className="pb-24">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-xl font-extrabold flex items-center gap-2"><GraduationCap size={20} className="sm:w-6 sm:h-6" /> ניהול מדריכים</h1>
+        <p className="text-muted-foreground text-xs sm:text-sm">{coaches.length} מדריכים</p>
       </div>
 
       {error ? (
@@ -76,23 +76,23 @@ export default function AdminCoaches() {
       ) : (
         <>
           {/* Mobile: card list */}
-          <div className="md:hidden space-y-3">
+          <div className="md:hidden space-y-2 sm:space-y-3">
             {coaches.map((coach) => (
               <Card key={coach.id}>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <Avatar>
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-lg">
-                      <GraduationCap size={20} />
+                <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600/20 to-blue-800/25 text-sm">
+                      <GraduationCap size={16} className="sm:w-5 sm:h-5" />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
-                    <div className="text-sm font-bold">{coach.name}</div>
-                    <div className="text-xs text-muted-foreground">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs sm:text-sm font-bold truncate">{coach.name}</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
                       {coach.email || 'אין דוא"ל'}
                     </div>
                   </div>
                   {coach.is_admin ? (
-                    <Badge className="bg-gradient-to-br from-purple-600 to-purple-800 text-white text-xs font-bold">
+                    <Badge className="bg-gradient-to-br from-purple-600 to-purple-800 text-white text-[10px] sm:text-xs font-bold shrink-0">
                       מנהל
                     </Badge>
                   ) : null}
