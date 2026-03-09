@@ -1,6 +1,6 @@
 'use client'
 
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Button } from '@/components/ui/button'
 
 function FilterToggle({ currentFilter, onFilterChange }) {
   const filters = [
@@ -9,23 +9,17 @@ function FilterToggle({ currentFilter, onFilterChange }) {
   ]
 
   return (
-    <div className="flex justify-center py-2 sm:py-3" dir="rtl">
-      <ToggleGroup
-        type="single"
-        value={currentFilter}
-        onValueChange={(value) => value && onFilterChange(value)}
-        className="gap-2"
-      >
-        {filters.map((filter) => (
-          <ToggleGroupItem
-            key={filter.value}
-            value={filter.value}
-            className="px-4 py-2 min-w-[80px] text-sm data-[state=on]:bg-drc-blue-light data-[state=on]:text-white"
-          >
-            {filter.label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+    <div className="flex justify-center py-2 sm:py-3 gap-2" dir="rtl">
+      {filters.map((filter) => (
+        <Button
+          key={filter.value}
+          variant={currentFilter === filter.value ? 'default' : 'outline'}
+          onClick={() => onFilterChange(filter.value)}
+          className={currentFilter === filter.value ? 'bg-drc-blue-light text-white' : ''}
+        >
+          {filter.label}
+        </Button>
+      ))}
     </div>
   )
 }

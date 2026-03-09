@@ -646,11 +646,6 @@ export default function SchedulePage() {
 
       <ViewModeToggle currentMode={viewMode} onModeChange={setViewMode} />
       <FilterToggle currentFilter={filterMode} onFilterChange={setFilterMode} />
-      <div className="flex items-center justify-center gap-3 text-muted-foreground text-xs mb-3">
-        <span>⬇</span>
-        <span>⬇</span>
-        <span>⬇</span>
-      </div>
       {managerRequestNotice ? (
         <Alert className="mb-4">
           <AlertDescription>{managerRequestNotice}</AlertDescription>
