@@ -701,6 +701,35 @@ export default function SchedulePage() {
               month={currentDate.getMonth()}
               onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
               onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+              onDateClick={(dateStr) => {
+                setSelectedDayDate(dateStr)
+                setViewMode('day')
+              }}
+              getDayContent={(dateStr) => {
+                const daySessions = getSessionsForDate(dateStr)
+                if (daySessions.length === 0) return null
+                return (
+                  <div className="flex flex-col gap-1">
+                    {daySessions.slice(0, 2).map((session) => (
+                      <div
+                        key={session.id}
+                        className="text-[10px] px-1 py-0.5 rounded bg-secondary border border-border line-clamp-1"
+                        style={{
+                          backgroundColor: (session.groups?.color || '#3b82f6') + '20',
+                          borderColor: session.groups?.color || '#3b82f6',
+                        }}
+                      >
+                        {session.groups?.name || 'קבוצה'}
+                      </div>
+                    ))}
+                    {daySessions.length > 2 && (
+                      <div className="text-[9px] text-muted-foreground text-center">
+                        +{daySessions.length - 2}
+                      </div>
+                    )}
+                  </div>
+                )
+              }}
             />
           )}
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/src/hooks/useAuth'
 import { Button } from '@/components/ui/button'
@@ -17,10 +17,11 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [localError, setLocalError] = useState('')
 
-  if (isAuthenticated && !isLoading) {
-    router.push('/schedule')
-    return null
-  }
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      router.push('/schedule')
+    }
+  }, [isAuthenticated, isLoading, router])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
