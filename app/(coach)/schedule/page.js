@@ -260,7 +260,8 @@ export default function SchedulePage() {
     const createdSession = {
       ...session,
       ...created,
-      attendance: [],
+      attendance: Array.isArray(created.attendance) ? created.attendance : [],
+      group_sailors: Array.isArray(session.group_sailors) ? session.group_sailors : [],
       is_virtual: false,
     }
     setSessions((prev) => {
@@ -366,6 +367,7 @@ export default function SchedulePage() {
       })
       if (!res.ok) throw new Error('Failed to update attendance')
       const savedAttendance = await res.json()
+
       setSessions((prev) => prev.map((session) => {
         if (session.id !== targetSessionId) return session
         const existingAttendance = Array.isArray(session.attendance) ? session.attendance : []
@@ -375,12 +377,13 @@ export default function SchedulePage() {
               ? { ...record, present, absence_reason: reason || null }
               : record
           ))
-          : [...existingAttendance, savedAttendance]
+          : [...existingAttendance, { ...savedAttendance, sailor_id: sailorId, present, absence_reason: reason || null }]
         return {
           ...session,
           attendance: nextAttendance,
         }
       }))
+
       setSelectedSession((prev) => {
         if (!prev || prev.id !== targetSessionId) return prev
         const existingAttendance = Array.isArray(prev.attendance) ? prev.attendance : []
@@ -390,16 +393,17 @@ export default function SchedulePage() {
               ? { ...record, present, absence_reason: reason || null }
               : record
           ))
-          : [...existingAttendance, savedAttendance]
+          : [...existingAttendance, { ...savedAttendance, sailor_id: sailorId, present, absence_reason: reason || null }]
         return {
           ...prev,
           attendance: nextAttendance,
         }
       })
-      // Reload board data after a short delay to ensure fresh data
+
+      // Reload board data after a short delay to ensure fresh data from API
       setTimeout(() => {
         loadBoardData()
-      }, 300)
+      }, 500)
     } catch (error) {
       console.error('Error updating attendance:', error)
     }
