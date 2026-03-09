@@ -1,6 +1,6 @@
 'use client'
 
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Button } from '@/components/ui/button'
 
 function ViewModeToggle({ currentMode, onModeChange }) {
   const modes = [
@@ -10,23 +10,17 @@ function ViewModeToggle({ currentMode, onModeChange }) {
   ]
 
   return (
-    <div className="flex justify-center py-2 sm:py-3" dir="rtl">
-      <ToggleGroup
-        type="single"
-        value={currentMode}
-        onValueChange={(value) => value && onModeChange(value)}
-        className="gap-2"
-      >
-        {modes.map((mode) => (
-          <ToggleGroupItem
-            key={mode.value}
-            value={mode.value}
-            className="px-4 py-2 min-w-[60px] text-sm data-[state=on]:bg-drc-blue-light data-[state=on]:text-white"
-          >
-            {mode.label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+    <div className="flex justify-center py-2 sm:py-3 gap-2" dir="rtl">
+      {modes.map((mode) => (
+        <Button
+          key={mode.value}
+          variant={currentMode === mode.value ? 'default' : 'outline'}
+          onClick={() => onModeChange(mode.value)}
+          className={currentMode === mode.value ? 'bg-drc-blue-light text-white' : ''}
+        >
+          {mode.label}
+        </Button>
+      ))}
     </div>
   )
 }
