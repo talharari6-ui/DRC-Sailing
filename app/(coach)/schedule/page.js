@@ -186,12 +186,15 @@ export default function SchedulePage() {
 
       const title = `שבוע ${formatDate(weekStart)} - ${formatDate(weekEnd)}`
       document.title = title
+      console.log('Updated page title (week):', title)
     } else if (viewMode === 'month') {
       const monthName = new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric' }).format(currentDate)
       document.title = monthName
+      console.log('Updated page title (month):', monthName)
     } else if (viewMode === 'day') {
       const dayName = new Intl.DateTimeFormat('he-IL', { weekday: 'long', month: 'short', day: 'numeric' }).format(new Date(`${selectedDayDate}T12:00:00`))
       document.title = dayName
+      console.log('Updated page title (day):', dayName)
     }
   }, [viewMode, currentDate, selectedDayDate])
 
