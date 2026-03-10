@@ -16,7 +16,7 @@ export async function GET(request) {
       selectFields = `
         *,
         groups(id, name, color),
-        coaches(name),
+        coaches!coach_id(name),
         attendance(sailor_id, present, absence_reason)
       `
     }
