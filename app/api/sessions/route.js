@@ -60,10 +60,21 @@ export async function POST(request) {
         cancelled: false,
         admin_approved: true,
       }])
-      .select()
+      .select('*')
 
     if (error) throw error
-    return Response.json(data[0], { status: 201 })
+    const session = data && data[0]
+    return Response.json({
+      id: session?.id,
+      group_id: session?.group_id,
+      date: session?.date,
+      coach_id: session?.coach_id,
+      start_time: session?.start_time,
+      end_time: session?.end_time,
+      cancelled: session?.cancelled,
+      admin_approved: session?.admin_approved,
+      attendance: [],
+    }, { status: 201 })
   } catch (error) {
     console.error('Sessions POST error:', error)
     return Response.json({ error: error.message }, { status: 500 })
