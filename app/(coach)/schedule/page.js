@@ -500,7 +500,7 @@ export default function SchedulePage() {
         const groupSailorsData = await groupSailorsRes.json()
         const mapped = Array.isArray(groupSailorsData)
           ? groupSailorsData.map((sailor) => ({
-              sailor_id: sailor.id,
+              sailor_id: sailor.id || sailor.sailor_id,
               sailors: sailor,
             }))
           : []
