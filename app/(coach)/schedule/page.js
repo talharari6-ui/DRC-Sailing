@@ -298,10 +298,10 @@ export default function SchedulePage() {
     return (
       <div className="shrink-0 min-w-[52px] text-left">
         <div className="rounded-md border border-drc-blue-light bg-drc-blue-light/10 px-2 py-1 text-[12px] font-semibold text-drc-blue-light">
-          {totalSailors > 0 ? `${attendedCount}/${totalSailors}` : '0'}
+          {`${attendedCount}/${totalSailors}`}
         </div>
         <div className="mt-1 text-[10px] text-muted-foreground">
-          {totalSailors > 0 ? 'נוכחים' : 'attendance'}
+          נוכחים
         </div>
       </div>
     )
