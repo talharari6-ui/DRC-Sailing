@@ -622,9 +622,12 @@ export default function SchedulePage() {
     const trimmedName = newGroupName.trim()
     if (!trimmedName) return false
     if (newGroupDays.length === 0) return false
+    // Times are required
+    if (!newGroupStartTime) return false
+    if (!newGroupEndTime) return false
     const normalizedStart = normalizeTimeInput(newGroupStartTime)
     const normalizedEnd = normalizeTimeInput(newGroupEndTime)
-    if ((newGroupStartTime && !normalizedStart) || (newGroupEndTime && !normalizedEnd)) return false
+    if (!normalizedStart || !normalizedEnd) return false
     return true
   }
 
@@ -641,14 +644,30 @@ export default function SchedulePage() {
       return
     }
 
+    if (!newGroupStartTime) {
+      setGroupFormError('יש להזין שעת התחלה')
+      return
+    }
+
+    if (!newGroupEndTime) {
+      setGroupFormError('יש להזין שעת סיום')
+      return
+    }
+
     setCreatingGroup(true)
     setGroupFormError('')
     try {
       const normalizedStart = normalizeTimeInput(newGroupStartTime)
       const normalizedEnd = normalizeTimeInput(newGroupEndTime)
 
-      if ((newGroupStartTime && !normalizedStart) || (newGroupEndTime && !normalizedEnd)) {
-        setGroupFormError('פורמט שעות לא תקין. לדוגמה: 10, 1030, 1300')
+      if (!normalizedStart) {
+        setGroupFormError('שעת התחלה לא תקינה. לדוגמה: 10 או 1030')
+        setCreatingGroup(false)
+        return
+      }
+
+      if (!normalizedEnd) {
+        setGroupFormError('שעת סיום לא תקינה. לדוגמה: 13 או 1300')
         setCreatingGroup(false)
         return
       }
