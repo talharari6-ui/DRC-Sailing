@@ -87,6 +87,7 @@ export default function SchedulePage() {
     }
   })
   const [boardDataError, setBoardDataError] = useState('')
+  const [sailorCountMap, setSailorCountMap] = useState({})
 
   const loadBoardData = useCallback(async () => {
     setLoading(true)
@@ -96,7 +97,7 @@ export default function SchedulePage() {
       const timestamp = Date.now()
       const [sessionsRes, groupsRes] = await Promise.all([
         fetch(`/api/sessions?include_details=true&t=${timestamp}`),
-        fetch('/api/groups'),
+        fetch('/api/groups?include_count=true'),
       ])
       const sessionsData = await sessionsRes.json()
       const groupsData = await groupsRes.json()
@@ -106,28 +107,22 @@ export default function SchedulePage() {
         setSessions([])
         setBoardDataError('שגיאה בטעינת הפעילויות. הלוח מוצג חלקית.')
       } else if (Array.isArray(sessionsData)) {
-        // Fetch sailor counts for all groups to display in attendance counter
+        // Build sailor count map from groups data (which includes sailor_count)
         try {
-          const groupIds = [...new Set(sessionsData.map(s => s.group_id).filter(Boolean))]
-          const sailorRequests = groupIds.map(groupId =>
-            fetch(`/api/groups/${groupId}/sailors`)
-              .then(r => r.json())
-              .then(data => ({ groupId, count: Array.isArray(data) ? data.length : 0 }))
-              .catch((err) => {
-                console.error(`Error fetching sailors for group ${groupId}:`, err)
-                return { groupId, count: 0 }
-              })
-          )
+          const sailorCountMapData = {}
+          if (Array.isArray(groupsData)) {
+            groupsData.forEach(group => {
+              sailorCountMapData[group.id] = group.sailor_count || 0
+            })
+          }
 
-          const sailorCounts = await Promise.all(sailorRequests)
-          const sailorCountMap = Object.fromEntries(
-            sailorCounts.map(({ groupId, count }) => [groupId, count])
-          )
+          // Store sailor count map in state for use in mergedSessions
+          setSailorCountMap(sailorCountMapData)
 
           // Enrich sessions with group_sailors (array length = sailor count)
           const enrichedSessions = sessionsData.map(session => ({
             ...session,
-            group_sailors: Array(sailorCountMap[session.group_id] || 0).fill(null),
+            group_sailors: Array(sailorCountMapData[session.group_id] || 0).fill(null),
           }))
 
           setSessions(enrichedSessions)
@@ -225,13 +220,8 @@ export default function SchedulePage() {
         .map((s) => `${s.group_id}__${s.date}`)
     )
 
-    // Build a map of group_id -> sailor count from real sessions
-    const sailorCountMap = {}
-    for (const session of realSessions) {
-      if (session.group_id && !sailorCountMap[session.group_id]) {
-        sailorCountMap[session.group_id] = Array.isArray(session.group_sailors) ? session.group_sailors.length : 0
-      }
-    }
+    // Use sailor count map from loadBoardData (which fetched counts for ALL groups)
+    // This ensures virtual sessions have correct sailor counts even if there are no real sessions
 
     const virtualSessions = []
     for (const group of allGroups) {
@@ -265,7 +255,7 @@ export default function SchedulePage() {
     }
 
     return [...realSessions, ...virtualSessions]
-  }, [sessions, groups, currentDate])
+  }, [sessions, groups, currentDate, sailorCountMap])
 
   const filteredSessions = useMemo(() => {
     return mergedSessions.filter(s => {
@@ -308,10 +298,10 @@ export default function SchedulePage() {
     return (
       <div className="shrink-0 min-w-[52px] text-left">
         <div className="rounded-md border border-drc-blue-light bg-drc-blue-light/10 px-2 py-1 text-[12px] font-semibold text-drc-blue-light">
-          {totalSailors > 0 ? `${attendedCount}/${totalSailors}` : '0'}
+          {`${attendedCount}/${totalSailors}`}
         </div>
         <div className="mt-1 text-[10px] text-muted-foreground">
-          {totalSailors > 0 ? 'נוכחים' : 'attendance'}
+          נוכחים
         </div>
       </div>
     )
@@ -497,10 +487,12 @@ export default function SchedulePage() {
         const responses = await Promise.all(requests)
         const groupSailorsRes = responses[0]
         const groupSailorsData = await groupSailorsRes.json()
-        const mapped = (Array.isArray(groupSailorsData) ? groupSailorsData : []).map((sailor) => ({
-          sailor_id: sailor?.id,
-          sailors: sailor,
-        })).filter((item) => item.sailor_id)
+        const mapped = Array.isArray(groupSailorsData)
+          ? groupSailorsData.map((sailor) => ({
+              sailor_id: sailor.id || sailor.sailor_id,
+              sailors: sailor,
+            }))
+          : []
         let attendance = Array.isArray(session.attendance) ? session.attendance : []
         if (responses[1]?.ok) {
           const sessionData = await responses[1].json()
