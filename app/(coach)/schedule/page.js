@@ -119,13 +119,8 @@ export default function SchedulePage() {
           // Store sailor count map in state for use in mergedSessions
           setSailorCountMap(sailorCountMapData)
 
-          // Enrich sessions with group_sailors (array length = sailor count)
-          const enrichedSessions = sessionsData.map(session => ({
-            ...session,
-            group_sailors: Array(sailorCountMapData[session.group_id] || 0).fill(null),
-          }))
-
-          setSessions(enrichedSessions)
+          // Don't add fake group_sailors data - SessionDetailModal will handle empty sailors gracefully
+          setSessions(sessionsData)
         } catch (error) {
           console.error('Error enriching sessions with sailor counts:', error)
           setSessions(sessionsData)
