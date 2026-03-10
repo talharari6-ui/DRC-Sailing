@@ -225,6 +225,14 @@ export default function SchedulePage() {
         .map((s) => `${s.group_id}__${s.date}`)
     )
 
+    // Build a map of group_id -> sailor count from real sessions
+    const sailorCountMap = {}
+    for (const session of realSessions) {
+      if (session.group_id && !sailorCountMap[session.group_id]) {
+        sailorCountMap[session.group_id] = Array.isArray(session.group_sailors) ? session.group_sailors.length : 0
+      }
+    }
+
     const virtualSessions = []
     for (const group of allGroups) {
       const groupDays = Array.isArray(group.days_of_week) ? group.days_of_week : []
@@ -238,6 +246,7 @@ export default function SchedulePage() {
         const isNotInOffSeason = !isInOffSeason(iter)
         const key = `${group.id}__${dateStr}`
         if (afterStart && isMatchingDay && isNotInOffSeason && !existingKeys.has(key)) {
+          const sailorCount = sailorCountMap[group.id] || 0
           virtualSessions.push({
             id: `virtual-${group.id}-${dateStr}`,
             group_id: group.id,
@@ -248,6 +257,7 @@ export default function SchedulePage() {
             groups: { name: group.name, color: group.color || '#3b82f6' },
             coaches: { name: 'לא מוגדר' },
             is_virtual: true,
+            group_sailors: Array(sailorCount).fill(null),
           })
         }
         iter.setDate(iter.getDate() + 1)
