@@ -16,10 +16,9 @@ const COACH_ROUTES = [
 
 const ADMIN_ROUTES = [
   { href: '/admin/dashboard', icon: Crown, label: 'ניהול' },
+  { href: '/admin/board', icon: Calendar, label: 'לוח' },
   { href: '/admin/coaches', icon: GraduationCap, label: 'מדריכים' },
-  { href: '/admin/sailors', icon: Users, label: 'חניכים' },
-  { href: '/admin/absences', icon: Ban, label: 'חיסורים' },
-  { href: '/admin/substitutions', icon: RefreshCw, label: 'החלפות' },
+  { href: '/admin/groups', icon: Users, label: 'קבוצות' },
 ]
 
 export function BottomNav() {
