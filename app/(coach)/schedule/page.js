@@ -87,6 +87,7 @@ export default function SchedulePage() {
     }
   })
   const [boardDataError, setBoardDataError] = useState('')
+  const [sailorCountMap, setSailorCountMap] = useState({})
 
   const loadBoardData = useCallback(async () => {
     setLoading(true)
@@ -121,14 +122,17 @@ export default function SchedulePage() {
           )
 
           const sailorCounts = await Promise.all(sailorRequests)
-          const sailorCountMap = Object.fromEntries(
+          const sailorCountMapData = Object.fromEntries(
             sailorCounts.map(({ groupId, count }) => [groupId, count])
           )
+
+          // Store sailor count map in state for use in mergedSessions
+          setSailorCountMap(sailorCountMapData)
 
           // Enrich sessions with group_sailors (array length = sailor count)
           const enrichedSessions = sessionsData.map(session => ({
             ...session,
-            group_sailors: Array(sailorCountMap[session.group_id] || 0).fill(null),
+            group_sailors: Array(sailorCountMapData[session.group_id] || 0).fill(null),
           }))
 
           setSessions(enrichedSessions)
@@ -226,13 +230,8 @@ export default function SchedulePage() {
         .map((s) => `${s.group_id}__${s.date}`)
     )
 
-    // Build a map of group_id -> sailor count from real sessions
-    const sailorCountMap = {}
-    for (const session of realSessions) {
-      if (session.group_id && !sailorCountMap[session.group_id]) {
-        sailorCountMap[session.group_id] = Array.isArray(session.group_sailors) ? session.group_sailors.length : 0
-      }
-    }
+    // Use sailor count map from loadBoardData (which fetched counts for ALL groups)
+    // This ensures virtual sessions have correct sailor counts even if there are no real sessions
 
     const virtualSessions = []
     for (const group of allGroups) {
@@ -266,7 +265,7 @@ export default function SchedulePage() {
     }
 
     return [...realSessions, ...virtualSessions]
-  }, [sessions, groups, currentDate])
+  }, [sessions, groups, currentDate, sailorCountMap])
 
   const filteredSessions = useMemo(() => {
     return mergedSessions.filter(s => {
