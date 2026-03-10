@@ -498,12 +498,18 @@ export default function SchedulePage() {
         const responses = await Promise.all(requests)
         const groupSailorsRes = responses[0]
         const groupSailorsData = await groupSailorsRes.json()
+        const mapped = Array.isArray(groupSailorsData)
+          ? groupSailorsData.map((sailor) => ({
+              sailor_id: sailor.id,
+              sailors: sailor,
+            }))
+          : []
         let attendance = Array.isArray(session.attendance) ? session.attendance : []
         if (responses[1]?.ok) {
           const sessionData = await responses[1].json()
           attendance = Array.isArray(sessionData?.attendance) ? sessionData.attendance : attendance
         }
-        enriched = { ...session, group_sailors: Array.isArray(groupSailorsData) ? groupSailorsData : [], attendance }
+        enriched = { ...session, group_sailors: mapped, attendance }
       } catch (error) {
         console.error('Error loading attendance sailors:', error)
       }
