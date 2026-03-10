@@ -618,11 +618,26 @@ export default function SchedulePage() {
     )
   }
 
+  const isGroupFormValid = () => {
+    const trimmedName = newGroupName.trim()
+    if (!trimmedName) return false
+    if (newGroupDays.length === 0) return false
+    const normalizedStart = normalizeTimeInput(newGroupStartTime)
+    const normalizedEnd = normalizeTimeInput(newGroupEndTime)
+    if ((newGroupStartTime && !normalizedStart) || (newGroupEndTime && !normalizedEnd)) return false
+    return true
+  }
+
   const handleCreateGroup = async () => {
     if (!coach?.id) return
     const trimmedName = newGroupName.trim()
     if (!trimmedName) {
       setGroupFormError('יש להזין שם קבוצה')
+      return
+    }
+
+    if (newGroupDays.length === 0) {
+      setGroupFormError('יש לבחור לפחות יום אחד')
       return
     }
 
@@ -1060,7 +1075,7 @@ export default function SchedulePage() {
             <Button variant="outline" onClick={() => setAddGroupDialogOpen(false)} disabled={creatingGroup}>
               ביטול
             </Button>
-            <Button onClick={handleCreateGroup} disabled={creatingGroup}>
+            <Button onClick={handleCreateGroup} disabled={creatingGroup || !isGroupFormValid()}>
               {creatingGroup ? 'יוצר קבוצה...' : 'צור קבוצה'}
             </Button>
           </DialogFooter>
