@@ -106,10 +106,11 @@ export default function SchedulePage() {
         setSessions([])
         setBoardDataError('שגיאה בטעינת הפעילויות. הלוח מוצג חלקית.')
       } else if (Array.isArray(sessionsData)) {
-        // Fetch sailor counts for all groups to display in attendance counter
+        // Fetch sailor counts for ALL groups to display in attendance counter
         try {
-          const groupIds = [...new Set(sessionsData.map(s => s.group_id).filter(Boolean))]
-          const sailorRequests = groupIds.map(groupId =>
+          // Get all group IDs from groupsData (not just groups with sessions)
+          const allGroupIds = Array.isArray(groupsData) ? groupsData.map(g => g.id).filter(Boolean) : []
+          const sailorRequests = allGroupIds.map(groupId =>
             fetch(`/api/groups/${groupId}/sailors`)
               .then(r => r.json())
               .then(data => ({ groupId, count: Array.isArray(data) ? data.length : 0 }))
