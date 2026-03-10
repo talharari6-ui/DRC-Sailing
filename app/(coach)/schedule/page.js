@@ -454,9 +454,9 @@ export default function SchedulePage() {
         const groupSailorsRes = responses[0]
         const groupSailorsData = await groupSailorsRes.json()
         const mapped = (Array.isArray(groupSailorsData) ? groupSailorsData : []).map((sailor) => ({
-          sailor_id: sailor.id,
+          sailor_id: sailor?.id,
           sailors: sailor,
-        }))
+        })).filter((item) => item.sailor_id)
         let attendance = Array.isArray(session.attendance) ? session.attendance : []
         if (responses[1]?.ok) {
           const sessionData = await responses[1].json()
@@ -992,9 +992,8 @@ export default function SchedulePage() {
                   type="color"
                   value={newGroupColor}
                   onChange={(e) => setNewGroupColor(e.target.value)}
-                  className="h-10 w-16 p-1"
+                  className="h-10 w-12 p-1 cursor-pointer"
                 />
-                <span className="text-xs text-muted-foreground">{newGroupColor}</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {GROUP_COLORS.map((color) => (
@@ -1033,14 +1032,14 @@ export default function SchedulePage() {
                   value={newGroupStartTime}
                   onChange={(e) => setNewGroupStartTime(e.target.value)}
                   onBlur={(e) => setNewGroupStartTime(normalizeTimeInput(e.target.value))}
-                  placeholder="שעת התחלה (למשל 10 או 1030)"
+                  placeholder="התחלה"
                 />
                 <Input
                   type="text"
                   value={newGroupEndTime}
                   onChange={(e) => setNewGroupEndTime(e.target.value)}
                   onBlur={(e) => setNewGroupEndTime(normalizeTimeInput(e.target.value))}
-                  placeholder="שעת סיום (למשל 13 או 1300)"
+                  placeholder="סיום"
                 />
               </div>
             </div>
