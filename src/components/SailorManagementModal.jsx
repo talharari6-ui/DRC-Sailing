@@ -115,10 +115,10 @@ export default function SailorManagementModal({
             }}
             className="w-full"
           >
-            <ToggleGroupItem value="existing" className="flex-1 text-xs data-[state=on]:bg-drc-blue-light data-[state=on]:text-white">
+            <ToggleGroupItem value="existing" onClick={() => setNewSailorMode('existing')} className="flex-1 text-xs data-[state=on]:bg-drc-blue-light data-[state=on]:text-white">
               חניך קיים
             </ToggleGroupItem>
-            <ToggleGroupItem value="new" className="flex-1 text-xs data-[state=on]:bg-drc-blue-light data-[state=on]:text-white">
+            <ToggleGroupItem value="new" onClick={() => setNewSailorMode('new')} className="flex-1 text-xs data-[state=on]:bg-drc-blue-light data-[state=on]:text-white">
               חניך חדש
             </ToggleGroupItem>
           </ToggleGroup>
