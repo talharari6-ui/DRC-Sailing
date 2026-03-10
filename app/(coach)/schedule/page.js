@@ -740,27 +740,6 @@ export default function SchedulePage() {
 
       {viewMode === 'month' ? (
         <div className="space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-              className="h-9 w-9 p-0"
-            >
-              ←
-            </Button>
-            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center">
-              {new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric' }).format(currentDate)}
-            </h2>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-              className="h-9 w-9 p-0"
-            >
-              →
-            </Button>
-          </div>
           {loading ? (
             <Card>
               <CardContent className="p-4">
@@ -809,20 +788,7 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'week' ? (
         <div className="mt-6">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                const d = new Date(currentDate)
-                d.setDate(d.getDate() - 7)
-                setCurrentDate(d)
-              }}
-              className="h-9 w-9 p-0"
-            >
-              ←
-            </Button>
-            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center flex items-center justify-center gap-2"><CalendarIcon size={18} className="sm:w-5 sm:h-5" /> השבוע</h2>
+          <div className="flex items-center justify-end gap-2 mb-3">
             <Button
               size="sm"
               variant="outline"
@@ -911,20 +877,7 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'day' ? (
         <div className="mt-6">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                const d = new Date(`${selectedDayDate}T12:00:00`)
-                d.setDate(d.getDate() - 1)
-                setSelectedDayDate(toDateStr(d))
-              }}
-              className="h-9 w-9 p-0"
-            >
-              ←
-            </Button>
-            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center flex items-center justify-center gap-2"><ClipboardList size={18} className="sm:w-5 sm:h-5" /> יום {daySelectedMeta.dayName}</h2>
+          <div className="flex items-center justify-end gap-2 mb-3">
             <Button
               size="sm"
               variant="outline"
