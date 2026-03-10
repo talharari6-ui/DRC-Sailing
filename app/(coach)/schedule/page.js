@@ -171,6 +171,30 @@ export default function SchedulePage() {
     }
   }, [requestStatusBySession])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    if (viewMode === 'week') {
+      const weekStart = new Date(currentDate)
+      weekStart.setDate(currentDate.getDate() - currentDate.getDay())
+      const weekEnd = new Date(weekStart)
+      weekEnd.setDate(weekStart.getDate() + 6)
+
+      const formatDate = (date) => {
+        return new Intl.DateTimeFormat('he-IL', { month: 'short', day: 'numeric' }).format(date)
+      }
+
+      const title = `שבוע ${formatDate(weekStart)} - ${formatDate(weekEnd)}`
+      document.title = title
+    } else if (viewMode === 'month') {
+      const monthName = new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric' }).format(currentDate)
+      document.title = monthName
+    } else if (viewMode === 'day') {
+      const dayName = new Intl.DateTimeFormat('he-IL', { weekday: 'long', month: 'short', day: 'numeric' }).format(new Date(`${selectedDayDate}T12:00:00`))
+      document.title = dayName
+    }
+  }, [viewMode, currentDate, selectedDayDate])
+
   const mergedSessions = useMemo(() => {
     const realSessions = Array.isArray(sessions) ? sessions : []
     const allGroups = Array.isArray(groups) ? groups : []
