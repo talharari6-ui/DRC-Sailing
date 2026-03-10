@@ -106,7 +106,35 @@ export default function SchedulePage() {
         setSessions([])
         setBoardDataError('שגיאה בטעינת הפעילויות. הלוח מוצג חלקית.')
       } else if (Array.isArray(sessionsData)) {
-        setSessions(sessionsData)
+        // Fetch sailor counts for all groups to display in attendance counter
+        try {
+          const groupIds = [...new Set(sessionsData.map(s => s.group_id).filter(Boolean))]
+          const sailorRequests = groupIds.map(groupId =>
+            fetch(`/api/groups/${groupId}/sailors`)
+              .then(r => r.json())
+              .then(data => ({ groupId, count: Array.isArray(data) ? data.length : 0 }))
+              .catch((err) => {
+                console.error(`Error fetching sailors for group ${groupId}:`, err)
+                return { groupId, count: 0 }
+              })
+          )
+
+          const sailorCounts = await Promise.all(sailorRequests)
+          const sailorCountMap = Object.fromEntries(
+            sailorCounts.map(({ groupId, count }) => [groupId, count])
+          )
+
+          // Enrich sessions with group_sailors (array length = sailor count)
+          const enrichedSessions = sessionsData.map(session => ({
+            ...session,
+            group_sailors: Array(sailorCountMap[session.group_id] || 0).fill(null),
+          }))
+
+          setSessions(enrichedSessions)
+        } catch (error) {
+          console.error('Error enriching sessions with sailor counts:', error)
+          setSessions(sessionsData)
+        }
       } else {
         setSessions([])
       }
@@ -232,14 +260,14 @@ export default function SchedulePage() {
     }
   }
   const renderAttendanceIndicator = (session) => {
-    const { attendedCount, markedCount } = getAttendanceSummary(session)
+    const { attendedCount, totalSailors } = getAttendanceSummary(session)
     return (
       <div className="shrink-0 min-w-[52px] text-left">
         <div className="rounded-md border border-drc-blue-light bg-drc-blue-light/10 px-2 py-1 text-[12px] font-semibold text-drc-blue-light">
-          {markedCount > 0 ? `${attendedCount}/${markedCount}` : '0'}
+          {totalSailors > 0 ? `${attendedCount}/${totalSailors}` : '0'}
         </div>
         <div className="mt-1 text-[10px] text-muted-foreground">
-          {markedCount > 0 ? 'נוכחים' : 'attendance'}
+          {totalSailors > 0 ? 'נוכחים' : 'attendance'}
         </div>
       </div>
     )
