@@ -631,6 +631,15 @@ export default function SchedulePage() {
     return days
   }, [currentDate])
 
+  const weekDateRangeDisplay = useMemo(() => {
+    if (weekDays.length === 0) return ''
+    const startDate = weekDays[0].dateObj
+    const endDate = weekDays[6].dateObj
+    const formatDate = (date) =>
+      new Intl.DateTimeFormat('he-IL', { month: 'short', day: 'numeric' }).format(date)
+    return `${formatDate(startDate)} - ${formatDate(endDate)}`
+  }, [weekDays])
+
 
   const openAddGroupDialog = (day = null) => {
     setSelectedGroupDay(day)
@@ -828,7 +837,7 @@ export default function SchedulePage() {
             >
               <ChevronRight size={16} className="sm:w-5 sm:h-5" />
             </Button>
-            <div className="flex-1 text-center font-extrabold text-xs sm:text-base">השבוע</div>
+            <div className="flex-1 text-center font-extrabold text-xs sm:text-base">{weekDateRangeDisplay}</div>
             <Button
               variant="outline"
               size="sm"
@@ -930,7 +939,7 @@ export default function SchedulePage() {
             >
               <ChevronRight size={16} className="sm:w-5 sm:h-5" />
             </Button>
-            <div className="flex-1 text-center font-extrabold text-xs sm:text-base">יום {daySelectedMeta.dayName}</div>
+            <div className="flex-1 text-center font-extrabold text-xs sm:text-base">{daySelectedMeta.dayNum}.{daySelectedMeta.monthNum} {daySelectedMeta.dayName}</div>
             <Button
               variant="outline"
               size="sm"
