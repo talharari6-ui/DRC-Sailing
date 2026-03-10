@@ -201,7 +201,7 @@ export default function SchedulePage() {
         const dateStr = toDateStr(iter)
         const iterDow = iter.getDay()
         const afterStart = !groupStart || iter >= groupStart
-        const isMatchingDay = groupDays.length > 0 ? groupDays.includes(iterDow) : dateStr === group.start_date
+        const isMatchingDay = (groupDays.length > 0 ? groupDays.includes(iterDow) : false) || dateStr === group.start_date
         const key = `${group.id}__${dateStr}`
         if (afterStart && isMatchingDay && !existingKeys.has(key)) {
           virtualSessions.push({
