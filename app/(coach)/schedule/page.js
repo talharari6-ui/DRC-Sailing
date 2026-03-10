@@ -545,7 +545,7 @@ export default function SchedulePage() {
       return {
         ...s,
         group_sailors: (Array.isArray(refreshedGroup) ? refreshedGroup : []).map((sailor) => ({
-          sailor_id: sailor.id,
+          sailor_id: sailor.id || sailor.sailor_id,
           sailors: sailor,
         })),
       }
@@ -555,7 +555,7 @@ export default function SchedulePage() {
       return {
         ...prev,
         group_sailors: (Array.isArray(refreshedGroup) ? refreshedGroup : []).map((sailor) => ({
-          sailor_id: sailor.id,
+          sailor_id: sailor.id || sailor.sailor_id,
           sailors: sailor,
         })),
       }
@@ -572,7 +572,7 @@ export default function SchedulePage() {
       return {
         ...s,
         group_sailors: (Array.isArray(refreshedGroup) ? refreshedGroup : []).map((sailor) => ({
-          sailor_id: sailor.id,
+          sailor_id: sailor.id || sailor.sailor_id,
           sailors: sailor,
         })),
       }
@@ -582,7 +582,7 @@ export default function SchedulePage() {
       return {
         ...prev,
         group_sailors: (Array.isArray(refreshedGroup) ? refreshedGroup : []).map((sailor) => ({
-          sailor_id: sailor.id,
+          sailor_id: sailor.id || sailor.sailor_id,
           sailors: sailor,
         })),
       }
