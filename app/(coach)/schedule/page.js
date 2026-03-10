@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Calendar as CalendarIcon, Plus, ClipboardList } from 'lucide-react'
+import { Calendar as CalendarIcon, Plus, ClipboardList, ChevronRight, ChevronLeft } from 'lucide-react'
 
 const SessionDetailModal = dynamic(() => import('@/src/components/SessionDetailModal'), { ssr: false })
 const SailorManagementModal = dynamic(() => import('@/src/components/SailorManagementModal'), { ssr: false })
@@ -788,19 +788,31 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'week' ? (
         <div className="mt-6">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center flex items-center justify-center gap-2"><CalendarIcon size={18} className="sm:w-5 sm:h-5" /> השבוע</h2>
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 bg-card border border-border rounded-xl p-2 sm:p-2.5 sm:px-4">
             <Button
-              size="sm"
               variant="outline"
+              size="sm"
+              onClick={() => {
+                const d = new Date(currentDate)
+                d.setDate(d.getDate() - 7)
+                setCurrentDate(d)
+              }}
+              className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 p-0"
+            >
+              <ChevronRight size={16} className="sm:w-5 sm:h-5" />
+            </Button>
+            <div className="flex-1 text-center font-extrabold text-xs sm:text-base">השבוע</div>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 const d = new Date(currentDate)
                 d.setDate(d.getDate() + 7)
                 setCurrentDate(d)
               }}
-              className="h-9 w-9 p-0"
+              className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 p-0"
             >
-              →
+              <ChevronLeft size={16} className="sm:w-5 sm:h-5" />
             </Button>
           </div>
           <div className="flex flex-col gap-3">
@@ -878,19 +890,31 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'day' ? (
         <div className="mt-6">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center flex items-center justify-center gap-2"><ClipboardList size={18} className="sm:w-5 sm:h-5" /> יום {daySelectedMeta.dayName}</h2>
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 bg-card border border-border rounded-xl p-2 sm:p-2.5 sm:px-4">
             <Button
-              size="sm"
               variant="outline"
+              size="sm"
+              onClick={() => {
+                const d = new Date(`${selectedDayDate}T12:00:00`)
+                d.setDate(d.getDate() - 1)
+                setSelectedDayDate(toDateStr(d))
+              }}
+              className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 p-0"
+            >
+              <ChevronRight size={16} className="sm:w-5 sm:h-5" />
+            </Button>
+            <div className="flex-1 text-center font-extrabold text-xs sm:text-base">יום {daySelectedMeta.dayName}</div>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 const d = new Date(`${selectedDayDate}T12:00:00`)
                 d.setDate(d.getDate() + 1)
                 setSelectedDayDate(toDateStr(d))
               }}
-              className="h-9 w-9 p-0"
+              className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 p-0"
             >
-              →
+              <ChevronLeft size={16} className="sm:w-5 sm:h-5" />
             </Button>
           </div>
           <Card>
