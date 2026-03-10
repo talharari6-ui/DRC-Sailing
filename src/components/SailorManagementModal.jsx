@@ -105,7 +105,7 @@ export default function SailorManagementModal({
           )}
         </div>
 
-        <div className="mb-4 sticky top-0 bg-background z-10">
+        <div className="mb-4">
           <ToggleGroup
             type="single"
             value={newSailorMode}
@@ -152,9 +152,6 @@ export default function SailorManagementModal({
           </div>
         ) : (
           <div className="mb-4 space-y-3">
-            <Button variant="ghost" onClick={() => setNewSailorMode('existing')} className="w-full mb-4 text-sm" size="sm">
-              ← חזור לחניכים קיימים
-            </Button>
             <Label>שם פרטי</Label>
             <Input value={newSailorData.first_name} onChange={(e) => setNewSailorData({ ...newSailorData, first_name: e.target.value })} placeholder="שם פרטי" />
             <Label>שם משפחה</Label>
