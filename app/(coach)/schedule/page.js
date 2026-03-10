@@ -195,7 +195,7 @@ export default function SchedulePage() {
     const virtualSessions = []
     for (const group of allGroups) {
       const groupDays = Array.isArray(group.days_of_week) ? group.days_of_week : []
-      const groupStart = group.start_date ? new Date(`${group.start_date}T12:00:00`) : null
+      const groupStart = group.start_date ? new Date(`${group.start_date}T00:00:00`) : null
       const iter = new Date(rangeStart)
       while (iter <= rangeEnd) {
         const dateStr = toDateStr(iter)
