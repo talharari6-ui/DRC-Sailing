@@ -51,6 +51,30 @@ export async function POST(request) {
       )
     }
 
+    // First check if session already exists
+    const { data: existing, error: checkError } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('group_id', group_id)
+      .eq('date', date)
+      .single()
+
+    if (existing) {
+      // Session already exists, return it
+      return Response.json({
+        id: existing.id,
+        group_id: existing.group_id,
+        date: existing.date,
+        coach_id: existing.coach_id,
+        start_time: existing.start_time,
+        end_time: existing.end_time,
+        cancelled: existing.cancelled,
+        admin_approved: existing.admin_approved,
+        attendance: [],
+      }, { status: 200 })
+    }
+
+    // Create new session
     const { data, error } = await supabase
       .from('sessions')
       .insert([{
