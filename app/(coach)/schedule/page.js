@@ -788,7 +788,8 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'week' ? (
         <div className="mt-6">
-          <div className="flex items-center justify-end gap-2 mb-3">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center flex items-center justify-center gap-2"><CalendarIcon size={18} className="sm:w-5 sm:h-5" /> השבוע</h2>
             <Button
               size="sm"
               variant="outline"
@@ -877,7 +878,8 @@ export default function SchedulePage() {
 
       {!loading && viewMode === 'day' ? (
         <div className="mt-6">
-          <div className="flex items-center justify-end gap-2 mb-3">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <h2 className="text-sm sm:text-base font-extrabold flex-1 text-center flex items-center justify-center gap-2"><ClipboardList size={18} className="sm:w-5 sm:h-5" /> יום {daySelectedMeta.dayName}</h2>
             <Button
               size="sm"
               variant="outline"
