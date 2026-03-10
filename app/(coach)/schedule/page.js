@@ -186,6 +186,12 @@ export default function SchedulePage() {
     const rangeStart = new Date(Math.min(...anchors.map((d) => d.getTime())))
     const rangeEnd = new Date(Math.max(...anchorsEnd.map((d) => d.getTime())))
 
+    // Define off-season dates (July 1 to August 31)
+    const isInOffSeason = (date) => {
+      const month = date.getMonth() // 0-11 (0=Jan, 6=July, 7=August)
+      return month === 6 || month === 7 // July (6) or August (7)
+    }
+
     const existingKeys = new Set(
       realSessions
         .filter((s) => s.group_id && s.date)
@@ -202,8 +208,9 @@ export default function SchedulePage() {
         const iterDow = iter.getDay()
         const afterStart = !groupStart || iter >= groupStart
         const isMatchingDay = (groupDays.length > 0 ? groupDays.includes(iterDow) : false) || dateStr === group.start_date
+        const isNotInOffSeason = !isInOffSeason(iter)
         const key = `${group.id}__${dateStr}`
-        if (afterStart && isMatchingDay && !existingKeys.has(key)) {
+        if (afterStart && isMatchingDay && isNotInOffSeason && !existingKeys.has(key)) {
           virtualSessions.push({
             id: `virtual-${group.id}-${dateStr}`,
             group_id: group.id,
