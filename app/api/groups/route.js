@@ -5,6 +5,7 @@ export async function GET(request) {
     const supabase = getSupabaseClient()
     const searchParams = request.nextUrl.searchParams
     const coachId = searchParams.get('coach_id')
+    const includeCount = searchParams.get('include_count') === 'true'
 
     let query = supabase.from('groups').select('*')
 
@@ -15,6 +16,25 @@ export async function GET(request) {
     const { data, error } = await query.order('name')
 
     if (error) throw error
+
+    // If include_count is true, fetch sailor counts for each group
+    if (includeCount && data) {
+      const groupsWithCounts = await Promise.all(
+        data.map(async (group) => {
+          const { count, error: countError } = await supabase
+            .from('group_sailors')
+            .select('*', { count: 'exact', head: true })
+            .eq('group_id', group.id)
+
+          return {
+            ...group,
+            sailor_count: countError ? 0 : (count || 0),
+          }
+        })
+      )
+      return Response.json(groupsWithCounts || [])
+    }
+
     return Response.json(data || [])
   } catch (error) {
     console.error('Groups GET error:', error)

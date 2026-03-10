@@ -97,7 +97,7 @@ export default function SchedulePage() {
       const timestamp = Date.now()
       const [sessionsRes, groupsRes] = await Promise.all([
         fetch(`/api/sessions?include_details=true&t=${timestamp}`),
-        fetch('/api/groups'),
+        fetch('/api/groups?include_count=true'),
       ])
       const sessionsData = await sessionsRes.json()
       const groupsData = await groupsRes.json()
@@ -107,24 +107,14 @@ export default function SchedulePage() {
         setSessions([])
         setBoardDataError('שגיאה בטעינת הפעילויות. הלוח מוצג חלקית.')
       } else if (Array.isArray(sessionsData)) {
-        // Fetch sailor counts for ALL groups to display in attendance counter
+        // Build sailor count map from groups data (which includes sailor_count)
         try {
-          // Get all group IDs from groupsData (not just groups with sessions)
-          const allGroupIds = Array.isArray(groupsData) ? groupsData.map(g => g.id).filter(Boolean) : []
-          const sailorRequests = allGroupIds.map(groupId =>
-            fetch(`/api/groups/${groupId}/sailors`)
-              .then(r => r.json())
-              .then(data => ({ groupId, count: Array.isArray(data) ? data.length : 0 }))
-              .catch((err) => {
-                console.error(`Error fetching sailors for group ${groupId}:`, err)
-                return { groupId, count: 0 }
-              })
-          )
-
-          const sailorCounts = await Promise.all(sailorRequests)
-          const sailorCountMapData = Object.fromEntries(
-            sailorCounts.map(({ groupId, count }) => [groupId, count])
-          )
+          const sailorCountMapData = {}
+          if (Array.isArray(groupsData)) {
+            groupsData.forEach(group => {
+              sailorCountMapData[group.id] = group.sailor_count || 0
+            })
+          }
 
           // Store sailor count map in state for use in mergedSessions
           setSailorCountMap(sailorCountMapData)
