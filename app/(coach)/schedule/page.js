@@ -232,14 +232,14 @@ export default function SchedulePage() {
     }
   }
   const renderAttendanceIndicator = (session) => {
-    const { attendedCount, markedCount } = getAttendanceSummary(session)
+    const { attendedCount, totalSailors } = getAttendanceSummary(session)
     return (
       <div className="shrink-0 min-w-[52px] text-left">
         <div className="rounded-md border border-drc-blue-light bg-drc-blue-light/10 px-2 py-1 text-[12px] font-semibold text-drc-blue-light">
-          {markedCount > 0 ? `${attendedCount}/${markedCount}` : '0'}
+          {totalSailors > 0 ? `${attendedCount}/${totalSailors}` : '0'}
         </div>
         <div className="mt-1 text-[10px] text-muted-foreground">
-          {markedCount > 0 ? 'נוכחים' : 'attendance'}
+          {totalSailors > 0 ? 'נוכחים' : 'attendance'}
         </div>
       </div>
     )
