@@ -105,7 +105,7 @@ export default function SailorManagementModal({
           )}
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 sticky top-0 bg-background z-10">
           <ToggleGroup
             type="single"
             value={newSailorMode}
