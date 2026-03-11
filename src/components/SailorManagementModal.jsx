@@ -2,7 +2,6 @@ import Modal from './Modal'
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Label } from '@/components/ui/label'
 
 export default function SailorManagementModal({
@@ -105,23 +104,27 @@ export default function SailorManagementModal({
           )}
         </div>
 
-        <div className="mb-4 sticky top-0 bg-background z-10">
-          <ToggleGroup
-            type="single"
-            value={newSailorMode}
-            onValueChange={(v) => {
-              if (!v) return
-              setNewSailorMode(v)
-            }}
-            className="w-full"
+        <div className="mb-4 flex gap-2">
+          <Button
+            onClick={() => setNewSailorMode('existing')}
+            className={`flex-1 text-xs ${
+              newSailorMode === 'existing'
+                ? 'bg-drc-blue-light text-white'
+                : 'bg-secondary text-secondary-foreground'
+            }`}
           >
-            <ToggleGroupItem value="existing" className="flex-1 text-xs data-[state=on]:bg-drc-blue-light data-[state=on]:text-white">
-              חניך קיים
-            </ToggleGroupItem>
-            <ToggleGroupItem value="new" className="flex-1 text-xs data-[state=on]:bg-drc-blue-light data-[state=on]:text-white">
-              חניך חדש
-            </ToggleGroupItem>
-          </ToggleGroup>
+            חניך קיים
+          </Button>
+          <Button
+            onClick={() => setNewSailorMode('new')}
+            className={`flex-1 text-xs ${
+              newSailorMode === 'new'
+                ? 'bg-drc-blue-light text-white'
+                : 'bg-secondary text-secondary-foreground'
+            }`}
+          >
+            חניך חדש
+          </Button>
         </div>
 
         {newSailorMode === 'existing' ? (
@@ -152,9 +155,6 @@ export default function SailorManagementModal({
           </div>
         ) : (
           <div className="mb-4 space-y-3">
-            <Button variant="ghost" onClick={() => setNewSailorMode('existing')} className="w-full mb-4 text-sm" size="sm">
-              ← חזור לחניכים קיימים
-            </Button>
             <Label>שם פרטי</Label>
             <Input value={newSailorData.first_name} onChange={(e) => setNewSailorData({ ...newSailorData, first_name: e.target.value })} placeholder="שם פרטי" />
             <Label>שם משפחה</Label>
